@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>成績トラッカー | 個別指導塾コネクト</title>
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#1F2A44" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="成績トラッカー" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --ink: #1F2A44;
+    --paper: #EFF1EC;
+    --card: #FFFFFF;
+    --line: #D8DAD3;
+    --growth: #3E7C59;
+    --growth-soft: #E3EEE7;
+    --amber: #C77D2E;
+    --amber-soft: #F5E6D3;
+    --muted: #6B7280;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body { padding: max(20px, env(safe-area-inset-top)) 16px 40px; min-height: 100vh; }
+
+  .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
+  h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 22px; margin: 0 0 4px; line-height: 1.25; }
+  .student-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .field input, .field select {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
+  }
+  .field input:focus, .field select:focus { outline: 2px solid var(--growth); outline-offset: 1px; }
+  .row { display: flex; gap: 10px; }
+  .row .field { flex: 1; }
+
+  .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
+  .msg.error { color: #B3441E; background: #FCEBE3; }
+  .msg.success { color: var(--growth); background: var(--growth-soft); }
+  .msg.show { display: block; }
+
+  button.submit, button.secondary {
+    width: 100%; padding: 13px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600;
+  }
+  button.submit { background: var(--ink); color: #fff; }
+  button.submit:disabled { opacity: 0.6; }
+  button.secondary { background: var(--amber-soft); color: var(--amber); margin-top: 4px; }
+
+  .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 22px 0 10px; }
+
+  .test-card { margin-bottom: 12px; }
+  .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .test-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; }
+
+  .entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .entry:last-child { border-bottom: none; }
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.hit { background: var(--growth-soft); color: var(--growth); }
+  .badge.miss { background: var(--amber-soft); color: var(--amber); }
+  .badge.done { background: var(--growth-soft); color: var(--growth); }
+  .badge.pending { background: var(--amber-soft); color: var(--amber); }
+
+  .photo-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; }
+  .photo-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--amber); background: var(--amber-soft); color: var(--amber); font-size: 13px; font-weight: 600; }
+  .photo-btn.done { border-color: var(--growth); background: var(--growth-soft); color: var(--growth); }
+  input[type="file"] { display: none; }
+
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 10px; }
+  .id-error { text-align: center; padding: 60px 16px; color: var(--muted); font-size: 14px; }
+
+  .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; display: none; }
+  .install-hint.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="app">読み込み中...</div>
+
+<script>
+  // ここに、Google Apps Script をウェブアプリとして公開したときの URL を貼り付けてください。
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
+
+  const params = new URLSearchParams(window.location.search);
+  const studentId = params.get("id");
+  const appEl = document.getElementById("app");
+
+  let currentTestName = ""; // 「新しいテストを追加」フォームで使う一時状態
+
+  function formatDateTime(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+
+  async function init() {
+    if (!studentId) {
+      appEl.innerHTML = `
+        <div class="id-error">
+          専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。
+        </div>`;
+      return;
+    }
+    if (GAS_URL === "GAS_WEB_APP_URL_HERE") {
+      appEl.innerHTML = `
+        <div class="id-error">
+          まだ保存先(GAS)が接続されていません。管理者に確認してください。
+        </div>`;
+      return;
+    }
+    await loadAndRender();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      });
+    }
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
+    if (isIos && !isStandalone) {
+      const hint = document.createElement("p");
+      hint.className = "install-hint show";
+      hint.textContent = "ブラウザのメニューから「ホーム画面に追加」すると、アプリのように起動できます。";
+      appEl.appendChild(hint);
+    }
+  }
+
+  async function fetchData() {
+    const res = await fetch(`${GAS_URL}?id=${encodeURIComponent(studentId)}`);
+    return res.json();
+  }
+
+  async function loadAndRender() {
+    appEl.innerHTML = "読み込み中...";
+    let data;
+    try {
+      data = await fetchData();
+    } catch (err) {
+      appEl.innerHTML = `<div class="id-error">通信に失敗しました。電波の良い場所でもう一度お試しください。</div>`;
+      return;
+    }
+    if (!data.ok) {
+      appEl.innerHTML = `<div class="id-error">リンクが無効です。講師に確認してください。</div>`;
+      return;
+    }
+    render(data);
+  }
+
+  function render(data) {
+    const tests = (data.tests || []).slice().sort((a, b) => {
+      const aTime = a.entries[0]?.timestamp || a.photo?.submittedAt || "";
+      const bTime = b.entries[0]?.timestamp || b.photo?.submittedAt || "";
+      return new Date(bTime) - new Date(aTime);
+    });
+
+    appEl.innerHTML = `
+      <p class="eyebrow">個別指導塾コネクト</p>
+      <h1>成績トラッカー</h1>
+      <p class="student-name">${data.studentName} さん</p>
+
+      <div class="card">
+        <form id="entry-form">
+          <div class="field">
+            <label for="testName">テスト名</label>
+            <input id="testName" type="text" placeholder="例:2学期中間テスト" list="test-name-list" />
+            <datalist id="test-name-list">
+              ${tests.map((t) => `<option value="${t.testName}"></option>`).join("")}
+            </datalist>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="subject">科目</label>
+              <select id="subject">
+                <option>英語</option><option>数学</option><option>国語</option><option>理科</option><option>社会</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="score">点数</label>
+              <input id="score" type="number" inputmode="numeric" min="0" max="100" placeholder="0〜100" />
+            </div>
+            <div class="field">
+              <label for="target">目標点数</label>
+              <input id="target" type="number" inputmode="numeric" min="0" max="100" placeholder="0〜100" />
+            </div>
+          </div>
+          <div id="form-error" class="msg error"></div>
+          <div id="form-success" class="msg success">記録しました。</div>
+          <button class="submit" id="submit-btn" type="submit">この科目を記録する</button>
+        </form>
+      </div>
+
+      <p class="section-title">テストごとの記録</p>
+      <div id="tests-list">
+        ${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}
+      </div>
+    `;
+
+    const testsListEl = document.getElementById("tests-list");
+    tests.forEach((t) => {
+      const card = document.createElement("div");
+      card.className = "card test-card";
+      const photoSubmitted = !!t.photo;
+      card.innerHTML = `
+        <div class="test-header"><p class="test-name">${t.testName}</p></div>
+        ${t.entries
+          .map((e) => {
+            const hit = Number(e.score) >= Number(e.target);
+            return `
+              <div class="entry">
+                <div>${e.subject}</div>
+                <div style="text-align:right">
+                  <div>${e.score}点 / 目標${e.target}点</div>
+                  <span class="badge ${hit ? "hit" : "miss"}">${hit ? "達成" : "未達成"}</span>
+                </div>
+              </div>`;
+          })
+          .join("")}
+        <div class="photo-row">
+          <span>
+            成績表:
+            <span class="badge ${photoSubmitted ? "done" : "pending"}">
+              ${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}
+            </span>
+          </span>
+          <label class="photo-btn ${photoSubmitted ? "done" : ""}">
+            ${photoSubmitted ? "写真を撮り直す" : "成績表を撮影"}
+            <input type="file" accept="image/*" capture="environment" data-test-name="${t.testName}" class="photo-input" />
+          </label>
+        </div>
+      `;
+      testsListEl.appendChild(card);
+    });
+
+    document.getElementById("entry-form").addEventListener("submit", handleAddScore);
+    document.querySelectorAll(".photo-input").forEach((input) => {
+      input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName));
+    });
+  }
+
+  async function handleAddScore(e) {
+    e.preventDefault();
+    const testNameEl = document.getElementById("testName");
+    const subjectEl = document.getElementById("subject");
+    const scoreEl = document.getElementById("score");
+    const targetEl = document.getElementById("target");
+    const errorEl = document.getElementById("form-error");
+    const successEl = document.getElementById("form-success");
+    const btn = document.getElementById("submit-btn");
+
+    errorEl.classList.remove("show");
+    successEl.classList.remove("show");
+
+    const testName = testNameEl.value.trim();
+    const subject = subjectEl.value;
+    const score = Number(scoreEl.value);
+    const target = Number(targetEl.value);
+
+    if (!testName) return showFieldError(errorEl, "テスト名を入力してください");
+    if (scoreEl.value === "" || Number.isNaN(score) || score < 0 || score > 100)
+      return showFieldError(errorEl, "点数は0〜100の数字で入力してください");
+    if (targetEl.value === "" || Number.isNaN(target) || target < 0 || target > 100)
+      return showFieldError(errorEl, "目標点数は0〜100の数字で入力してください");
+
+    btn.disabled = true;
+    btn.textContent = "保存中...";
+    try {
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "addScore", studentId, testName, subject, score, target }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      successEl.classList.add("show");
+      scoreEl.value = "";
+      targetEl.value = "";
+      await loadAndRender();
+    } catch (err) {
+      showFieldError(errorEl, "保存に失敗しました。もう一度お試しください。");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "この科目を記録する";
+    }
+  }
+
+  function showFieldError(el, msg) {
+    el.textContent = msg;
+    el.classList.add("show");
+  }
+
+  function compressImage(file, maxWidth = 1600, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxWidth / img.width);
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
+          resolve(dataUrl.split(",")[1]);
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handlePhotoSelected(e, testName) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const label = e.target.closest(".photo-btn");
+    const originalText = label.childNodes[0].textContent;
+    label.childNodes[0].textContent = "アップロード中...";
+
+    try {
+      const base64 = await compressImage(file);
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "uploadPhoto",
+          studentId,
+          testName,
+          imageBase64: base64,
+          mimeType: "image/jpeg",
+        }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      await loadAndRender();
+    } catch (err) {
+      alert("成績表のアップロードに失敗しました。もう一度お試しください。");
+      label.childNodes[0].textContent = originalText;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
