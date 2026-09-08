@@ -160,7 +160,7 @@
 </head>
 <body>
 
-<div id="app">読み込み中...</div>
+<div id="app">ただいま集計中…</div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
@@ -221,7 +221,7 @@
   }
 
   async function loadAndRender() {
-    appEl.innerHTML = "読み込み中...";
+    appEl.innerHTML = "ただいま集計中…";
     let data;
     try {
       data = await fetchData();
