@@ -116,6 +116,32 @@
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
 
+  function updateManifestForInstall(id) {
+    try {
+      const base = window.location.origin + window.location.pathname;
+      const manifest = {
+        name: "私の成績表 | 個別指導塾コネクト",
+        short_name: "私の成績表",
+        start_url: `${base}?id=${id}`,
+        scope: base,
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#FFF6EC",
+        theme_color: "#D9720B",
+        lang: "ja",
+        icons: [
+          { src: `${base}icons/icon-192.png`, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: `${base}icons/icon-512.png`, sizes: "512x512", type: "image/png", purpose: "any maskable" },
+        ],
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      document.querySelector('link[rel="manifest"]').setAttribute("href", url);
+    } catch (err) {
+      // 失敗しても致命的ではないので何もしない(静的manifestのまま動く)
+    }
+  }
+
   async function init() {
     if (!studentId) {
       appEl.innerHTML = `
@@ -167,6 +193,7 @@
       return;
     }
     if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
+    updateManifestForInstall(studentId);
     render(data);
   }
 
