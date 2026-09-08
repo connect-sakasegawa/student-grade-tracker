@@ -101,7 +101,9 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
 
   const params = new URLSearchParams(window.location.search);
-  const studentId = params.get("id");
+  const STORAGE_KEY_ID = "connect-student-id";
+  const urlId = params.get("id");
+  const studentId = urlId || localStorage.getItem(STORAGE_KEY_ID);
   const appEl = document.getElementById("app");
 
   let currentTestName = ""; // 「新しいテストを追加」フォームで使う一時状態
@@ -162,6 +164,7 @@
       appEl.innerHTML = `<div class="id-error">リンクが無効です。講師に確認してください。</div>`;
       return;
     }
+    if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
     render(data);
   }
 
@@ -321,47 +324,3 @@
           canvas.height = img.height * scale;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL("image/jpeg", quality);
-          resolve(dataUrl.split(",")[1]);
-        };
-        img.onerror = reject;
-        img.src = reader.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function handlePhotoSelected(e, testName) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const label = e.target.closest(".photo-btn");
-    const originalText = label.childNodes[0].textContent;
-    label.childNodes[0].textContent = "アップロード中...";
-
-    try {
-      const base64 = await compressImage(file);
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "uploadPhoto",
-          studentId,
-          testName,
-          imageBase64: base64,
-          mimeType: "image/jpeg",
-        }),
-      });
-      const result = await res.json();
-      if (!result.ok) throw new Error(result.error || "failed");
-      await loadAndRender();
-    } catch (err) {
-      alert("成績表のアップロードに失敗しました。もう一度お試しください。");
-      label.childNodes[0].textContent = originalText;
-    }
-  }
-
-  init();
-</script>
-</body>
-</html>
