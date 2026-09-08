@@ -14,8 +14,6 @@
 <link rel="icon" href="icons/icon-192.png" />
 
 <script>
-  // manifestの<link>タグは、この後すぐ、ページ読み込みの最初の段階でJSから直接挿入します
-  // (静的なmanifest.jsonを先に読み込ませないようにするため、あえてここではリンクしません)
   (function () {
     try {
       var params = new URLSearchParams(window.location.search);
@@ -45,9 +43,7 @@
       link.rel = "manifest";
       link.href = dataUri;
       document.head.appendChild(link);
-    } catch (err) {
-      // 失敗しても致命的ではない
-    }
+    } catch (err) {}
   })();
 </script>
 
@@ -90,32 +86,49 @@
     font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
   }
   .field input:focus, .field select:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
-  .row { display: flex; gap: 10px; }
-  .row .field { flex: 1; }
 
   .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
   .msg.error { color: #B3441E; background: #FCEBE3; }
   .msg.success { color: var(--growth); background: var(--growth-soft); }
   .msg.show { display: block; }
 
-  button.submit, button.secondary {
+  button.submit {
     width: 100%; padding: 13px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600;
+    background: var(--brand); color: #fff;
   }
-  button.submit { background: var(--brand); color: #fff; }
   button.submit:disabled { opacity: 0.6; }
-  button.secondary { background: var(--amber-soft); color: var(--amber); margin-top: 4px; }
 
   .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 22px 0 10px; }
+
+  .subject-grid { margin-bottom: 4px; }
+  .subject-grid-header, .subject-row {
+    display: grid;
+    grid-template-columns: 2.4fr 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .subject-grid-header {
+    font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 6px;
+  }
+  .subject-grid-header span:nth-child(2), .subject-grid-header span:nth-child(3) { text-align: center; }
+  .subject-row { padding: 6px 0; }
+  .subject-row label { font-size: 14px; font-weight: 600; }
+  .subject-row input {
+    width: 100%; padding: 8px 6px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 15px; text-align: center; background: #fff; color: var(--ink);
+  }
+  .subject-row input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
 
   .test-card { margin-bottom: 12px; }
   .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .test-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; color: var(--ink); }
 
-  .entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .entry { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
   .entry:last-child { border-bottom: none; }
+  .entry.total { font-weight: 700; }
+  .entry-meta { color: var(--muted); font-size: 12px; }
+
   .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-  .badge.hit { background: var(--growth-soft); color: var(--growth); }
-  .badge.miss { background: var(--amber-soft); color: var(--amber); }
   .badge.done { background: var(--growth-soft); color: var(--growth); }
   .badge.pending { background: var(--amber-soft); color: var(--amber); }
 
@@ -138,13 +151,25 @@
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
 
+  // バックエンド(Code.gs)と同じ並び・同じ表記にしてください
+  const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
+  const TEST_NAMES = [
+    "1学期中間テスト",
+    "1学期期末テスト",
+    "2学期中間テスト",
+    "2学期期末テスト",
+    "学年末テスト",
+    "第1回実力テスト（6月）",
+    "第2回実力テスト（9月）",
+    "第3回実力テスト（11月）",
+    "第4回実力テスト（1月）",
+  ];
+
   const params = new URLSearchParams(window.location.search);
   const STORAGE_KEY_ID = "connect-student-id";
   const urlId = params.get("id");
   const studentId = urlId || localStorage.getItem(STORAGE_KEY_ID);
   const appEl = document.getElementById("app");
-
-  let currentTestName = "";
 
   function formatDateTime(iso) {
     if (!iso) return "";
@@ -200,11 +225,7 @@
   }
 
   function render(data) {
-    const tests = (data.tests || []).slice().sort((a, b) => {
-      const aTime = a.entries[0]?.timestamp || a.photo?.submittedAt || "";
-      const bTime = b.entries[0]?.timestamp || b.photo?.submittedAt || "";
-      return new Date(bTime) - new Date(aTime);
-    });
+    const tests = (data.tests || []).slice().reverse(); // 新しいテスト回を上に
 
     appEl.innerHTML = `
       <p class="eyebrow">個別指導塾コネクト</p>
@@ -215,32 +236,27 @@
         <form id="entry-form">
           <div class="field">
             <label for="testName">テスト名</label>
-            <input id="testName" type="text" placeholder="例:2学期中間テスト" list="test-name-list" />
-            <datalist id="test-name-list">
-              ${tests.map((t) => `<option value="${t.testName}"></option>`).join("")}
-            </datalist>
+            <select id="testName">
+              <option value="">選択してください</option>
+              ${TEST_NAMES.map((t) => `<option value="${t}">${t}</option>`).join("")}
+            </select>
           </div>
-          <div class="row">
-            <div class="field">
-              <label for="subject">科目</label>
-              <select id="subject">
-                <option>英語</option><option>数学</option><option>国語</option><option>理科</option><option>社会</option>
-              </select>
-            </div>
+
+          <div class="subject-grid">
+            <div class="subject-grid-header"><span></span><span>得点</span><span>平均点</span></div>
+            ${SUBJECTS.map(
+              (s) => `
+              <div class="subject-row">
+                <label>${s}</label>
+                <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
+                <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
+              </div>`
+            ).join("")}
           </div>
-          <div class="row">
-            <div class="field">
-              <label for="score">点数</label>
-              <input id="score" type="number" inputmode="numeric" min="0" max="100" placeholder="0〜100" />
-            </div>
-            <div class="field">
-              <label for="target">目標点数</label>
-              <input id="target" type="number" inputmode="numeric" min="0" max="100" placeholder="0〜100" />
-            </div>
-          </div>
+
           <div id="form-error" class="msg error"></div>
           <div id="form-success" class="msg success">記録しました。</div>
-          <button class="submit" id="submit-btn" type="submit">この科目を記録する</button>
+          <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
         </form>
       </div>
 
@@ -255,21 +271,24 @@
       const card = document.createElement("div");
       card.className = "card test-card";
       const photoSubmitted = !!t.photo;
+      const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null);
+
       card.innerHTML = `
         <div class="test-header"><p class="test-name">${t.testName}</p></div>
-        ${t.entries
-          .map((e) => {
-            const hit = Number(e.score) >= Number(e.target);
-            return `
+        ${filledSubjects
+          .map(
+            (s) => `
               <div class="entry">
-                <div>${e.subject}</div>
+                <div>${s.subject}</div>
                 <div style="text-align:right">
-                  <div>${e.score}点 / 目標${e.target}点</div>
-                  <span class="badge ${hit ? "hit" : "miss"}">${hit ? "達成" : "未達成"}</span>
+                  ${s.score !== null ? `${s.score}点` : "-"}
+                  ${s.average !== null ? `<span class="entry-meta">(平均${s.average}点)</span>` : ""}
                 </div>
-              </div>`;
-          })
+              </div>`
+          )
           .join("")}
+        <div class="entry total"><div>5教科合計</div><div>${t.total5 !== null ? t.total5 + "点" : "-"}</div></div>
+        <div class="entry total"><div>9教科合計</div><div>${t.total9 !== null ? t.total9 + "点" : "-"}</div></div>
         <div class="photo-row">
           <span>
             成績表:
@@ -295,9 +314,6 @@
   async function handleAddScore(e) {
     e.preventDefault();
     const testNameEl = document.getElementById("testName");
-    const subjectEl = document.getElementById("subject");
-    const scoreEl = document.getElementById("score");
-    const targetEl = document.getElementById("target");
     const errorEl = document.getElementById("form-error");
     const successEl = document.getElementById("form-success");
     const btn = document.getElementById("submit-btn");
@@ -305,16 +321,43 @@
     errorEl.classList.remove("show");
     successEl.classList.remove("show");
 
-    const testName = testNameEl.value.trim();
-    const subject = subjectEl.value;
-    const score = Number(scoreEl.value);
-    const target = Number(targetEl.value);
+    const testName = testNameEl.value;
+    if (!testName) return showFieldError(errorEl, "テスト名を選択してください");
 
-    if (!testName) return showFieldError(errorEl, "テスト名を入力してください");
-    if (scoreEl.value === "" || Number.isNaN(score) || score < 0 || score > 100)
-      return showFieldError(errorEl, "点数は0〜100の数字で入力してください");
-    if (targetEl.value === "" || Number.isNaN(target) || target < 0 || target > 100)
-      return showFieldError(errorEl, "目標点数は0〜100の数字で入力してください");
+    const subjects = [];
+    let validationError = "";
+
+    SUBJECTS.forEach((subject) => {
+      if (validationError) return;
+      const scoreInput = document.querySelector(`input[data-subject="${subject}"][data-field="score"]`);
+      const avgInput = document.querySelector(`input[data-subject="${subject}"][data-field="average"]`);
+      const scoreRaw = scoreInput.value;
+      const avgRaw = avgInput.value;
+
+      if (scoreRaw === "" && avgRaw === "") return; // 未入力の科目はスキップ
+
+      let score = null;
+      let average = null;
+
+      if (scoreRaw !== "") {
+        score = Number(scoreRaw);
+        if (Number.isNaN(score) || score < 0 || score > 100) {
+          validationError = `${subject}の点数は0〜100の数字で入力してください`;
+          return;
+        }
+      }
+      if (avgRaw !== "") {
+        average = Number(avgRaw);
+        if (Number.isNaN(average) || average < 0 || average > 100) {
+          validationError = `${subject}の平均点は0〜100の数字で入力してください`;
+          return;
+        }
+      }
+      subjects.push({ subject, score, average });
+    });
+
+    if (validationError) return showFieldError(errorEl, validationError);
+    if (subjects.length === 0) return showFieldError(errorEl, "少なくとも1科目は入力してください");
 
     btn.disabled = true;
     btn.textContent = "保存中...";
@@ -322,19 +365,17 @@
       const res = await fetch(GAS_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "addScore", studentId, testName, subject, score, target }),
+        body: JSON.stringify({ action: "addTestScores", studentId, testName, subjects }),
       });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       successEl.classList.add("show");
-      scoreEl.value = "";
-      targetEl.value = "";
       await loadAndRender();
     } catch (err) {
       showFieldError(errorEl, "保存に失敗しました。もう一度お試しください。");
     } finally {
       btn.disabled = false;
-      btn.textContent = "この科目を記録する";
+      btn.textContent = "この結果を記録する";
     }
   }
 
