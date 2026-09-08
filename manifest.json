@@ -1,13 +1,13 @@
 {
-  "name": "成績トラッカー(生徒・保護者用) | 個別指導塾コネクト",
-  "short_name": "成績トラッカー",
+  "name": "私の成績表 | 個別指導塾コネクト",
+  "short_name": "私の成績表",
   "description": "個別指導塾コネクトの生徒が定期テストの点数を記録するアプリ",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#EFF1EC",
-  "theme_color": "#1F2A44",
+  "background_color": "#FFF6EC",
+  "theme_color": "#D9720B",
   "lang": "ja",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },

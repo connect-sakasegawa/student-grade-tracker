@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>成績トラッカー | 個別指導塾コネクト</title>
+<title>私の成績表 | 個別指導塾コネクト</title>
 
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#1F2A44" />
+<meta name="theme-color" content="#D9720B" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="成績トラッカー" />
+<meta name="apple-mobile-web-app-title" content="私の成績表" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <link rel="icon" href="icons/icon-192.png" />
 
@@ -19,14 +19,16 @@
 
   :root {
     --ink: #1F2A44;
-    --paper: #EFF1EC;
+    --paper: #FFF6EC;
     --card: #FFFFFF;
-    --line: #D8DAD3;
+    --line: #E8D9C6;
+    --brand: #D9720B;
+    --brand-soft: #FBE7D0;
     --growth: #3E7C59;
     --growth-soft: #E3EEE7;
-    --amber: #C77D2E;
-    --amber-soft: #F5E6D3;
-    --muted: #6B7280;
+    --amber: #B24D2F;
+    --amber-soft: #F3DCD3;
+    --muted: #7A6F63;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -39,7 +41,7 @@
   body { padding: max(20px, env(safe-area-inset-top)) 16px 40px; min-height: 100vh; }
 
   .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
-  h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 22px; margin: 0 0 4px; line-height: 1.25; }
+  h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 22px; margin: 0 0 4px; line-height: 1.25; color: var(--brand); }
   .student-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
 
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
@@ -50,7 +52,7 @@
     width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
     font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
   }
-  .field input:focus, .field select:focus { outline: 2px solid var(--growth); outline-offset: 1px; }
+  .field input:focus, .field select:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
   .row { display: flex; gap: 10px; }
   .row .field { flex: 1; }
 
@@ -62,7 +64,7 @@
   button.submit, button.secondary {
     width: 100%; padding: 13px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600;
   }
-  button.submit { background: var(--ink); color: #fff; }
+  button.submit { background: var(--brand); color: #fff; }
   button.submit:disabled { opacity: 0.6; }
   button.secondary { background: var(--amber-soft); color: var(--amber); margin-top: 4px; }
 
@@ -70,7 +72,7 @@
 
   .test-card { margin-bottom: 12px; }
   .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .test-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; }
+  .test-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; color: var(--ink); }
 
   .entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
   .entry:last-child { border-bottom: none; }
@@ -81,7 +83,7 @@
   .badge.pending { background: var(--amber-soft); color: var(--amber); }
 
   .photo-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; }
-  .photo-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--amber); background: var(--amber-soft); color: var(--amber); font-size: 13px; font-weight: 600; }
+  .photo-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 13px; font-weight: 600; }
   .photo-btn.done { border-color: var(--growth); background: var(--growth-soft); color: var(--growth); }
   input[type="file"] { display: none; }
 
@@ -98,7 +100,7 @@
 
 <script>
   // ここに、Google Apps Script をウェブアプリとして公開したときの URL を貼り付けてください。
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
+  const GAS_URL = "GAS_WEB_APP_URL_HERE";
 
   const params = new URLSearchParams(window.location.search);
   const STORAGE_KEY_ID = "connect-student-id";
@@ -177,7 +179,7 @@
 
     appEl.innerHTML = `
       <p class="eyebrow">個別指導塾コネクト</p>
-      <h1>成績トラッカー</h1>
+      <h1>私の成績表</h1>
       <p class="student-name">${data.studentName} さん</p>
 
       <div class="card">
@@ -324,3 +326,47 @@
           canvas.height = img.height * scale;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
+          resolve(dataUrl.split(",")[1]);
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handlePhotoSelected(e, testName) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const label = e.target.closest(".photo-btn");
+    const originalText = label.childNodes[0].textContent;
+    label.childNodes[0].textContent = "アップロード中...";
+
+    try {
+      const base64 = await compressImage(file);
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "uploadPhoto",
+          studentId,
+          testName,
+          imageBase64: base64,
+          mimeType: "image/jpeg",
+        }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      await loadAndRender();
+    } catch (err) {
+      alert("成績表のアップロードに失敗しました。もう一度お試しください。");
+      label.childNodes[0].textContent = originalText;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
