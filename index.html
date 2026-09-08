@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>私の成績表 | 個別指導塾コネクト</title>
 
-<link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#D9720B" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -13,6 +12,44 @@
 <meta name="apple-mobile-web-app-title" content="私の成績表" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <link rel="icon" href="icons/icon-192.png" />
+
+<script>
+  // manifestの<link>タグは、この後すぐ、ページ読み込みの最初の段階でJSから直接挿入します
+  // (静的なmanifest.jsonを先に読み込ませないようにするため、あえてここではリンクしません)
+  (function () {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var STORAGE_KEY_ID = "connect-student-id";
+      var urlId = params.get("id");
+      var id = urlId || localStorage.getItem(STORAGE_KEY_ID);
+      if (!id) return;
+
+      var base = window.location.origin + window.location.pathname;
+      var manifest = {
+        name: "私の成績表 | 個別指導塾コネクト",
+        short_name: "私の成績表",
+        start_url: base + "?id=" + id,
+        scope: base,
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#FFF6EC",
+        theme_color: "#D9720B",
+        lang: "ja",
+        icons: [
+          { src: base + "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: base + "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+        ],
+      };
+      var dataUri = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
+      var link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = dataUri;
+      document.head.appendChild(link);
+    } catch (err) {
+      // 失敗しても致命的ではない
+    }
+  })();
+</script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
@@ -99,7 +136,6 @@
 <div id="app">読み込み中...</div>
 
 <script>
-  // ここに、Google Apps Script をウェブアプリとして公開したときの URL を貼り付けてください。
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -116,44 +152,11 @@
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
 
-  function updateManifestForInstall(id) {
-    try {
-      const base = window.location.origin + window.location.pathname;
-      const manifest = {
-        name: "私の成績表 | 個別指導塾コネクト",
-        short_name: "私の成績表",
-        start_url: `${base}?id=${id}`,
-        scope: base,
-        display: "standalone",
-        orientation: "portrait",
-        background_color: "#FFF6EC",
-        theme_color: "#D9720B",
-        lang: "ja",
-        icons: [
-          { src: `${base}icons/icon-192.png`, sizes: "192x192", type: "image/png", purpose: "any maskable" },
-          { src: `${base}icons/icon-512.png`, sizes: "512x512", type: "image/png", purpose: "any maskable" },
-        ],
-      };
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      document.querySelector('link[rel="manifest"]').setAttribute("href", url);
-    } catch (err) {
-      // 失敗しても致命的ではないので何もしない(静的manifestのまま動く)
-    }
-  }
-
   async function init() {
     if (!studentId) {
       appEl.innerHTML = `
         <div class="id-error">
           専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。
-        </div>`;
-      return;
-    }
-    if (GAS_URL === "GAS_WEB_APP_URL_HERE") {
-      appEl.innerHTML = `
-        <div class="id-error">
-          まだ保存先(GAS)が接続されていません。管理者に確認してください。
         </div>`;
       return;
     }
@@ -193,7 +196,6 @@
       return;
     }
     if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
-    updateManifestForInstall(studentId);
     render(data);
   }
 
