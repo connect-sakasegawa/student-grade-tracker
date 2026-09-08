@@ -62,6 +62,7 @@
     --amber: #B24D2F;
     --amber-soft: #F3DCD3;
     --muted: #7A6F63;
+    --target-blue: #2A5FB4;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -103,7 +104,7 @@
   .subject-grid { margin-bottom: 4px; }
   .subject-grid-header, .subject-row {
     display: grid;
-    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
     gap: 6px;
     align-items: center;
   }
@@ -113,6 +114,8 @@
   .subject-grid-header span:nth-child(2),
   .subject-grid-header span:nth-child(3),
   .subject-grid-header span:nth-child(4) { text-align: center; }
+  .subject-grid-header span.target-label { color: var(--target-blue); }
+
   .subject-row { padding: 6px 0; }
   .subject-row label { font-size: 13.5px; font-weight: 600; }
   .subject-row input {
@@ -120,6 +123,15 @@
     font-size: 14px; text-align: center; background: #fff; color: var(--ink);
   }
   .subject-row input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  .target-cell {
+    border-right: 1px dashed var(--muted);
+    padding-right: 6px;
+  }
+  .target-cell input {
+    color: var(--target-blue);
+    font-weight: 600;
+  }
 
   .test-card { margin-bottom: 12px; }
   .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -153,7 +165,6 @@
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
 
-  // バックエンド(Code.gs)と同じ並び・同じ表記にしてください
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
   const TEST_NAMES = [
     "1学期中間テスト",
@@ -227,7 +238,6 @@
   }
 
   function render(data) {
-    // 「テストごとの記録」は TEST_NAMES の並び順で表示(第4回実力テストが一番下)
     const tests = (data.tests || []).slice().sort(
       (a, b) => TEST_NAMES.indexOf(a.testName) - TEST_NAMES.indexOf(b.testName)
     );
@@ -248,13 +258,17 @@
           </div>
 
           <div class="subject-grid">
-            <div class="subject-grid-header"><span></span><span>得点</span><span>目標点</span><span>平均点</span></div>
+            <div class="subject-grid-header">
+              <span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span>
+            </div>
             ${SUBJECTS.map(
               (s) => `
               <div class="subject-row">
                 <label>${s}</label>
+                <div class="target-cell">
+                  <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" />
+                </div>
                 <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
-                <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" />
                 <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
               </div>`
             ).join("")}
@@ -347,7 +361,7 @@
       const avgRaw = avgInput.value;
       const targetRaw = targetInput.value;
 
-      if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return; // 未入力の科目はスキップ
+      if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return;
 
       const parseOrError = (raw, label) => {
         if (raw === "") return null;
@@ -359,11 +373,11 @@
         return n;
       };
 
+      const target = parseOrError(targetRaw, "目標点");
+      if (validationError) return;
       const score = parseOrError(scoreRaw, "点数");
       if (validationError) return;
       const average = parseOrError(avgRaw, "平均点");
-      if (validationError) return;
-      const target = parseOrError(targetRaw, "目標点");
       if (validationError) return;
 
       subjects.push({ subject, score, average, target });
