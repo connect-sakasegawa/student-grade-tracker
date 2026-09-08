@@ -81,11 +81,11 @@
 
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  .field input, .field select {
+  .field select {
     width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
     font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
   }
-  .field input:focus, .field select:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .field select:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
 
   .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
   .msg.error { color: #B3441E; background: #FCEBE3; }
@@ -103,19 +103,21 @@
   .subject-grid { margin-bottom: 4px; }
   .subject-grid-header, .subject-row {
     display: grid;
-    grid-template-columns: 2.4fr 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 6px;
     align-items: center;
   }
   .subject-grid-header {
-    font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 6px;
+    font-size: 10.5px; color: var(--muted); font-weight: 700; margin-bottom: 6px;
   }
-  .subject-grid-header span:nth-child(2), .subject-grid-header span:nth-child(3) { text-align: center; }
+  .subject-grid-header span:nth-child(2),
+  .subject-grid-header span:nth-child(3),
+  .subject-grid-header span:nth-child(4) { text-align: center; }
   .subject-row { padding: 6px 0; }
-  .subject-row label { font-size: 14px; font-weight: 600; }
+  .subject-row label { font-size: 13.5px; font-weight: 600; }
   .subject-row input {
-    width: 100%; padding: 8px 6px; border: 1px solid var(--line); border-radius: 8px;
-    font-size: 15px; text-align: center; background: #fff; color: var(--ink);
+    width: 100%; padding: 8px 4px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 14px; text-align: center; background: #fff; color: var(--ink);
   }
   .subject-row input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
 
@@ -126,7 +128,7 @@
   .entry { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
   .entry:last-child { border-bottom: none; }
   .entry.total { font-weight: 700; }
-  .entry-meta { color: var(--muted); font-size: 12px; }
+  .entry-meta { color: var(--muted); font-size: 12px; display: block; }
 
   .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
   .badge.done { background: var(--growth-soft); color: var(--growth); }
@@ -225,7 +227,10 @@
   }
 
   function render(data) {
-    const tests = (data.tests || []).slice().reverse(); // 新しいテスト回を上に
+    // 「テストごとの記録」は TEST_NAMES の並び順で表示(第4回実力テストが一番下)
+    const tests = (data.tests || []).slice().sort(
+      (a, b) => TEST_NAMES.indexOf(a.testName) - TEST_NAMES.indexOf(b.testName)
+    );
 
     appEl.innerHTML = `
       <p class="eyebrow">個別指導塾コネクト</p>
@@ -243,12 +248,13 @@
           </div>
 
           <div class="subject-grid">
-            <div class="subject-grid-header"><span></span><span>得点</span><span>平均点</span></div>
+            <div class="subject-grid-header"><span></span><span>得点</span><span>目標点</span><span>平均点</span></div>
             ${SUBJECTS.map(
               (s) => `
               <div class="subject-row">
                 <label>${s}</label>
                 <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
+                <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" />
                 <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
               </div>`
             ).join("")}
@@ -271,7 +277,9 @@
       const card = document.createElement("div");
       card.className = "card test-card";
       const photoSubmitted = !!t.photo;
-      const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null);
+      const filledSubjects = t.subjects.filter(
+        (s) => s.score !== null || s.average !== null || s.target !== null
+      );
 
       card.innerHTML = `
         <div class="test-header"><p class="test-name">${t.testName}</p></div>
@@ -282,7 +290,10 @@
                 <div>${s.subject}</div>
                 <div style="text-align:right">
                   ${s.score !== null ? `${s.score}点` : "-"}
-                  ${s.average !== null ? `<span class="entry-meta">(平均${s.average}点)</span>` : ""}
+                  <span class="entry-meta">
+                    ${s.target !== null ? `目標${s.target}点` : ""}
+                    ${s.average !== null ? `${s.target !== null ? " / " : ""}平均${s.average}点` : ""}
+                  </span>
                 </div>
               </div>`
           )
@@ -331,29 +342,31 @@
       if (validationError) return;
       const scoreInput = document.querySelector(`input[data-subject="${subject}"][data-field="score"]`);
       const avgInput = document.querySelector(`input[data-subject="${subject}"][data-field="average"]`);
+      const targetInput = document.querySelector(`input[data-subject="${subject}"][data-field="target"]`);
       const scoreRaw = scoreInput.value;
       const avgRaw = avgInput.value;
+      const targetRaw = targetInput.value;
 
-      if (scoreRaw === "" && avgRaw === "") return; // 未入力の科目はスキップ
+      if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return; // 未入力の科目はスキップ
 
-      let score = null;
-      let average = null;
-
-      if (scoreRaw !== "") {
-        score = Number(scoreRaw);
-        if (Number.isNaN(score) || score < 0 || score > 100) {
-          validationError = `${subject}の点数は0〜100の数字で入力してください`;
-          return;
+      const parseOrError = (raw, label) => {
+        if (raw === "") return null;
+        const n = Number(raw);
+        if (Number.isNaN(n) || n < 0 || n > 100) {
+          validationError = `${subject}の${label}は0〜100の数字で入力してください`;
+          return null;
         }
-      }
-      if (avgRaw !== "") {
-        average = Number(avgRaw);
-        if (Number.isNaN(average) || average < 0 || average > 100) {
-          validationError = `${subject}の平均点は0〜100の数字で入力してください`;
-          return;
-        }
-      }
-      subjects.push({ subject, score, average });
+        return n;
+      };
+
+      const score = parseOrError(scoreRaw, "点数");
+      if (validationError) return;
+      const average = parseOrError(avgRaw, "平均点");
+      if (validationError) return;
+      const target = parseOrError(targetRaw, "目標点");
+      if (validationError) return;
+
+      subjects.push({ subject, score, average, target });
     });
 
     if (validationError) return showFieldError(errorEl, validationError);
