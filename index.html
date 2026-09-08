@@ -108,7 +108,7 @@
   const studentId = urlId || localStorage.getItem(STORAGE_KEY_ID);
   const appEl = document.getElementById("app");
 
-  let currentTestName = ""; // 「新しいテストを追加」フォームで使う一時状態
+  let currentTestName = "";
 
   function formatDateTime(iso) {
     if (!iso) return "";
