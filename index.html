@@ -124,8 +124,11 @@
   .week-nav button { background: var(--brand-soft); color: var(--brand); border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
   .week-nav .week-label { font-size: 13.5px; font-weight: 700; }
 
-  .garden-stage-wrap { text-align: center; margin: 4px 0 10px; }
-  .garden-status { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+  .garden-stage-wrap { position: relative; border-radius: 10px; overflow: hidden; height: 150px; margin-bottom: 4px; }
+  .garden-stage-bg { position: absolute; inset: 0; }
+  .garden-stage-bg svg { display: block; width: 100%; height: 100%; }
+  .garden-stage-fg { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; }
+  .garden-status { font-size: 13px; color: var(--muted); text-align: center; margin: 4px 0 0; }
   .field-harvest { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; border: none; background: var(--gold-soft); color: #8A6A1E; font-size: 16px; font-weight: 700; text-align: center; }
 
   .preset-actions { margin: -6px 0 14px; }
@@ -177,11 +180,16 @@
   .tab-btn { flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
   .tab-btn .tab-icon { font-size: 19px; line-height: 1; }
   .tab-btn.active { color: var(--brand); font-weight: 700; }
+
+  #toast-container { position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom) + 10px); z-index: 30; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast { background: var(--ink); color: #fff; padding: 11px 14px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.18); opacity: 0; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; }
+  .toast.show { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
 
 <div id="app">学ぶ人は変える人だ</div>
+<div id="toast-container"></div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
@@ -222,32 +230,39 @@
     <circle cx="20" cy="33" r="3.6" fill="#E8C24A"/>
   </svg>`;
 
-  const SOIL_ICON = `<svg width="70" height="70" viewBox="0 0 100 90"><ellipse cx="50" cy="78" rx="30" ry="9" fill="#8B6B47"/></svg>`;
-
-  const SPROUT_ICON = `<svg width="70" height="90" viewBox="0 0 100 100">
-    <ellipse cx="50" cy="88" rx="30" ry="9" fill="#8B6B47"/>
-    <path d="M50 86 Q46 66 50 50" fill="none" stroke="#4C7A3D" stroke-width="3.4" stroke-linecap="round"/>
-    <path d="M50 50 Q32 44 28 56 Q38 60 50 50 Z" fill="#5E8F4A"/>
-    <path d="M50 50 Q68 44 72 56 Q62 60 50 50 Z" fill="#6FA357"/>
+  const FIELD_BG_SVG = `<svg viewBox="0 0 300 150" preserveAspectRatio="none">
+    <rect x="0" y="0" width="300" height="95" fill="#EAF3DD"/>
+    <rect x="0" y="95" width="300" height="55" fill="#96754C"/>
+    <path d="M0 108 Q75 102 150 108 T300 108" fill="none" stroke="#7A5B3A" stroke-width="2"/>
+    <path d="M0 122 Q75 116 150 122 T300 122" fill="none" stroke="#7A5B3A" stroke-width="2"/>
+    <path d="M0 136 Q75 130 150 136 T300 136" fill="none" stroke="#7A5B3A" stroke-width="2"/>
+    <path d="M18 95 Q20 87 24 95 Q26 88 30 95" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M256 95 Q258 87 262 95 Q264 88 268 95" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M60 95 Q61 90 63 95" fill="none" stroke="#5E8F4A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M225 95 Q226 90 228 95" fill="none" stroke="#5E8F4A" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
 
-  const BUD_ICON = `<svg width="70" height="100" viewBox="0 0 100 110">
-    <ellipse cx="50" cy="98" rx="30" ry="9" fill="#8B6B47"/>
-    <path d="M50 96 Q44 68 50 34" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
-    <path d="M50 82 Q30 75 27 88 Q38 92 50 82 Z" fill="#5E8F4A"/>
-    <path d="M50 82 Q70 75 73 88 Q62 92 50 82 Z" fill="#6FA357"/>
-    <path d="M50 58 Q35 52 32 62 Q41 66 50 58 Z" fill="#6FA357"/>
-    <path d="M50 58 Q65 52 68 62 Q59 66 50 58 Z" fill="#8FB56B"/>
-    <path d="M50 34 Q45 16 50 0 Q55 16 50 34 Z" fill="#8FB56B"/>
+  const SPROUT_ICON = `<svg width="70" height="88" viewBox="0 0 100 100">
+    <path d="M50 84 Q46 64 50 48" fill="none" stroke="#4C7A3D" stroke-width="3.4" stroke-linecap="round"/>
+    <path d="M50 48 Q32 42 28 54 Q38 58 50 48 Z" fill="#5E8F4A"/>
+    <path d="M50 48 Q68 42 72 54 Q62 58 50 48 Z" fill="#6FA357"/>
   </svg>`;
 
-  const MYSTERY_ICON = `<svg width="70" height="100" viewBox="0 0 100 110">
-    <ellipse cx="50" cy="98" rx="30" ry="9" fill="#8B6B47"/>
-    <path d="M50 96 Q44 60 50 20" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
+  const BUD_ICON = `<svg width="70" height="96" viewBox="0 0 100 108">
+    <path d="M50 94 Q44 66 50 32" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
     <path d="M50 80 Q30 73 27 86 Q38 90 50 80 Z" fill="#5E8F4A"/>
     <path d="M50 80 Q70 73 73 86 Q62 90 50 80 Z" fill="#6FA357"/>
-    <circle cx="50" cy="32" r="24" fill="#FBF0D0" stroke="#C99A2E" stroke-width="1.5" stroke-dasharray="3 3"/>
-    <text x="50" y="41" text-anchor="middle" font-size="26" font-weight="700" fill="#8A6A1E">?</text>
+    <path d="M50 56 Q35 50 32 60 Q41 64 50 56 Z" fill="#6FA357"/>
+    <path d="M50 56 Q65 50 68 60 Q59 64 50 56 Z" fill="#8FB56B"/>
+    <path d="M50 32 Q45 14 50 -2 Q55 14 50 32 Z" fill="#8FB56B"/>
+  </svg>`;
+
+  const MYSTERY_ICON = `<svg width="70" height="96" viewBox="0 0 100 108">
+    <path d="M50 94 Q44 58 50 18" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
+    <path d="M50 78 Q30 71 27 84 Q38 88 50 78 Z" fill="#5E8F4A"/>
+    <path d="M50 78 Q70 71 73 84 Q62 88 50 78 Z" fill="#6FA357"/>
+    <circle cx="50" cy="30" r="24" fill="#FBF0D0" stroke="#C99A2E" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="50" y="39" text-anchor="middle" font-size="26" font-weight="700" fill="#8A6A1E">?</text>
   </svg>`;
 
   const params = new URLSearchParams(window.location.search);
@@ -263,6 +278,19 @@
 
   function escapeHtml(str) {
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function showToast(message) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.textContent = message;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => {
+      el.classList.remove("show");
+      setTimeout(() => el.remove(), 300);
+    }, 2500);
   }
   function formatDateTime(iso) {
     if (!iso) return "";
@@ -283,6 +311,10 @@
   function formatMD(ymd) {
     const d = new Date(ymd + "T00:00:00");
     return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+  function todayYMD() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
 
   function getPreviousScore(subject, testName) {
@@ -553,7 +585,7 @@
       if (!result.ok) throw new Error(result.error || "failed");
       await loadAndRender();
     } catch (err) {
-      alert("成績表のアップロードに失敗しました。もう一度お試しください。");
+      showToast("成績表のアップロードに失敗しました。もう一度お試しください。");
       label.childNodes[0].textContent = originalText;
     }
   }
@@ -562,16 +594,19 @@
   function renderGardenStage() {
     const garden = currentData.garden || { nutrientCount: 0, missionsPerStage: 3 };
     const n = garden.nutrientCount;
-    if (n <= 0) {
-      return `<div class="garden-stage-wrap">${SOIL_ICON}<p class="garden-status">まだ何も植えていません。ミッションを完了すると育ち始めます</p></div>`;
-    }
-    if (n === 1) {
-      return `<div class="garden-stage-wrap">${SPROUT_ICON}<p class="garden-status">芽が出た!</p></div>`;
-    }
-    if (n === 2) {
-      return `<div class="garden-stage-wrap">${BUD_ICON}<p class="garden-status">つぼみがふくらんできた</p></div>`;
-    }
-    return `<div class="garden-stage-wrap">${MYSTERY_ICON}<p class="garden-status">何かが実りそう…</p><button id="harvest-btn" class="field-harvest">🎁 タップして収穫する</button></div>`;
+    let iconSvg = "", statusText = "まだ何も植えていません。ミッションを完了すると育ち始めます", showHarvest = false;
+    if (n === 1) { iconSvg = SPROUT_ICON; statusText = "芽が出た!"; }
+    else if (n === 2) { iconSvg = BUD_ICON; statusText = "つぼみがふくらんできた"; }
+    else if (n >= garden.missionsPerStage) { iconSvg = MYSTERY_ICON; statusText = "何かが実りそう…"; showHarvest = true; }
+
+    return `
+      <div class="garden-stage-wrap">
+        <div class="garden-stage-bg">${FIELD_BG_SVG}</div>
+        <div class="garden-stage-fg">${iconSvg}</div>
+      </div>
+      <p class="garden-status">${statusText}</p>
+      ${showHarvest ? `<button id="harvest-btn" class="field-harvest">🎁 タップして収穫する</button>` : ""}
+    `;
   }
 
   function renderNotebook(el) {
@@ -579,6 +614,10 @@
     const presets = currentData.missionPresets || [];
     const weekStart = selectedWeekStart || currentData.weekStart;
     const weekEnd = addDaysToYMD(weekStart, 6);
+    const today = todayYMD();
+
+    const dayDates = DAYS.map((d, i) => addDaysToYMD(weekStart, i));
+    const hasAvailableDay = dayDates.some((d) => d >= today);
 
     el.innerHTML = `
       <div class="week-nav">
@@ -587,16 +626,23 @@
         <button id="week-next">次週 →</button>
       </div>
 
-      <div class="card">
+      <div class="card" id="garden-card">
         <p class="section-title" style="margin-top:0;">畑</p>
         ${renderGardenStage()}
       </div>
 
       <div class="card">
+        ${hasAvailableDay ? `
         <form id="mission-form">
           <div class="field">
             <label for="mission-day">曜日</label>
-            <select id="mission-day">${DAYS.map((d, i) => `<option value="${d}">${d}曜日(${formatMD(addDaysToYMD(weekStart, i))})</option>`).join("")}</select>
+            <select id="mission-day">
+              ${DAYS.map((d, i) => {
+                const dateStr = dayDates[i];
+                const isPast = dateStr < today;
+                return `<option value="${d}" ${isPast ? "disabled" : ""}>${d}曜日(${formatMD(dateStr)})${isPast ? " - 終了" : ""}</option>`;
+              }).join("")}
+            </select>
           </div>
           <div class="field">
             <label for="mission-category">区分</label>
@@ -618,7 +664,7 @@
           </div>
           <div id="mission-error" class="msg error"></div>
           <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
-        </form>
+        </form>` : `<p class="empty">この週は終了しています。新しいミッションは今週以降の週で追加してください</p>`}
       </div>
 
       <p class="section-title">この週のミッション</p>
@@ -631,7 +677,7 @@
       const dayMissions = missions.filter((m) => m.day === day);
       const block = document.createElement("div");
       block.className = "day-block";
-      block.innerHTML = `<p class="day-title">${day}曜日(${formatMD(addDaysToYMD(weekStart, i))})</p>`;
+      block.innerHTML = `<p class="day-title">${day}曜日(${formatMD(dayDates[i])})</p>`;
       if (dayMissions.length === 0) {
         block.innerHTML += `<p class="day-empty">まだミッションがありません</p>`;
       } else {
@@ -655,13 +701,18 @@
     document.querySelectorAll(".mission-checkbox").forEach((cb) => {
       cb.addEventListener("click", () => toggleMission(cb.dataset.id));
     });
-    document.getElementById("mission-form").addEventListener("submit", handleAddMission);
+    const form = document.getElementById("mission-form");
+    if (form) form.addEventListener("submit", handleAddMission);
     document.getElementById("week-prev").addEventListener("click", () => changeWeek(-7));
     document.getElementById("week-next").addEventListener("click", () => changeWeek(7));
-    document.getElementById("preset-save-btn").addEventListener("click", saveMissionPreset);
-    document.getElementById("mission-preset").addEventListener("change", (e) => {
-      if (e.target.value) document.getElementById("mission-content").value = e.target.value;
-    });
+    const presetBtn = document.getElementById("preset-save-btn");
+    if (presetBtn) presetBtn.addEventListener("click", saveMissionPreset);
+    const presetSelect = document.getElementById("mission-preset");
+    if (presetSelect) {
+      presetSelect.addEventListener("change", (e) => {
+        if (e.target.value) document.getElementById("mission-content").value = e.target.value;
+      });
+    }
     const harvestBtn = document.getElementById("harvest-btn");
     if (harvestBtn) harvestBtn.addEventListener("click", harvestGarden);
   }
@@ -692,10 +743,18 @@
       });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
+
+      // 全データを読み込み直さず、その場でミッション一覧に追加する(軽量化)
+      currentData.missions = currentData.missions || [];
+      currentData.missions.push({
+        id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""),
+        day, category, content, completed: false, completedAt: "",
+      });
       contentInput.value = "";
-      await loadAndRender();
+      renderNotebook(document.getElementById("tab-content"));
+      showToast("ミッションを追加しました");
     } catch (err) {
-      showFieldError(errorEl, "追加に失敗しました。もう一度お試しください。");
+      showFieldError(errorEl, err.message || "追加に失敗しました。もう一度お試しください。");
     } finally {
       btn.disabled = false;
       btn.textContent = "ミッションを追加";
@@ -705,7 +764,7 @@
   async function saveMissionPreset() {
     const contentInput = document.getElementById("mission-content");
     const content = contentInput.value.trim();
-    if (!content) { alert("登録する内容を先に入力してください"); return; }
+    if (!content) { showToast("登録する内容を先に入力してください"); return; }
     try {
       const res = await fetch(GAS_URL, {
         method: "POST",
@@ -719,13 +778,12 @@
         currentData.missionPresets.push({ id: result.id, content: result.content });
       }
       renderNotebook(document.getElementById("tab-content"));
-      alert("よく使う項目に登録しました");
+      showToast("よく使う項目に登録しました");
     } catch (err) {
-      alert("登録に失敗しました。もう一度お試しください。");
+      showToast("登録に失敗しました。もう一度お試しください。");
     }
   }
 
-  // チェック操作は毎回全部読み込み直さず、その場で見た目を反映してから通信する(サクサク動かすため)
   async function toggleMission(id) {
     const m = (currentData.missions || []).find((x) => x.id === id);
     if (!m) return;
@@ -744,10 +802,15 @@
       m.completed = result.completed;
       currentData.garden = result.garden;
       renderNotebook(document.getElementById("tab-content"));
+
+      const gardenCard = document.getElementById("garden-card");
+      if (gardenCard && m.completed) {
+        gardenCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     } catch (err) {
       m.completed = prevCompleted;
       renderNotebook(document.getElementById("tab-content"));
-      alert("更新に失敗しました。もう一度お試しください。");
+      showToast("更新に失敗しました。もう一度お試しください。");
     }
   }
 
@@ -764,14 +827,14 @@
       if (!result.ok) throw new Error(result.error || "failed");
       await loadAndRender();
       const label = result.fruit && result.fruit.indexOf(GOLDEN_MARK) === 0 ? "金のぶどう" : result.fruit;
-      setTimeout(() => alert(`収穫しました! ${label}`), 150);
+      showToast(`収穫しました! ${label}`);
     } catch (err) {
-      alert("収穫に失敗しました。もう一度お試しください。");
+      showToast("収穫に失敗しました。もう一度お試しください。");
       if (btn) { btn.disabled = false; btn.textContent = "🎁 タップして収穫する"; }
     }
   }
 
-  // ---------- 収穫コレクションタブ(未収穫の果物は伏せる) ----------
+  // ---------- 収穫コレクションタブ ----------
   function renderGarden(el) {
     const harvests = currentData.harvests || [];
     const counts = {};
@@ -871,7 +934,7 @@
       const data = await res.json();
       icon.classList.remove("drawing");
       if (!data.ok) {
-        alert(data.error || "取得に失敗しました。もう一度お試しください。");
+        showToast(data.error || "取得に失敗しました。もう一度お試しください。");
         btn.disabled = false;
         return;
       }
@@ -891,7 +954,7 @@
       icon.classList.remove("drawing");
       btn.disabled = false;
       btn.textContent = "本日のお御籤をひく";
-      alert("取得に失敗しました。もう一度お試しください。");
+      showToast("取得に失敗しました。もう一度お試しください。");
     }
   }
 
