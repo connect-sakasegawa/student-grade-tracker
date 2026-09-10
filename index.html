@@ -124,11 +124,12 @@
   .week-nav button { background: var(--brand-soft); color: var(--brand); border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
   .week-nav .week-label { font-size: 13.5px; font-weight: 700; }
 
-  .field-row { display: flex; gap: 6px; justify-content: center; margin: 10px 0; }
-  .field-slot { width: 38px; height: 38px; border-radius: 8px; background: var(--paper); border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .field-slot.filled { background: var(--growth-soft); border-style: solid; border-color: var(--growth); }
-  .garden-status { font-size: 13px; color: var(--muted); text-align: center; margin: 6px 0 0; }
+  .garden-stage-wrap { text-align: center; margin: 4px 0 10px; }
+  .garden-status { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
   .field-harvest { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; border: none; background: var(--gold-soft); color: #8A6A1E; font-size: 16px; font-weight: 700; text-align: center; }
+
+  .preset-actions { margin: -6px 0 14px; }
+  .preset-save-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 12.5px; font-weight: 600; }
 
   .day-block { margin-bottom: 14px; }
   .day-title { font-size: 13px; font-weight: 700; color: var(--brand); margin: 0 0 8px; }
@@ -147,6 +148,7 @@
   .fruit-cell { text-align: center; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 4px; font-size: 24px; }
   .fruit-cell .count { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
   .fruit-cell.golden { background: var(--gold-soft); border-color: var(--gold); }
+  .fruit-cell.mystery { opacity: 0.5; }
   .history-fruit-icon { vertical-align: middle; margin-right: 4px; }
 
   .rank-current { text-align: center; padding: 16px; background: var(--brand-soft); border-radius: 12px; margin-bottom: 16px; }
@@ -220,6 +222,34 @@
     <circle cx="20" cy="33" r="3.6" fill="#E8C24A"/>
   </svg>`;
 
+  const SOIL_ICON = `<svg width="70" height="70" viewBox="0 0 100 90"><ellipse cx="50" cy="78" rx="30" ry="9" fill="#8B6B47"/></svg>`;
+
+  const SPROUT_ICON = `<svg width="70" height="90" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="88" rx="30" ry="9" fill="#8B6B47"/>
+    <path d="M50 86 Q46 66 50 50" fill="none" stroke="#4C7A3D" stroke-width="3.4" stroke-linecap="round"/>
+    <path d="M50 50 Q32 44 28 56 Q38 60 50 50 Z" fill="#5E8F4A"/>
+    <path d="M50 50 Q68 44 72 56 Q62 60 50 50 Z" fill="#6FA357"/>
+  </svg>`;
+
+  const BUD_ICON = `<svg width="70" height="100" viewBox="0 0 100 110">
+    <ellipse cx="50" cy="98" rx="30" ry="9" fill="#8B6B47"/>
+    <path d="M50 96 Q44 68 50 34" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
+    <path d="M50 82 Q30 75 27 88 Q38 92 50 82 Z" fill="#5E8F4A"/>
+    <path d="M50 82 Q70 75 73 88 Q62 92 50 82 Z" fill="#6FA357"/>
+    <path d="M50 58 Q35 52 32 62 Q41 66 50 58 Z" fill="#6FA357"/>
+    <path d="M50 58 Q65 52 68 62 Q59 66 50 58 Z" fill="#8FB56B"/>
+    <path d="M50 34 Q45 16 50 0 Q55 16 50 34 Z" fill="#8FB56B"/>
+  </svg>`;
+
+  const MYSTERY_ICON = `<svg width="70" height="100" viewBox="0 0 100 110">
+    <ellipse cx="50" cy="98" rx="30" ry="9" fill="#8B6B47"/>
+    <path d="M50 96 Q44 60 50 20" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
+    <path d="M50 80 Q30 73 27 86 Q38 90 50 80 Z" fill="#5E8F4A"/>
+    <path d="M50 80 Q70 73 73 86 Q62 90 50 80 Z" fill="#6FA357"/>
+    <circle cx="50" cy="32" r="24" fill="#FBF0D0" stroke="#C99A2E" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="50" y="41" text-anchor="middle" font-size="26" font-weight="700" fill="#8A6A1E">?</text>
+  </svg>`;
+
   const params = new URLSearchParams(window.location.search);
   const STORAGE_KEY_ID = "connect-student-id";
   const urlId = params.get("id");
@@ -229,8 +259,11 @@
   let currentData = null;
   let currentTab = "grades";
   let selectedWeekStart = null;
-  let lastOmikuji = null; // このセッション中に引いた結果を覚えておく(サーバー側は日付での制限をしない)
+  let lastOmikuji = null;
 
+  function escapeHtml(str) {
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
   function formatDateTime(iso) {
     if (!iso) return "";
     const d = new Date(iso);
@@ -525,16 +558,27 @@
     }
   }
 
-  // ---------- 学習手帳タブ(週ナビ+畑、7日間すべて表示) ----------
+  // ---------- 学習手帳タブ ----------
+  function renderGardenStage() {
+    const garden = currentData.garden || { nutrientCount: 0, missionsPerStage: 3 };
+    const n = garden.nutrientCount;
+    if (n <= 0) {
+      return `<div class="garden-stage-wrap">${SOIL_ICON}<p class="garden-status">まだ何も植えていません。ミッションを完了すると育ち始めます</p></div>`;
+    }
+    if (n === 1) {
+      return `<div class="garden-stage-wrap">${SPROUT_ICON}<p class="garden-status">芽が出た!</p></div>`;
+    }
+    if (n === 2) {
+      return `<div class="garden-stage-wrap">${BUD_ICON}<p class="garden-status">つぼみがふくらんできた</p></div>`;
+    }
+    return `<div class="garden-stage-wrap">${MYSTERY_ICON}<p class="garden-status">何かが実りそう…</p><button id="harvest-btn" class="field-harvest">🎁 タップして収穫する</button></div>`;
+  }
+
   function renderNotebook(el) {
     const missions = currentData.missions || [];
-    const garden = currentData.garden || { nutrientCount: 0, missionsPerStage: 3 };
+    const presets = currentData.missionPresets || [];
     const weekStart = selectedWeekStart || currentData.weekStart;
     const weekEnd = addDaysToYMD(weekStart, 6);
-
-    const slots = [];
-    for (let i = 0; i < garden.missionsPerStage; i++) slots.push(i < garden.nutrientCount);
-    const ready = garden.nutrientCount >= garden.missionsPerStage;
 
     el.innerHTML = `
       <div class="week-nav">
@@ -545,12 +589,7 @@
 
       <div class="card">
         <p class="section-title" style="margin-top:0;">畑</p>
-        <div class="field-row">
-          ${slots.map((filled) => `<div class="field-slot ${filled ? "filled" : ""}">${filled ? "🌱" : ""}</div>`).join("")}
-        </div>
-        ${ready
-          ? `<button id="harvest-btn" class="field-harvest">🍇 タップして収穫する</button>`
-          : `<p class="garden-status">あと${garden.missionsPerStage - garden.nutrientCount}個ミッションを完了すると収穫できます</p>`}
+        ${renderGardenStage()}
       </div>
 
       <div class="card">
@@ -564,8 +603,18 @@
             <select id="mission-category">${CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
           </div>
           <div class="field">
-            <label for="mission-content">内容</label>
+            <label for="mission-preset">よく使う項目から選ぶ</label>
+            <select id="mission-preset">
+              <option value="">— 選択(任意) —</option>
+              ${presets.map((p) => `<option value="${escapeHtml(p.content)}">${escapeHtml(p.content)}</option>`).join("")}
+            </select>
+          </div>
+          <div class="field">
+            <label for="mission-content">内容(自由記述)</label>
             <input type="text" id="mission-content" placeholder="例:数学の宿題プリント2枚" />
+          </div>
+          <div class="preset-actions">
+            <button type="button" id="preset-save-btn" class="preset-save-btn">＋ この内容をよく使う項目に登録</button>
           </div>
           <div id="mission-error" class="msg error"></div>
           <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
@@ -593,7 +642,7 @@
           item.innerHTML = `
             <div class="mission-checkbox ${done ? "checked" : ""}" data-id="${m.id}">${done ? "✓" : ""}</div>
             <div class="mission-text ${done ? "done" : ""}">
-              ${m.content}
+              ${escapeHtml(m.content)}
               <span class="mission-cat ${m.category === "宿題" ? "homework" : "self"}">${m.category}</span>
             </div>
           `;
@@ -609,6 +658,10 @@
     document.getElementById("mission-form").addEventListener("submit", handleAddMission);
     document.getElementById("week-prev").addEventListener("click", () => changeWeek(-7));
     document.getElementById("week-next").addEventListener("click", () => changeWeek(7));
+    document.getElementById("preset-save-btn").addEventListener("click", saveMissionPreset);
+    document.getElementById("mission-preset").addEventListener("change", (e) => {
+      if (e.target.value) document.getElementById("mission-content").value = e.target.value;
+    });
     const harvestBtn = document.getElementById("harvest-btn");
     if (harvestBtn) harvestBtn.addEventListener("click", harvestGarden);
   }
@@ -649,7 +702,37 @@
     }
   }
 
+  async function saveMissionPreset() {
+    const contentInput = document.getElementById("mission-content");
+    const content = contentInput.value.trim();
+    if (!content) { alert("登録する内容を先に入力してください"); return; }
+    try {
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "addMissionPreset", studentId, content }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      if (!result.alreadyExists) {
+        currentData.missionPresets = currentData.missionPresets || [];
+        currentData.missionPresets.push({ id: result.id, content: result.content });
+      }
+      renderNotebook(document.getElementById("tab-content"));
+      alert("よく使う項目に登録しました");
+    } catch (err) {
+      alert("登録に失敗しました。もう一度お試しください。");
+    }
+  }
+
+  // チェック操作は毎回全部読み込み直さず、その場で見た目を反映してから通信する(サクサク動かすため)
   async function toggleMission(id) {
+    const m = (currentData.missions || []).find((x) => x.id === id);
+    if (!m) return;
+    const prevCompleted = m.completed === true || m.completed === "TRUE" || m.completed === "true";
+    m.completed = !prevCompleted;
+    renderNotebook(document.getElementById("tab-content"));
+
     try {
       const res = await fetch(GAS_URL, {
         method: "POST",
@@ -658,8 +741,12 @@
       });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-      await loadAndRender();
+      m.completed = result.completed;
+      currentData.garden = result.garden;
+      renderNotebook(document.getElementById("tab-content"));
     } catch (err) {
+      m.completed = prevCompleted;
+      renderNotebook(document.getElementById("tab-content"));
       alert("更新に失敗しました。もう一度お試しください。");
     }
   }
@@ -680,11 +767,11 @@
       setTimeout(() => alert(`収穫しました! ${label}`), 150);
     } catch (err) {
       alert("収穫に失敗しました。もう一度お試しください。");
-      if (btn) { btn.disabled = false; btn.textContent = "🍇 タップして収穫する"; }
+      if (btn) { btn.disabled = false; btn.textContent = "🎁 タップして収穫する"; }
     }
   }
 
-  // ---------- 収穫コレクションタブ ----------
+  // ---------- 収穫コレクションタブ(未収穫の果物は伏せる) ----------
   function renderGarden(el) {
     const harvests = currentData.harvests || [];
     const counts = {};
@@ -700,8 +787,13 @@
       <div class="card">
         <p class="section-title" style="margin-top:0;">これまでの収穫</p>
         <div class="fruit-grid">
-          ${FRUIT_LIST.map((f) => `<div class="fruit-cell">${f}<span class="count">×${counts[f]}</span></div>`).join("")}
-          <div class="fruit-cell golden">${GOLDEN_GRAPE_SVG}<span class="count">×${goldenCount}</span></div>
+          ${FRUIT_LIST.map((f) => counts[f] > 0
+            ? `<div class="fruit-cell">${f}<span class="count">×${counts[f]}</span></div>`
+            : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`
+          ).join("")}
+          ${goldenCount > 0
+            ? `<div class="fruit-cell golden">${GOLDEN_GRAPE_SVG}<span class="count">×${goldenCount}</span></div>`
+            : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`}
         </div>
       </div>
       <p class="section-title">収穫履歴</p>
@@ -737,7 +829,7 @@
     el.innerHTML = html;
   }
 
-  // ---------- お御籤タブ(お賽銭がある限り何度でも引ける) ----------
+  // ---------- お御籤タブ ----------
   function renderOmikuji(el) {
     const coins = currentData.coins || 0;
     const canDraw = coins >= 1;
