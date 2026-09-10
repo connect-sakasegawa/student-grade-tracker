@@ -124,10 +124,10 @@
   .week-nav button { background: var(--brand-soft); color: var(--brand); border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
   .week-nav .week-label { font-size: 13.5px; font-weight: 700; }
 
-  .garden-stage-wrap { position: relative; border-radius: 10px; overflow: hidden; height: 150px; margin-bottom: 4px; }
+  .garden-stage-wrap { position: relative; border-radius: 10px; overflow: hidden; height: 160px; margin-bottom: 4px; }
   .garden-stage-bg { position: absolute; inset: 0; }
   .garden-stage-bg svg { display: block; width: 100%; height: 100%; }
-  .garden-stage-fg { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; }
+  .garden-stage-fg { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; }
   .garden-status { font-size: 13px; color: var(--muted); text-align: center; margin: 4px 0 0; }
   .field-harvest { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; border: none; background: var(--gold-soft); color: #8A6A1E; font-size: 16px; font-weight: 700; text-align: center; }
 
@@ -184,12 +184,42 @@
   #toast-container { position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom) + 10px); z-index: 30; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
   .toast { background: var(--ink); color: #fff; padding: 11px 14px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.18); opacity: 0; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; }
   .toast.show { opacity: 1; transform: translateY(0); }
+
+  #celebration-container { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; padding: 24px; }
+  #celebration-container.show { display: flex; }
+  .celebration-backdrop { position: absolute; inset: 0; background: rgba(31, 42, 68, 0.55); }
+  @keyframes celebration-pop {
+    0% { opacity: 0; transform: scale(0.75) translateY(10px); }
+    60% { opacity: 1; transform: scale(1.06) translateY(0); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes celebration-sparkle {
+    0%, 100% { opacity: 0.4; transform: scale(0.9) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.15) rotate(15deg); }
+  }
+  .celebration-card {
+    position: relative; background: var(--card); border-radius: 18px; padding: 28px 24px 22px;
+    text-align: center; max-width: 300px; width: 100%; animation: celebration-pop 0.4s cubic-bezier(.2,.9,.3,1.3);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  }
+  .celebration-card.golden { background: linear-gradient(180deg, #FFF8E4, #ffffff); }
+  .celebration-sparkle { position: absolute; font-size: 20px; animation: celebration-sparkle 1.4s ease-in-out infinite; }
+  .celebration-sparkle.s1 { top: 6px; left: 14px; animation-delay: 0s; }
+  .celebration-sparkle.s2 { top: 14px; right: 18px; animation-delay: 0.3s; }
+  .celebration-sparkle.s3 { bottom: 10px; left: 22px; animation-delay: 0.6s; }
+  .celebration-icon { font-size: 56px; line-height: 1; margin-bottom: 10px; }
+  .celebration-icon svg { width: 64px; height: 64px; }
+  .celebration-title { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
+  .celebration-name { font-family: 'Zilla Slab', serif; font-size: 22px; font-weight: 700; color: var(--brand); margin: 0 0 18px; }
+  .celebration-name.golden-text { color: var(--gold); }
+  .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <div id="app">学ぶ人は変える人だ</div>
 <div id="toast-container"></div>
+<div id="celebration-container"></div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
@@ -217,7 +247,7 @@
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
   const GOLDEN_MARK = "grapes";
 
-  const GOLDEN_GRAPE_SVG = `<svg viewBox="0 0 40 40" width="26" height="26" style="vertical-align:middle;">
+  const GOLDEN_GRAPE_SVG = `<svg viewBox="0 0 40 40" style="vertical-align:middle;">
     <path d="M20 4 Q24 1 27 4 L25 8 Q22 6 20 8 Q18 6 15 8 L13 4 Q16 1 20 4 Z" fill="#5E8F4A"/>
     <circle cx="20" cy="14" r="4.2" fill="#E8C24A"/>
     <circle cx="14" cy="18" r="4.2" fill="#E8C24A"/>
@@ -230,39 +260,41 @@
     <circle cx="20" cy="33" r="3.6" fill="#E8C24A"/>
   </svg>`;
 
-  const FIELD_BG_SVG = `<svg viewBox="0 0 300 150" preserveAspectRatio="none">
-    <rect x="0" y="0" width="300" height="95" fill="#EAF3DD"/>
-    <rect x="0" y="95" width="300" height="55" fill="#96754C"/>
-    <path d="M0 108 Q75 102 150 108 T300 108" fill="none" stroke="#7A5B3A" stroke-width="2"/>
-    <path d="M0 122 Q75 116 150 122 T300 122" fill="none" stroke="#7A5B3A" stroke-width="2"/>
-    <path d="M0 136 Q75 130 150 136 T300 136" fill="none" stroke="#7A5B3A" stroke-width="2"/>
-    <path d="M18 95 Q20 87 24 95 Q26 88 30 95" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M256 95 Q258 87 262 95 Q264 88 268 95" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M60 95 Q61 90 63 95" fill="none" stroke="#5E8F4A" stroke-width="2" stroke-linecap="round"/>
-    <path d="M225 95 Q226 90 228 95" fill="none" stroke="#5E8F4A" stroke-width="2" stroke-linecap="round"/>
+  const FIELD_BG_SVG = `<svg viewBox="0 0 300 160" preserveAspectRatio="none">
+    <rect x="0" y="0" width="300" height="100" fill="#EAF3DD"/>
+    <rect x="0" y="100" width="300" height="60" fill="#96754C"/>
+    <path d="M0 114 Q75 108 150 114 T300 114" fill="none" stroke="#7A5B3A" stroke-width="2"/>
+    <path d="M0 130 Q75 124 150 130 T300 130" fill="none" stroke="#7A5B3A" stroke-width="2"/>
+    <path d="M0 146 Q75 140 150 146 T300 146" fill="none" stroke="#7A5B3A" stroke-width="2"/>
+    <path d="M18 100 Q20 92 24 100 Q26 93 30 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M256 100 Q258 92 262 100 Q264 93 268 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
   </svg>`;
 
-  const SPROUT_ICON = `<svg width="70" height="88" viewBox="0 0 100 100">
-    <path d="M50 84 Q46 64 50 48" fill="none" stroke="#4C7A3D" stroke-width="3.4" stroke-linecap="round"/>
-    <path d="M50 48 Q32 42 28 54 Q38 58 50 48 Z" fill="#5E8F4A"/>
-    <path d="M50 48 Q68 42 72 54 Q62 58 50 48 Z" fill="#6FA357"/>
+  // 背景に埋もれないよう、植物の後ろに柔らかい光の輪(ハイライト)を敷いてから描画する
+  const SPROUT_ICON = `<svg width="92" height="108" viewBox="0 0 100 118">
+    <ellipse cx="50" cy="98" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
+    <path d="M50 100 Q45 76 50 56" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
+    <path d="M50 56 Q28 49 23 63 Q35 68 50 56 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
+    <path d="M50 56 Q72 49 77 63 Q65 68 50 56 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
   </svg>`;
 
-  const BUD_ICON = `<svg width="70" height="96" viewBox="0 0 100 108">
-    <path d="M50 94 Q44 66 50 32" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
-    <path d="M50 80 Q30 73 27 86 Q38 90 50 80 Z" fill="#5E8F4A"/>
-    <path d="M50 80 Q70 73 73 86 Q62 90 50 80 Z" fill="#6FA357"/>
-    <path d="M50 56 Q35 50 32 60 Q41 64 50 56 Z" fill="#6FA357"/>
-    <path d="M50 56 Q65 50 68 60 Q59 64 50 56 Z" fill="#8FB56B"/>
-    <path d="M50 32 Q45 14 50 -2 Q55 14 50 32 Z" fill="#8FB56B"/>
+  const BUD_ICON = `<svg width="92" height="118" viewBox="0 0 100 128">
+    <ellipse cx="50" cy="108" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
+    <path d="M50 110 Q43 76 50 36" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
+    <path d="M50 90 Q27 82 23 96 Q36 101 50 90 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
+    <path d="M50 90 Q73 82 77 96 Q64 101 50 90 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
+    <path d="M50 62 Q32 55 28 66 Q39 71 50 62 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
+    <path d="M50 62 Q68 55 72 66 Q61 71 50 62 Z" fill="#7FBE6C" stroke="#2F5A26" stroke-width="1.2"/>
+    <path d="M50 36 Q43 14 50 -6 Q57 14 50 36 Z" fill="#7FBE6C" stroke="#2F5A26" stroke-width="1.2"/>
   </svg>`;
 
-  const MYSTERY_ICON = `<svg width="70" height="96" viewBox="0 0 100 108">
-    <path d="M50 94 Q44 58 50 18" fill="none" stroke="#4C7A3D" stroke-width="3.8" stroke-linecap="round"/>
-    <path d="M50 78 Q30 71 27 84 Q38 88 50 78 Z" fill="#5E8F4A"/>
-    <path d="M50 78 Q70 71 73 84 Q62 88 50 78 Z" fill="#6FA357"/>
-    <circle cx="50" cy="30" r="24" fill="#FBF0D0" stroke="#C99A2E" stroke-width="1.5" stroke-dasharray="3 3"/>
-    <text x="50" y="39" text-anchor="middle" font-size="26" font-weight="700" fill="#8A6A1E">?</text>
+  const MYSTERY_ICON = `<svg width="92" height="118" viewBox="0 0 100 128">
+    <ellipse cx="50" cy="108" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
+    <path d="M50 110 Q43 68 50 26" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
+    <path d="M50 88 Q27 80 23 94 Q36 99 50 88 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
+    <path d="M50 88 Q73 80 77 94 Q64 99 50 88 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
+    <circle cx="50" cy="34" r="28" fill="#FBF0D0" stroke="#C99A2E" stroke-width="2" stroke-dasharray="3 3"/>
+    <text x="50" y="44" text-anchor="middle" font-size="30" font-weight="700" fill="#8A6A1E">?</text>
   </svg>`;
 
   const params = new URLSearchParams(window.location.search);
@@ -292,6 +324,34 @@
       setTimeout(() => el.remove(), 300);
     }, 2500);
   }
+
+  function showHarvestCelebration(fruit) {
+    const container = document.getElementById("celebration-container");
+    const isGolden = fruit.indexOf(GOLDEN_MARK) === 0;
+    const iconHtml = isGolden ? GOLDEN_GRAPE_SVG : `<span>${fruit.split(" ")[0]}</span>`;
+    const nameText = isGolden ? "金のぶどう" : fruit.replace(/^\S+\s/, "");
+
+    container.innerHTML = `
+      <div class="celebration-backdrop"></div>
+      <div class="celebration-card ${isGolden ? "golden" : ""}">
+        ${isGolden ? `
+          <span class="celebration-sparkle s1">✨</span>
+          <span class="celebration-sparkle s2">✨</span>
+          <span class="celebration-sparkle s3">✨</span>
+        ` : ""}
+        <div class="celebration-icon">${iconHtml}</div>
+        <p class="celebration-title">${isGolden ? "激レア収穫!" : "収穫しました"}</p>
+        <p class="celebration-name ${isGolden ? "golden-text" : ""}">${nameText}</p>
+        <button class="celebration-close" id="celebration-close-btn">やったね!</button>
+      </div>
+    `;
+    container.classList.add("show");
+    document.getElementById("celebration-close-btn").addEventListener("click", () => {
+      container.classList.remove("show");
+      container.innerHTML = "";
+    });
+  }
+
   function formatDateTime(iso) {
     if (!iso) return "";
     const d = new Date(iso);
@@ -744,7 +804,6 @@
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
 
-      // 全データを読み込み直さず、その場でミッション一覧に追加する(軽量化)
       currentData.missions = currentData.missions || [];
       currentData.missions.push({
         id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""),
@@ -814,6 +873,7 @@
     }
   }
 
+  // 収穫も、全データの読み込み直しをやめてその場で更新する(軽量化)。階級への反映は次回の自然な読み込み時に同期される
   async function harvestGarden() {
     const btn = document.getElementById("harvest-btn");
     if (btn) { btn.disabled = true; btn.textContent = "収穫中..."; }
@@ -825,9 +885,16 @@
       });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-      await loadAndRender();
-      const label = result.fruit && result.fruit.indexOf(GOLDEN_MARK) === 0 ? "金のぶどう" : result.fruit;
-      showToast(`収穫しました! ${label}`);
+
+      currentData.garden = { nutrientCount: 0, missionsPerStage: currentData.garden.missionsPerStage };
+      currentData.harvests = currentData.harvests || [];
+      currentData.harvests.unshift({ studentId, fruit: result.fruit, harvestedAt: new Date().toISOString() });
+
+      renderNotebook(document.getElementById("tab-content"));
+      showHarvestCelebration(result.fruit);
+
+      // 階級ポイントなどは裏側で静かに同期しておく(画面表示はブロックしない)
+      loadAndRender();
     } catch (err) {
       showToast("収穫に失敗しました。もう一度お試しください。");
       if (btn) { btn.disabled = false; btn.textContent = "🎁 タップして収穫する"; }
