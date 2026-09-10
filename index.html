@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>私の成績表 | 個別指導塾コネクト</title>
+<title>CONNEC＋ | 個別指導塾コネクト</title>
 
 <meta name="theme-color" content="#D9720B" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="私の成績表" />
+<meta name="apple-mobile-web-app-title" content="CONNEC＋" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <link rel="icon" href="icons/icon-192.png" />
 
@@ -24,8 +24,8 @@
 
       var base = window.location.origin + window.location.pathname;
       var manifest = {
-        name: "私の成績表 | 個別指導塾コネクト",
-        short_name: "私の成績表",
+        name: "CONNEC＋ | 個別指導塾コネクト",
+        short_name: "CONNEC＋",
         start_url: base + "?id=" + id,
         scope: base,
         display: "standalone",
@@ -62,6 +62,8 @@
     --amber: #B24D2F;
     --amber-soft: #F3DCD3;
     --muted: #7A6F63;
+    --gold: #C99A2E;
+    --gold-soft: #FBF0D0;
     --target-blue: #2A5FB4;
   }
   * { box-sizing: border-box; }
@@ -72,7 +74,7 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
-  body { padding: max(20px, env(safe-area-inset-top)) 16px 40px; min-height: 100vh; }
+  body { padding: max(20px, env(safe-area-inset-top)) 16px calc(84px + env(safe-area-inset-bottom)); min-height: 100vh; }
 
   .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
   h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 22px; margin: 0 0 4px; line-height: 1.25; color: var(--brand); }
@@ -82,11 +84,11 @@
 
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  .field select {
+  .field select, .field input[type="text"] {
     width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
     font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
   }
-  .field select:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .field select:focus, .field input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
 
   .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
   .msg.error { color: #B3441E; background: #FCEBE3; }
@@ -108,9 +110,7 @@
     gap: 6px;
     align-items: center;
   }
-  .subject-grid-header {
-    font-size: 10.5px; color: var(--muted); font-weight: 700; margin-bottom: 6px;
-  }
+  .subject-grid-header { font-size: 10.5px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
   .subject-grid-header span:nth-child(2),
   .subject-grid-header span:nth-child(3),
   .subject-grid-header span:nth-child(4) { text-align: center; }
@@ -122,16 +122,8 @@
     width: 100%; padding: 8px 4px; border: 1px solid var(--line); border-radius: 8px;
     font-size: 14px; text-align: center; background: #fff; color: var(--ink);
   }
-  .subject-row input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
-
-  .target-cell {
-    border-right: 1px dashed var(--muted);
-    padding-right: 6px;
-  }
-  .target-cell input {
-    color: var(--target-blue);
-    font-weight: 600;
-  }
+  .target-cell { border-right: 1px dashed var(--muted); padding-right: 6px; }
+  .target-cell input { color: var(--target-blue); font-weight: 600; }
 
   .test-card { margin-bottom: 12px; }
   .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -153,9 +145,74 @@
 
   .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 10px; }
   .id-error { text-align: center; padding: 60px 16px; color: var(--muted); font-size: 14px; }
-
   .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; display: none; }
   .install-hint.show { display: block; }
+
+  /* 学習手帳 */
+  .day-block { margin-bottom: 14px; }
+  .day-title { font-size: 13px; font-weight: 700; color: var(--brand); margin: 0 0 8px; }
+  .mission-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .mission-item:last-child { border-bottom: none; }
+  .mission-checkbox {
+    width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--line);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    background: #fff; cursor: pointer; font-size: 14px; margin-top: 1px;
+  }
+  .mission-checkbox.checked { background: var(--growth); border-color: var(--growth); color: #fff; }
+  .mission-text { font-size: 14px; flex: 1; }
+  .mission-text.done { text-decoration: line-through; color: var(--muted); }
+  .mission-cat { font-size: 11px; padding: 2px 7px; border-radius: 999px; margin-left: 6px; }
+  .mission-cat.homework { background: var(--brand-soft); color: var(--brand); }
+  .mission-cat.self { background: var(--growth-soft); color: var(--growth); }
+
+  .garden-bar-wrap { background: var(--line); border-radius: 999px; height: 10px; overflow: hidden; margin: 8px 0; }
+  .garden-bar { background: var(--growth); height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+  .garden-status { font-size: 13px; color: var(--muted); text-align: center; }
+
+  /* 収穫コレクション */
+  .fruit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .fruit-cell { text-align: center; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 4px; font-size: 24px; }
+  .fruit-cell .count { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .fruit-cell.golden { background: var(--gold-soft); border-color: var(--gold); }
+
+  /* 階級一覧 */
+  .rank-current { text-align: center; padding: 16px; background: var(--brand-soft); border-radius: 12px; margin-bottom: 16px; }
+  .rank-current .rank-name { font-family: 'Zilla Slab', serif; font-size: 24px; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
+  .rank-current .rank-next { font-size: 12px; color: var(--muted); }
+  .rank-class-title { font-size: 12px; font-weight: 700; color: var(--muted); margin: 14px 0 6px; }
+  .rank-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--line); }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-row.current { font-weight: 700; color: var(--brand); }
+  .rank-row .pt { color: var(--muted); font-size: 12px; }
+
+  /* 御守り */
+  @keyframes omamori-shake {
+    0%,100% { transform: rotate(0deg) scale(1); }
+    20% { transform: rotate(-8deg) scale(1.05); }
+    40% { transform: rotate(7deg) scale(1.05); }
+    60% { transform: rotate(-6deg) scale(1.08); }
+    80% { transform: rotate(5deg) scale(1.05); }
+  }
+  .omamori-icon { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 12px; background: var(--gold-soft); display: flex; align-items: center; justify-content: center; font-size: 30px; }
+  .omamori-icon.drawing { animation: omamori-shake 0.5s ease-in-out infinite; }
+  .omamori-en { font-size: 19px; font-weight: 500; margin: 0 0 6px; }
+  .omamori-ja { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+  .omamori-advice { font-size: 13px; color: #B3441E; margin: 0; }
+
+  /* タブバー */
+  .tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--card); border-top: 1px solid var(--line);
+    display: flex; padding-bottom: env(safe-area-inset-bottom);
+    z-index: 10;
+  }
+  .tab-btn {
+    flex: 1; background: none; border: none; padding: 10px 2px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: var(--muted); font-size: 10.5px; font-family: inherit;
+  }
+  .tab-btn .tab-icon { font-size: 19px; line-height: 1; }
+  .tab-btn.active { color: var(--brand); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -167,16 +224,34 @@
 
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
   const TEST_NAMES = [
-    "1学期中間テスト",
-    "1学期期末テスト",
-    "2学期中間テスト",
-    "2学期期末テスト",
-    "学年末テスト",
-    "第1回実力テスト（6月）",
-    "第2回実力テスト（9月）",
-    "第3回実力テスト（11月）",
-    "第4回実力テスト（1月）",
+    "1学期中間テスト", "1学期期末テスト", "2学期中間テスト", "2学期期末テスト", "学年末テスト",
+    "第1回実力テスト（6月）", "第2回実力テスト（9月）", "第3回実力テスト（11月）", "第4回実力テスト（1月）",
   ];
+  const DAYS = ["月", "火", "水", "木", "金", "土", "日"];
+  const CATEGORIES = ["宿題", "自主学習"];
+  const RANKS = [
+    { name: "雑用", threshold: 0, cls: "見習いクラス" },
+    { name: "二等兵", threshold: 6, cls: "新兵クラス" },
+    { name: "一等兵", threshold: 12, cls: "新兵クラス" },
+    { name: "上等兵", threshold: 20, cls: "新兵クラス" },
+    { name: "兵長", threshold: 28, cls: "新兵クラス" },
+    { name: "伍長", threshold: 38, cls: "隊長クラス" },
+    { name: "軍曹", threshold: 48, cls: "隊長クラス" },
+    { name: "曹長", threshold: 60, cls: "隊長クラス" },
+    { name: "准尉", threshold: 72, cls: "隊長クラス" },
+    { name: "少尉", threshold: 86, cls: "指揮官クラス" },
+    { name: "中尉", threshold: 100, cls: "指揮官クラス" },
+    { name: "大尉", threshold: 116, cls: "指揮官クラス" },
+    { name: "少佐", threshold: 134, cls: "幹部クラス" },
+    { name: "中佐", threshold: 152, cls: "幹部クラス" },
+    { name: "大佐", threshold: 172, cls: "幹部クラス" },
+    { name: "少将", threshold: 194, cls: "将官クラス" },
+    { name: "中将", threshold: 218, cls: "将官クラス" },
+    { name: "大将", threshold: 244, cls: "将官クラス" },
+    { name: "元帥", threshold: 272, cls: "最高位" },
+    { name: "総帥", threshold: 300, cls: "トップ" },
+  ];
+  const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
 
   const params = new URLSearchParams(window.location.search);
   const STORAGE_KEY_ID = "connect-student-id";
@@ -184,18 +259,37 @@
   const studentId = urlId || localStorage.getItem(STORAGE_KEY_ID);
   const appEl = document.getElementById("app");
 
+  let currentData = null;
+  let currentTab = "grades"; // grades | notebook | garden | ranks | omamori
+
   function formatDateTime(iso) {
     if (!iso) return "";
     const d = new Date(iso);
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
+  function formatDate(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  function getPreviousScore(subject, testName) {
+    const idx = TEST_NAMES.indexOf(testName);
+    if (idx <= 0 || !currentData) return null;
+    const testsByName = {};
+    (currentData.tests || []).forEach((t) => { testsByName[t.testName] = t; });
+    for (let i = idx - 1; i >= 0; i--) {
+      const t = testsByName[TEST_NAMES[i]];
+      if (!t) continue;
+      const s = t.subjects.find((s) => s.subject === subject);
+      if (s && s.score !== null) return s.score;
+    }
+    return null;
+  }
 
   async function init() {
     if (!studentId) {
-      appEl.innerHTML = `
-        <div class="id-error">
-          専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。
-        </div>`;
+      appEl.innerHTML = `<div class="id-error">専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。</div>`;
       return;
     }
     await loadAndRender();
@@ -221,7 +315,7 @@
   }
 
   async function loadAndRender() {
-    appEl.innerHTML = "ただいま集計中…";
+    if (!currentData) appEl.innerHTML = "ただいま集計中…";
     let data;
     try {
       data = await fetchData();
@@ -234,19 +328,49 @@
       return;
     }
     if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
-    render(data);
+    currentData = data;
+    renderShell();
   }
 
-  function render(data) {
-    const tests = (data.tests || []).slice().sort(
+  function switchTab(tab) {
+    currentTab = tab;
+    renderShell();
+  }
+
+  function renderShell() {
+    const data = currentData;
+    appEl.innerHTML = `
+      <p class="eyebrow">個別指導塾コネクト</p>
+      <h1>CONNEC＋</h1>
+      <p class="student-name">${data.studentName} さん</p>
+      <div id="tab-content"></div>
+      <nav class="tabbar">
+        <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>私の成績表</button>
+        <button class="tab-btn ${currentTab === "notebook" ? "active" : ""}" data-tab="notebook"><span class="tab-icon">📔</span>学習手帳</button>
+        <button class="tab-btn ${currentTab === "garden" ? "active" : ""}" data-tab="garden"><span class="tab-icon">🍇</span>収穫</button>
+        <button class="tab-btn ${currentTab === "ranks" ? "active" : ""}" data-tab="ranks"><span class="tab-icon">🎖️</span>階級</button>
+        <button class="tab-btn ${currentTab === "omamori" ? "active" : ""}" data-tab="omamori"><span class="tab-icon">⛩️</span>御守り</button>
+      </nav>
+    `;
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    const contentEl = document.getElementById("tab-content");
+    if (currentTab === "grades") renderGrades(contentEl);
+    else if (currentTab === "notebook") renderNotebook(contentEl);
+    else if (currentTab === "garden") renderGarden(contentEl);
+    else if (currentTab === "ranks") renderRanks(contentEl);
+    else if (currentTab === "omamori") renderOmamori(contentEl);
+  }
+
+  // ---------- 成績表タブ ----------
+  function renderGrades(el) {
+    const tests = (currentData.tests || []).slice().sort(
       (a, b) => TEST_NAMES.indexOf(a.testName) - TEST_NAMES.indexOf(b.testName)
     );
 
-    appEl.innerHTML = `
-      <p class="eyebrow">個別指導塾コネクト</p>
-      <h1>私の成績表</h1>
-      <p class="student-name">${data.studentName} さん</p>
-
+    el.innerHTML = `
       <div class="card">
         <form id="entry-form">
           <div class="field">
@@ -256,34 +380,23 @@
               ${TEST_NAMES.map((t) => `<option value="${t}">${t}</option>`).join("")}
             </select>
           </div>
-
           <div class="subject-grid">
-            <div class="subject-grid-header">
-              <span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span>
-            </div>
-            ${SUBJECTS.map(
-              (s) => `
+            <div class="subject-grid-header"><span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span></div>
+            ${SUBJECTS.map((s) => `
               <div class="subject-row">
                 <label>${s}</label>
-                <div class="target-cell">
-                  <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" />
-                </div>
+                <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" /></div>
                 <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
                 <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
-              </div>`
-            ).join("")}
+              </div>`).join("")}
           </div>
-
           <div id="form-error" class="msg error"></div>
           <div id="form-success" class="msg success">記録しました。</div>
           <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
         </form>
       </div>
-
       <p class="section-title">テストごとの記録</p>
-      <div id="tests-list">
-        ${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}
-      </div>
+      <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
     `;
 
     const testsListEl = document.getElementById("tests-list");
@@ -291,36 +404,24 @@
       const card = document.createElement("div");
       card.className = "card test-card";
       const photoSubmitted = !!t.photo;
-      const filledSubjects = t.subjects.filter(
-        (s) => s.score !== null || s.average !== null || s.target !== null
-      );
-
+      const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null || s.target !== null);
       card.innerHTML = `
         <div class="test-header"><p class="test-name">${t.testName}</p></div>
-        ${filledSubjects
-          .map(
-            (s) => `
-              <div class="entry">
-                <div>${s.subject}</div>
-                <div style="text-align:right">
-                  ${s.score !== null ? `${s.score}点` : "-"}
-                  <span class="entry-meta">
-                    ${s.target !== null ? `目標${s.target}点` : ""}
-                    ${s.average !== null ? `${s.target !== null ? " / " : ""}平均${s.average}点` : ""}
-                  </span>
-                </div>
-              </div>`
-          )
-          .join("")}
+        ${filledSubjects.map((s) => `
+          <div class="entry">
+            <div>${s.subject}</div>
+            <div style="text-align:right">
+              ${s.score !== null ? `${s.score}点` : "-"}
+              <span class="entry-meta">
+                ${s.target !== null ? `目標${s.target}点` : ""}
+                ${s.average !== null ? `${s.target !== null ? " / " : ""}平均${s.average}点` : ""}
+              </span>
+            </div>
+          </div>`).join("")}
         <div class="entry total"><div>5教科合計</div><div>${t.total5 !== null ? t.total5 + "点" : "-"}</div></div>
         <div class="entry total"><div>9教科合計</div><div>${t.total9 !== null ? t.total9 + "点" : "-"}</div></div>
         <div class="photo-row">
-          <span>
-            成績表:
-            <span class="badge ${photoSubmitted ? "done" : "pending"}">
-              ${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}
-            </span>
-          </span>
+          <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span></span>
           <label class="photo-btn ${photoSubmitted ? "done" : ""}">
             ${photoSubmitted ? "写真を撮り直す" : "成績表を撮影"}
             <input type="file" accept="image/*" capture="environment" data-test-name="${t.testName}" class="photo-input" />
@@ -342,7 +443,6 @@
     const errorEl = document.getElementById("form-error");
     const successEl = document.getElementById("form-success");
     const btn = document.getElementById("submit-btn");
-
     errorEl.classList.remove("show");
     successEl.classList.remove("show");
 
@@ -357,10 +457,7 @@
       const scoreInput = document.querySelector(`input[data-subject="${subject}"][data-field="score"]`);
       const avgInput = document.querySelector(`input[data-subject="${subject}"][data-field="average"]`);
       const targetInput = document.querySelector(`input[data-subject="${subject}"][data-field="target"]`);
-      const scoreRaw = scoreInput.value;
-      const avgRaw = avgInput.value;
-      const targetRaw = targetInput.value;
-
+      const scoreRaw = scoreInput.value, avgRaw = avgInput.value, targetRaw = targetInput.value;
       if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return;
 
       const parseOrError = (raw, label) => {
@@ -372,7 +469,6 @@
         }
         return n;
       };
-
       const target = parseOrError(targetRaw, "目標点");
       if (validationError) return;
       const score = parseOrError(scoreRaw, "点数");
@@ -380,6 +476,13 @@
       const average = parseOrError(avgRaw, "平均点");
       if (validationError) return;
 
+      if (target !== null) {
+        const prev = getPreviousScore(subject, testName);
+        if (prev !== null && target < prev) {
+          validationError = `${subject}の目標点は、前回の点数(${prev}点)以上にしよう`;
+          return;
+        }
+      }
       subjects.push({ subject, score, average, target });
     });
 
@@ -399,17 +502,14 @@
       successEl.classList.add("show");
       await loadAndRender();
     } catch (err) {
-      showFieldError(errorEl, "保存に失敗しました。もう一度お試しください。");
+      showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
     } finally {
       btn.disabled = false;
       btn.textContent = "この結果を記録する";
     }
   }
 
-  function showFieldError(el, msg) {
-    el.textContent = msg;
-    el.classList.add("show");
-  }
+  function showFieldError(el, msg) { el.textContent = msg; el.classList.add("show"); }
 
   function compressImage(file, maxWidth = 1600, quality = 0.7) {
     return new Promise((resolve, reject) => {
@@ -423,8 +523,7 @@
           canvas.height = img.height * scale;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL("image/jpeg", quality);
-          resolve(dataUrl.split(",")[1]);
+          resolve(canvas.toDataURL("image/jpeg", quality).split(",")[1]);
         };
         img.onerror = reject;
         img.src = reader.result;
@@ -440,19 +539,12 @@
     const label = e.target.closest(".photo-btn");
     const originalText = label.childNodes[0].textContent;
     label.childNodes[0].textContent = "アップロード中...";
-
     try {
       const base64 = await compressImage(file);
       const res = await fetch(GAS_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "uploadPhoto",
-          studentId,
-          testName,
-          imageBase64: base64,
-          mimeType: "image/jpeg",
-        }),
+        body: JSON.stringify({ action: "uploadPhoto", studentId, testName, imageBase64: base64, mimeType: "image/jpeg" }),
       });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
@@ -460,6 +552,238 @@
     } catch (err) {
       alert("成績表のアップロードに失敗しました。もう一度お試しください。");
       label.childNodes[0].textContent = originalText;
+    }
+  }
+
+  // ---------- 学習手帳タブ ----------
+  function renderNotebook(el) {
+    const missions = currentData.missions || [];
+    const garden = currentData.garden || { nutrientCount: 0, missionsPerStage: 3 };
+    const pct = Math.min(100, Math.round((garden.nutrientCount / garden.missionsPerStage) * 100));
+
+    el.innerHTML = `
+      <div class="card">
+        <p class="section-title" style="margin-top:0;">今週の畑</p>
+        <div class="garden-bar-wrap"><div class="garden-bar" style="width:${pct}%"></div></div>
+        <p class="garden-status">🌱 養分 ${garden.nutrientCount} / ${garden.missionsPerStage}</p>
+      </div>
+
+      <div class="card">
+        <form id="mission-form">
+          <div class="field">
+            <label for="mission-day">曜日</label>
+            <select id="mission-day">${DAYS.map((d) => `<option value="${d}">${d}曜日</option>`).join("")}</select>
+          </div>
+          <div class="field">
+            <label for="mission-category">区分</label>
+            <select id="mission-category">${CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
+          </div>
+          <div class="field">
+            <label for="mission-content">内容</label>
+            <input type="text" id="mission-content" placeholder="例:数学の宿題プリント2枚" />
+          </div>
+          <div id="mission-error" class="msg error"></div>
+          <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
+        </form>
+      </div>
+
+      <p class="section-title">今週のミッション</p>
+      <div class="card" id="mission-list"></div>
+    `;
+
+    const listEl = document.getElementById("mission-list");
+    if (missions.length === 0) {
+      listEl.innerHTML = '<p class="empty">まだミッションがありません</p>';
+    } else {
+      listEl.innerHTML = "";
+      DAYS.forEach((day) => {
+        const dayMissions = missions.filter((m) => m.day === day);
+        if (dayMissions.length === 0) return;
+        const block = document.createElement("div");
+        block.className = "day-block";
+        block.innerHTML = `<p class="day-title">${day}曜日</p>`;
+        dayMissions.forEach((m) => {
+          const done = m.completed === true || m.completed === "TRUE" || m.completed === "true";
+          const item = document.createElement("div");
+          item.className = "mission-item";
+          item.innerHTML = `
+            <div class="mission-checkbox ${done ? "checked" : ""}" data-id="${m.id}">${done ? "✓" : ""}</div>
+            <div class="mission-text ${done ? "done" : ""}">
+              ${m.content}
+              <span class="mission-cat ${m.category === "宿題" ? "homework" : "self"}">${m.category}</span>
+            </div>
+          `;
+          block.appendChild(item);
+        });
+        listEl.appendChild(block);
+      });
+    }
+
+    document.querySelectorAll(".mission-checkbox").forEach((cb) => {
+      cb.addEventListener("click", () => toggleMission(cb.dataset.id));
+    });
+    document.getElementById("mission-form").addEventListener("submit", handleAddMission);
+  }
+
+  async function handleAddMission(e) {
+    e.preventDefault();
+    const day = document.getElementById("mission-day").value;
+    const category = document.getElementById("mission-category").value;
+    const contentInput = document.getElementById("mission-content");
+    const content = contentInput.value.trim();
+    const errorEl = document.getElementById("mission-error");
+    const btn = document.getElementById("mission-submit-btn");
+    errorEl.classList.remove("show");
+
+    if (!content) return showFieldError(errorEl, "内容を入力してください");
+
+    btn.disabled = true;
+    btn.textContent = "追加中...";
+    try {
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "addMission", studentId, day, category, content }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      contentInput.value = "";
+      await loadAndRender();
+    } catch (err) {
+      showFieldError(errorEl, "追加に失敗しました。もう一度お試しください。");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "ミッションを追加";
+    }
+  }
+
+  async function toggleMission(id) {
+    try {
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "toggleMission", studentId, id }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      await loadAndRender();
+      if (result.harvest) {
+        setTimeout(() => alert(`収穫しました! ${result.harvest}`), 200);
+      }
+    } catch (err) {
+      alert("更新に失敗しました。もう一度お試しください。");
+    }
+  }
+
+  // ---------- 収穫コレクションタブ ----------
+  function renderGarden(el) {
+    const harvests = currentData.harvests || [];
+    const counts = {};
+    FRUIT_LIST.forEach((f) => (counts[f] = 0));
+    let goldenCount = 0;
+    harvests.forEach((h) => {
+      const emoji = FRUIT_LIST.find((f) => h.fruit.indexOf(f) === 0);
+      if (emoji) counts[emoji] += 1;
+      else if (h.fruit.indexOf("黄金") !== -1) goldenCount += 1;
+    });
+
+    el.innerHTML = `
+      <div class="card">
+        <p class="section-title" style="margin-top:0;">これまでの収穫</p>
+        <div class="fruit-grid">
+          ${FRUIT_LIST.map((f) => `<div class="fruit-cell">${f}<span class="count">×${counts[f]}</span></div>`).join("")}
+          <div class="fruit-cell golden">🍉✨<span class="count">×${goldenCount}</span></div>
+        </div>
+      </div>
+      <p class="section-title">収穫履歴</p>
+      <div class="card">
+        ${harvests.length === 0 ? '<p class="empty">まだ収穫がありません</p>' : harvests.map((h) => `
+          <div class="entry"><div>${h.fruit}</div><div class="entry-meta">${formatDate(h.harvestedAt)}</div></div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  // ---------- 階級一覧タブ ----------
+  function renderRanks(el) {
+    const rank = currentData.rank || { rankName: "雑用", pointsInCycle: 0, nextRankName: null, pointsToNext: 0, totalPoints: 0 };
+    const isUra = rank.rankName.indexOf("裏・") === 0;
+
+    let html = `
+      <div class="rank-current">
+        <p class="rank-name">${rank.rankName}</p>
+        <p class="rank-next">${rank.nextRankName ? `次は「${rank.nextRankName}」まで あと${rank.pointsToNext}ポイント` : "最高位に到達しています"}</p>
+      </div>
+      <div class="card">
+    `;
+    let lastCls = "";
+    RANKS.forEach((r) => {
+      if (r.cls !== lastCls) {
+        html += `<p class="rank-class-title">${r.cls}</p>`;
+        lastCls = r.cls;
+      }
+      const displayName = isUra ? "裏・" + r.name : r.name;
+      const isCurrent = displayName === rank.rankName;
+      html += `<div class="rank-row ${isCurrent ? "current" : ""}"><span>${displayName}</span><span class="pt">${r.threshold}pt</span></div>`;
+    });
+    html += `</div>`;
+    el.innerHTML = html;
+  }
+
+  // ---------- 本日の御守りタブ ----------
+  function renderOmamori(el) {
+    const omamori = currentData.omamori || { drawn: false };
+    el.innerHTML = `
+      <div class="card" style="text-align:center;">
+        <div class="omamori-icon" id="omamori-icon">⛩️</div>
+        <button class="submit" id="omamori-btn" style="margin-top:4px;" ${omamori.drawn ? "disabled" : ""}>
+          ${omamori.drawn ? "Good luck!" : "本日の御守りを授かる"}
+        </button>
+        <div id="omamori-result" style="margin-top:1.25rem; ${omamori.drawn ? "" : "display:none;"} text-align:left; border-top:1px solid var(--line); padding-top:1rem;">
+          <p class="omamori-en">${omamori.en || ""}</p>
+          <p class="omamori-ja">${omamori.ja || ""}</p>
+          <p class="omamori-advice">${omamori.advice || ""}</p>
+        </div>
+      </div>
+    `;
+    if (!omamori.drawn) {
+      document.getElementById("omamori-btn").addEventListener("click", drawOmamori);
+    }
+  }
+
+  async function drawOmamori() {
+    const btn = document.getElementById("omamori-btn");
+    const icon = document.getElementById("omamori-icon");
+    const result = document.getElementById("omamori-result");
+    btn.disabled = true;
+    icon.classList.add("drawing");
+    result.style.display = "none";
+
+    try {
+      const [res] = await Promise.all([
+        fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "drawOmamori", studentId }),
+        }),
+        new Promise((r) => setTimeout(r, 2000)),
+      ]);
+      const data = await res.json();
+      icon.classList.remove("drawing");
+      if (!data.ok) throw new Error(data.error || "failed");
+
+      document.querySelector(".omamori-en").textContent = data.en;
+      document.querySelector(".omamori-ja").textContent = data.ja;
+      document.querySelector(".omamori-advice").textContent = data.advice;
+      result.style.display = "block";
+      btn.textContent = "Good luck!";
+
+      if (currentData) currentData.omamori = { drawn: true, en: data.en, ja: data.ja, advice: data.advice };
+    } catch (err) {
+      icon.classList.remove("drawing");
+      btn.disabled = false;
+      btn.textContent = "本日の御守りを授かる";
+      alert("取得に失敗しました。もう一度お試しください。");
     }
   }
 
