@@ -120,22 +120,16 @@
   .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; display: none; }
   .install-hint.show { display: block; }
 
-  /* 学習手帳:週ナビ */
   .week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .week-nav button { background: var(--brand-soft); color: var(--brand); border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
-  .week-nav .week-label { font-size: 14px; font-weight: 700; }
+  .week-nav .week-label { font-size: 13.5px; font-weight: 700; }
 
-  /* 畑(その場で育てる) */
   .field-row { display: flex; gap: 6px; justify-content: center; margin: 10px 0; }
   .field-slot { width: 38px; height: 38px; border-radius: 8px; background: var(--paper); border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 18px; }
   .field-slot.filled { background: var(--growth-soft); border-style: solid; border-color: var(--growth); }
   .garden-status { font-size: 13px; color: var(--muted); text-align: center; margin: 6px 0 0; }
-  .field-harvest {
-    display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; border: none;
-    background: var(--gold-soft); color: #8A6A1E; font-size: 16px; font-weight: 700; text-align: center;
-  }
+  .field-harvest { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; border: none; background: var(--gold-soft); color: #8A6A1E; font-size: 16px; font-weight: 700; text-align: center; }
 
-  /* 学習手帳:ミッション */
   .day-block { margin-bottom: 14px; }
   .day-title { font-size: 13px; font-weight: 700; color: var(--brand); margin: 0 0 8px; }
   .mission-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
@@ -147,24 +141,22 @@
   .mission-cat { font-size: 11px; padding: 2px 7px; border-radius: 999px; margin-left: 6px; }
   .mission-cat.homework { background: var(--brand-soft); color: var(--brand); }
   .mission-cat.self { background: var(--growth-soft); color: var(--growth); }
+  .day-empty { font-size: 12.5px; color: var(--muted); padding: 4px 0; }
 
-  /* 収穫コレクション */
   .fruit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .fruit-cell { text-align: center; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 4px; font-size: 24px; }
   .fruit-cell .count { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
   .fruit-cell.golden { background: var(--gold-soft); border-color: var(--gold); }
+  .history-fruit-icon { vertical-align: middle; margin-right: 4px; }
 
-  /* 階級一覧 */
   .rank-current { text-align: center; padding: 16px; background: var(--brand-soft); border-radius: 12px; margin-bottom: 16px; }
   .rank-current .rank-name { font-family: 'Zilla Slab', serif; font-size: 24px; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
   .rank-current .rank-next { font-size: 12px; color: var(--muted); }
   .rank-class-title { font-size: 12px; font-weight: 700; color: var(--muted); margin: 14px 0 6px; }
   .rank-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--line); }
-  .rank-row:last-child { border-bottom: none; }
   .rank-row.current { font-weight: 700; color: var(--brand); }
   .rank-row .pt { color: var(--muted); font-size: 12px; }
 
-  /* お御籤 */
   @keyframes omamori-shake {
     0%,100% { transform: rotate(0deg) scale(1); }
     20% { transform: rotate(-8deg) scale(1.05); }
@@ -175,12 +167,10 @@
   .omikuji-coins { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
   .omamori-icon { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 12px; background: var(--gold-soft); display: flex; align-items: center; justify-content: center; font-size: 30px; }
   .omamori-icon.drawing { animation: omamori-shake 0.5s ease-in-out infinite; }
-  .omikuji-note { font-size: 11.5px; color: var(--muted); margin: 10px 0 0; }
   .omamori-en { font-size: 19px; font-weight: 500; margin: 0 0 6px; }
   .omamori-ja { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
   .omamori-advice { font-size: 13px; color: #B3441E; margin: 0; }
 
-  /* タブバー */
   .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
   .tab-btn { flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
   .tab-btn .tab-icon { font-size: 19px; line-height: 1; }
@@ -189,10 +179,11 @@
 </head>
 <body>
 
-<div id="app">ただいま集計中…</div>
+<div id="app">学ぶ人は変える人だ</div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
+  const LOADING_TEXT = "学ぶ人は変える人だ";
 
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
   const TEST_NAMES = [
@@ -214,6 +205,20 @@
     { name: "元帥", threshold: 272, cls: "最高位" }, { name: "総帥", threshold: 300, cls: "トップ" },
   ];
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
+  const GOLDEN_MARK = "grapes";
+
+  const GOLDEN_GRAPE_SVG = `<svg viewBox="0 0 40 40" width="26" height="26" style="vertical-align:middle;">
+    <path d="M20 4 Q24 1 27 4 L25 8 Q22 6 20 8 Q18 6 15 8 L13 4 Q16 1 20 4 Z" fill="#5E8F4A"/>
+    <circle cx="20" cy="14" r="4.2" fill="#E8C24A"/>
+    <circle cx="14" cy="18" r="4.2" fill="#E8C24A"/>
+    <circle cx="26" cy="18" r="4.2" fill="#E8C24A"/>
+    <circle cx="10" cy="23" r="4.2" fill="#E8C24A"/>
+    <circle cx="20" cy="23" r="4.2" fill="#E8C24A"/>
+    <circle cx="30" cy="23" r="4.2" fill="#E8C24A"/>
+    <circle cx="14" cy="28" r="4.2" fill="#E8C24A"/>
+    <circle cx="26" cy="28" r="4.2" fill="#E8C24A"/>
+    <circle cx="20" cy="33" r="3.6" fill="#E8C24A"/>
+  </svg>`;
 
   const params = new URLSearchParams(window.location.search);
   const STORAGE_KEY_ID = "connect-student-id";
@@ -224,6 +229,7 @@
   let currentData = null;
   let currentTab = "grades";
   let selectedWeekStart = null;
+  let lastOmikuji = null; // このセッション中に引いた結果を覚えておく(サーバー側は日付での制限をしない)
 
   function formatDateTime(iso) {
     if (!iso) return "";
@@ -290,7 +296,7 @@
   }
 
   async function loadAndRender() {
-    if (!currentData) appEl.innerHTML = "ただいま集計中…";
+    if (!currentData) appEl.innerHTML = LOADING_TEXT;
     let data;
     try {
       data = await fetchData();
@@ -519,7 +525,7 @@
     }
   }
 
-  // ---------- 学習手帳タブ(週ナビ+畑) ----------
+  // ---------- 学習手帳タブ(週ナビ+畑、7日間すべて表示) ----------
   function renderNotebook(el) {
     const missions = currentData.missions || [];
     const garden = currentData.garden || { nutrientCount: 0, missionsPerStage: 3 };
@@ -571,16 +577,15 @@
     `;
 
     const listEl = document.getElementById("mission-list");
-    if (missions.length === 0) {
-      listEl.innerHTML = '<p class="empty">まだミッションがありません</p>';
-    } else {
-      listEl.innerHTML = "";
-      DAYS.forEach((day, i) => {
-        const dayMissions = missions.filter((m) => m.day === day);
-        if (dayMissions.length === 0) return;
-        const block = document.createElement("div");
-        block.className = "day-block";
-        block.innerHTML = `<p class="day-title">${day}曜日(${formatMD(addDaysToYMD(weekStart, i))})</p>`;
+    listEl.innerHTML = "";
+    DAYS.forEach((day, i) => {
+      const dayMissions = missions.filter((m) => m.day === day);
+      const block = document.createElement("div");
+      block.className = "day-block";
+      block.innerHTML = `<p class="day-title">${day}曜日(${formatMD(addDaysToYMD(weekStart, i))})</p>`;
+      if (dayMissions.length === 0) {
+        block.innerHTML += `<p class="day-empty">まだミッションがありません</p>`;
+      } else {
         dayMissions.forEach((m) => {
           const done = m.completed === true || m.completed === "TRUE" || m.completed === "true";
           const item = document.createElement("div");
@@ -594,9 +599,9 @@
           `;
           block.appendChild(item);
         });
-        listEl.appendChild(block);
-      });
-    }
+      }
+      listEl.appendChild(block);
+    });
 
     document.querySelectorAll(".mission-checkbox").forEach((cb) => {
       cb.addEventListener("click", () => toggleMission(cb.dataset.id));
@@ -671,7 +676,8 @@
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       await loadAndRender();
-      setTimeout(() => alert(`収穫しました! ${result.fruit}`), 150);
+      const label = result.fruit && result.fruit.indexOf(GOLDEN_MARK) === 0 ? "金のぶどう" : result.fruit;
+      setTimeout(() => alert(`収穫しました! ${label}`), 150);
     } catch (err) {
       alert("収穫に失敗しました。もう一度お試しください。");
       if (btn) { btn.disabled = false; btn.textContent = "🍇 タップして収穫する"; }
@@ -685,9 +691,9 @@
     FRUIT_LIST.forEach((f) => (counts[f] = 0));
     let goldenCount = 0;
     harvests.forEach((h) => {
+      if (h.fruit.indexOf(GOLDEN_MARK) === 0) { goldenCount += 1; return; }
       const emoji = FRUIT_LIST.find((f) => h.fruit.indexOf(f) === 0);
       if (emoji) counts[emoji] += 1;
-      else if (h.fruit.indexOf("黄金") !== -1) goldenCount += 1;
     });
 
     el.innerHTML = `
@@ -695,14 +701,16 @@
         <p class="section-title" style="margin-top:0;">これまでの収穫</p>
         <div class="fruit-grid">
           ${FRUIT_LIST.map((f) => `<div class="fruit-cell">${f}<span class="count">×${counts[f]}</span></div>`).join("")}
-          <div class="fruit-cell golden">🍉✨<span class="count">×${goldenCount}</span></div>
+          <div class="fruit-cell golden">${GOLDEN_GRAPE_SVG}<span class="count">×${goldenCount}</span></div>
         </div>
       </div>
       <p class="section-title">収穫履歴</p>
       <div class="card">
-        ${harvests.length === 0 ? '<p class="empty">まだ収穫がありません</p>' : harvests.map((h) => `
-          <div class="entry"><div>${h.fruit}</div><div class="entry-meta">${formatDate(h.harvestedAt)}</div></div>
-        `).join("")}
+        ${harvests.length === 0 ? '<p class="empty">まだ収穫がありません</p>' : harvests.map((h) => {
+          const isGolden = h.fruit.indexOf(GOLDEN_MARK) === 0;
+          const display = isGolden ? `${GOLDEN_GRAPE_SVG}<span class="history-fruit-icon">金のぶどう</span>` : h.fruit;
+          return `<div class="entry"><div>${display}</div><div class="entry-meta">${formatDate(h.harvestedAt)}</div></div>`;
+        }).join("")}
       </div>
     `;
   }
@@ -729,24 +737,22 @@
     el.innerHTML = html;
   }
 
-  // ---------- お御籤タブ ----------
+  // ---------- お御籤タブ(お賽銭がある限り何度でも引ける) ----------
   function renderOmikuji(el) {
-    const omikuji = currentData.omikuji || { drawn: false };
     const coins = currentData.coins || 0;
-    const canDraw = !omikuji.drawn && coins >= 1;
+    const canDraw = coins >= 1;
 
     el.innerHTML = `
       <div class="card" style="text-align:center;">
         <p class="omikuji-coins">🪙 お賽銭: ${coins}枚</p>
         <div class="omamori-icon" id="omamori-icon">⛩️</div>
-        <button class="submit" id="omamori-btn" ${omikuji.drawn || coins < 1 ? "disabled" : ""}>
-          ${omikuji.drawn ? "Good luck!" : coins < 1 ? "お賽銭が足りません" : "本日のお御籤をひく"}
+        <button class="submit" id="omamori-btn" ${canDraw ? "" : "disabled"}>
+          ${canDraw ? "本日のお御籤をひく" : "お賽銭が足りません"}
         </button>
-        <p class="omikuji-note">お御籤は1日1回までです</p>
-        <div id="omamori-result" style="margin-top:1.25rem; ${omikuji.drawn ? "" : "display:none;"} text-align:left; border-top:1px solid var(--line); padding-top:1rem;">
-          <p class="omamori-en">${omikuji.en || ""}</p>
-          <p class="omamori-ja">${omikuji.ja || ""}</p>
-          <p class="omamori-advice">${omikuji.advice || ""}</p>
+        <div id="omamori-result" style="margin-top:1.25rem; ${lastOmikuji ? "" : "display:none;"} text-align:left; border-top:1px solid var(--line); padding-top:1rem;">
+          <p class="omamori-en">${lastOmikuji ? lastOmikuji.en : ""}</p>
+          <p class="omamori-ja">${lastOmikuji ? lastOmikuji.ja : ""}</p>
+          <p class="omamori-advice">${lastOmikuji ? lastOmikuji.advice : ""}</p>
         </div>
       </div>
     `;
@@ -778,16 +784,17 @@
         return;
       }
 
+      lastOmikuji = { en: data.en, ja: data.ja, advice: data.advice };
       document.querySelector(".omamori-en").textContent = data.en;
       document.querySelector(".omamori-ja").textContent = data.ja;
       document.querySelector(".omamori-advice").textContent = data.advice;
       result.style.display = "block";
-      btn.textContent = "Good luck!";
 
-      if (currentData) {
-        currentData.omikuji = { drawn: true, en: data.en, ja: data.ja, advice: data.advice };
-        currentData.coins = data.coins;
-      }
+      if (currentData) currentData.coins = data.coins;
+      const stillCanDraw = data.coins >= 1;
+      btn.textContent = stillCanDraw ? "もう一度ひく" : "お賽銭が足りません";
+      btn.disabled = !stillCanDraw;
+      document.querySelector(".omikuji-coins").textContent = `🪙 お賽銭: ${data.coins}枚`;
     } catch (err) {
       icon.classList.remove("drawing");
       btn.disabled = false;
