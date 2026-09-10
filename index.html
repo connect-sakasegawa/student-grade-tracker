@@ -67,6 +67,10 @@
   .student-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
 
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .info-card { background: var(--paper); border: 1px dashed var(--line); }
+  .info-card p { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
+  .info-card p:last-child { margin-bottom: 0; }
+  .info-title { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0 0 8px; }
 
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
@@ -120,8 +124,13 @@
   .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; display: none; }
   .install-hint.show { display: block; }
 
+  .badge-legend { display: flex; justify-content: space-around; margin-top: 10px; }
+  .badge-legend-item { text-align: center; flex: 1; }
+  .badge-legend-item .diff { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
   .week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .week-nav button { background: var(--brand-soft); color: var(--brand); border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+  .week-nav button:disabled { opacity: 0.5; }
   .week-nav .week-label { font-size: 13.5px; font-weight: 700; }
 
   .garden-stage-wrap { position: relative; border-radius: 10px; overflow: hidden; height: 160px; margin-bottom: 4px; }
@@ -213,6 +222,7 @@
   .celebration-name { font-family: 'Zilla Slab', serif; font-size: 22px; font-weight: 700; color: var(--brand); margin: 0 0 18px; }
   .celebration-name.golden-text { color: var(--gold); }
   .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
+  .celebration-badge-note { font-size: 12px; color: var(--growth); font-weight: 600; margin: 0 0 14px; }
 </style>
 </head>
 <body>
@@ -226,6 +236,7 @@
   const LOADING_TEXT = "学ぶ人は変える人だ";
 
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
+  const MAIN5_SUBJECTS = ["国語", "社会", "数学", "理科", "英語"];
   const TEST_NAMES = [
     "1学期中間テスト", "1学期期末テスト", "2学期中間テスト", "2学期期末テスト", "学年末テスト",
     "第1回実力テスト（6月）", "第2回実力テスト（9月）", "第3回実力テスト（11月）", "第4回実力テスト（1月）",
@@ -270,7 +281,6 @@
     <path d="M256 100 Q258 92 262 100 Q264 93 268 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
   </svg>`;
 
-  // 背景に埋もれないよう、植物の後ろに柔らかい光の輪(ハイライト)を敷いてから描画する
   const SPROUT_ICON = `<svg width="92" height="108" viewBox="0 0 100 118">
     <ellipse cx="50" cy="98" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
     <path d="M50 100 Q45 76 50 56" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
@@ -280,22 +290,33 @@
 
   const BUD_ICON = `<svg width="92" height="118" viewBox="0 0 100 128">
     <ellipse cx="50" cy="108" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
-    <path d="M50 110 Q43 76 50 36" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
+    <path d="M50 110 Q44 82 50 54" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
     <path d="M50 90 Q27 82 23 96 Q36 101 50 90 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
     <path d="M50 90 Q73 82 77 96 Q64 101 50 90 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
-    <path d="M50 62 Q32 55 28 66 Q39 71 50 62 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
-    <path d="M50 62 Q68 55 72 66 Q61 71 50 62 Z" fill="#7FBE6C" stroke="#2F5A26" stroke-width="1.2"/>
-    <path d="M50 36 Q43 14 50 -6 Q57 14 50 36 Z" fill="#7FBE6C" stroke="#2F5A26" stroke-width="1.2"/>
+    <ellipse cx="50" cy="34" rx="20" ry="26" fill="#7FBE6C" stroke="#2F5A26" stroke-width="1.4"/>
+    <line x1="50" y1="12" x2="50" y2="56" stroke="#4C8A3E" stroke-width="1.6"/>
   </svg>`;
 
   const MYSTERY_ICON = `<svg width="92" height="118" viewBox="0 0 100 128">
     <ellipse cx="50" cy="108" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
-    <path d="M50 110 Q43 68 50 26" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
+    <path d="M50 110 Q44 68 50 26" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
     <path d="M50 88 Q27 80 23 94 Q36 99 50 88 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
     <path d="M50 88 Q73 80 77 94 Q64 99 50 88 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
     <circle cx="50" cy="34" r="28" fill="#FBF0D0" stroke="#C99A2E" stroke-width="2" stroke-dasharray="3 3"/>
     <text x="50" y="44" text-anchor="middle" font-size="30" font-weight="700" fill="#8A6A1E">?</text>
   </svg>`;
+
+  function medalSvg(outer, inner, ribbon, label, textColor) {
+    return `<svg viewBox="0 0 60 74" width="42" height="52">
+      <path d="M20 30 L13 60 L30 50 L47 60 L40 30" fill="${ribbon}"/>
+      <circle cx="30" cy="26" r="21" fill="${outer}" stroke="#5A3F1E" stroke-width="1.5"/>
+      <circle cx="30" cy="26" r="14" fill="${inner}"/>
+      <text x="30" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="${textColor}">${label}</text>
+    </svg>`;
+  }
+  const BRONZE_BADGE_SVG = medalSvg("#CD8B4E", "#B5651D", "#B5651D", "銅", "#FBE7D0");
+  const SILVER_BADGE_SVG = medalSvg("#D7D9DE", "#AEB0B8", "#AEB0B8", "銀", "#FFFFFF");
+  const GOLD_BADGE_SVG = medalSvg("#E8C24A", "#C99A2E", "#C99A2E", "金", "#FFF8E4");
 
   const params = new URLSearchParams(window.location.search);
   const STORAGE_KEY_ID = "connect-student-id";
@@ -307,6 +328,7 @@
   let currentTab = "grades";
   let selectedWeekStart = null;
   let lastOmikuji = null;
+  let weekNavBusy = false;
 
   function escapeHtml(str) {
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -325,7 +347,7 @@
     }, 2500);
   }
 
-  function showHarvestCelebration(fruit) {
+  function showHarvestCelebration(fruit, badgeAwarded) {
     const container = document.getElementById("celebration-container");
     const isGolden = fruit.indexOf(GOLDEN_MARK) === 0;
     const iconHtml = isGolden ? GOLDEN_GRAPE_SVG : `<span>${fruit.split(" ")[0]}</span>`;
@@ -342,6 +364,7 @@
         <div class="celebration-icon">${iconHtml}</div>
         <p class="celebration-title">${isGolden ? "激レア収穫!" : "収穫しました"}</p>
         <p class="celebration-name ${isGolden ? "golden-text" : ""}">${nameText}</p>
+        ${badgeAwarded ? `<p class="celebration-badge-note">🎉 果物10個達成でバッジも1つゲット!</p>` : ""}
         <button class="celebration-close" id="celebration-close-btn">やったね!</button>
       </div>
     `;
@@ -375,6 +398,13 @@
   function todayYMD() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  // 5教科合計・9教科合計は、スプレッドシートの値を見ずにアプリ側でその場で計算する
+  function calcTotal(subjects, list) {
+    const relevant = subjects.filter((s) => list.indexOf(s.subject) !== -1 && s.score !== null);
+    if (relevant.length === 0) return null;
+    return relevant.reduce((sum, s) => sum + Number(s.score), 0);
   }
 
   function getPreviousScore(subject, testName) {
@@ -416,6 +446,12 @@
   async function fetchData() {
     let url = `${GAS_URL}?id=${encodeURIComponent(studentId)}`;
     if (selectedWeekStart) url += `&week=${encodeURIComponent(selectedWeekStart)}`;
+    const res = await fetch(url);
+    return res.json();
+  }
+
+  async function fetchMissionsOnly(weekStart) {
+    const url = `${GAS_URL}?id=${encodeURIComponent(studentId)}&week=${encodeURIComponent(weekStart)}&missionsOnly=1`;
     const res = await fetch(url);
     return res.json();
   }
@@ -499,6 +535,17 @@
           <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
         </form>
       </div>
+
+      <div class="card info-card">
+        <p class="info-title">バッジについて</p>
+        <p>目標点・平均点を上回った差に応じて、自動でバッジがもらえます。バッジは階級のポイントにもなります。</p>
+        <div class="badge-legend">
+          <div class="badge-legend-item">${BRONZE_BADGE_SVG}<p class="diff">+1〜9点</p></div>
+          <div class="badge-legend-item">${SILVER_BADGE_SVG}<p class="diff">+10〜19点</p></div>
+          <div class="badge-legend-item">${GOLD_BADGE_SVG}<p class="diff">+20点〜</p></div>
+        </div>
+      </div>
+
       <p class="section-title">テストごとの記録</p>
       <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
     `;
@@ -508,6 +555,8 @@
       card.className = "card test-card";
       const photoSubmitted = !!t.photo;
       const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null || s.target !== null);
+      const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
+      const total9 = calcTotal(t.subjects, SUBJECTS);
       card.innerHTML = `
         <div class="test-header"><p class="test-name">${t.testName}</p></div>
         ${filledSubjects.map((s) => `
@@ -521,8 +570,8 @@
               </span>
             </div>
           </div>`).join("")}
-        <div class="entry total"><div>5教科合計</div><div>${t.total5 !== null ? t.total5 + "点" : "-"}</div></div>
-        <div class="entry total"><div>9教科合計</div><div>${t.total9 !== null ? t.total9 + "点" : "-"}</div></div>
+        <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
+        <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
         <div class="photo-row">
           <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span></span>
           <label class="photo-btn ${photoSubmitted ? "done" : ""}">
@@ -681,9 +730,9 @@
 
     el.innerHTML = `
       <div class="week-nav">
-        <button id="week-prev">← 前週</button>
+        <button id="week-prev" ${weekNavBusy ? "disabled" : ""}>← 前週</button>
         <span class="week-label">${formatMD(weekStart)}(月)〜${formatMD(weekEnd)}(日)</span>
-        <button id="week-next">次週 →</button>
+        <button id="week-next" ${weekNavBusy ? "disabled" : ""}>次週 →</button>
       </div>
 
       <div class="card" id="garden-card">
@@ -777,9 +826,25 @@
     if (harvestBtn) harvestBtn.addEventListener("click", harvestGarden);
   }
 
+  // 週の切り替えは、ミッションだけを軽く取り直す専用の通信で行う(全データの再読み込みをしない)
   async function changeWeek(days) {
-    selectedWeekStart = addDaysToYMD(selectedWeekStart || currentData.weekStart, days);
-    await loadAndRender();
+    if (weekNavBusy) return;
+    weekNavBusy = true;
+    renderNotebook(document.getElementById("tab-content"));
+
+    const newWeekStart = addDaysToYMD(selectedWeekStart || currentData.weekStart, days);
+    try {
+      const data = await fetchMissionsOnly(newWeekStart);
+      if (!data.ok) throw new Error(data.error || "failed");
+      selectedWeekStart = data.weekStart;
+      currentData.weekStart = data.weekStart;
+      currentData.missions = data.missions;
+    } catch (err) {
+      showToast("週の切り替えに失敗しました。もう一度お試しください。");
+    } finally {
+      weekNavBusy = false;
+      renderNotebook(document.getElementById("tab-content"));
+    }
   }
 
   async function handleAddMission(e) {
@@ -873,7 +938,6 @@
     }
   }
 
-  // 収穫も、全データの読み込み直しをやめてその場で更新する(軽量化)。階級への反映は次回の自然な読み込み時に同期される
   async function harvestGarden() {
     const btn = document.getElementById("harvest-btn");
     if (btn) { btn.disabled = true; btn.textContent = "収穫中..."; }
@@ -889,11 +953,11 @@
       currentData.garden = { nutrientCount: 0, missionsPerStage: currentData.garden.missionsPerStage };
       currentData.harvests = currentData.harvests || [];
       currentData.harvests.unshift({ studentId, fruit: result.fruit, harvestedAt: new Date().toISOString() });
+      currentData.harvestsTotalCount = result.totalHarvests || ((currentData.harvestsTotalCount || 0) + 1);
 
       renderNotebook(document.getElementById("tab-content"));
-      showHarvestCelebration(result.fruit);
+      showHarvestCelebration(result.fruit, result.badgeAwarded);
 
-      // 階級ポイントなどは裏側で静かに同期しておく(画面表示はブロックしない)
       loadAndRender();
     } catch (err) {
       showToast("収穫に失敗しました。もう一度お試しください。");
@@ -904,6 +968,8 @@
   // ---------- 収穫コレクションタブ ----------
   function renderGarden(el) {
     const harvests = currentData.harvests || [];
+    const totalCount = currentData.harvestsTotalCount || 0;
+    const remainder = totalCount === 0 ? 10 : (10 - (totalCount % 10)) % 10 || 10;
     const counts = {};
     FRUIT_LIST.forEach((f) => (counts[f] = 0));
     let goldenCount = 0;
@@ -914,6 +980,12 @@
     });
 
     el.innerHTML = `
+      <div class="card info-card">
+        <p class="info-title">収穫でもらえるバッジ</p>
+        <p>果物を10個収穫するごとに、自動でバッジが1つもらえます。バッジは階級のポイントにもなります。</p>
+        <p style="color: var(--brand); font-weight: 600;">これまでの収穫数: ${totalCount}個(あと${remainder}個で次のバッジ!)</p>
+      </div>
+
       <div class="card">
         <p class="section-title" style="margin-top:0;">これまでの収穫</p>
         <div class="fruit-grid">
