@@ -69,6 +69,7 @@
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
   .field select, .field input[type="text"] { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
   .field select:focus, .field input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .field-note { font-size: 11.5px; color: var(--muted); margin: -8px 0 14px; line-height: 1.4; }
 
   .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
   .msg.error { color: #B3441E; background: #FCEBE3; }
@@ -79,6 +80,7 @@
   button.submit:disabled { opacity: 0.6; }
 
   .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 22px 0 10px; }
+  .list-note { font-size: 12px; color: var(--muted); margin: -6px 0 12px; display: flex; align-items: center; gap: 6px; }
 
   .subject-grid { margin-bottom: 4px; }
   .subject-grid-header, .subject-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 6px; align-items: center; }
@@ -135,7 +137,8 @@
 
   .preset-actions { margin: -6px 0 14px; }
   .preset-save-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 12.5px; font-weight: 600; }
-  .preset-list { margin-top: 10px; }
+  .preset-list { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .preset-list-title { font-size: 12px; font-weight: 700; color: var(--muted); margin: 0 0 8px; }
   .preset-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
   .preset-item:last-child { border-bottom: none; }
   .preset-item-text { flex: 1; margin-right: 8px; }
@@ -165,10 +168,10 @@
   .fruit-cell.mystery { opacity: 0.5; }
   .history-fruit-icon { vertical-align: middle; margin-right: 4px; width:20px;height:20px; }
 
-  .rank-current { text-align: center; padding: 18px; background: var(--brand-soft); border-radius: 12px; margin-bottom: 16px; }
+  .rank-current { text-align: center; padding: 18px; border-radius: 12px; margin-bottom: 16px; transition: none; }
   .rank-current .rank-medal { margin-bottom: 6px; }
-  .rank-current .rank-name { font-family: 'Zilla Slab', serif; font-size: 24px; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
-  .rank-current .rank-next { font-size: 12px; color: var(--muted); }
+  .rank-current .rank-name { font-family: 'Zilla Slab', serif; font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  .rank-current .rank-next { font-size: 12px; }
   .rank-class-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--muted); margin: 14px 0 6px; }
   .rank-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--line); }
   .rank-row.current { font-weight: 700; color: var(--brand); }
@@ -245,6 +248,30 @@
   ];
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
 
+  // ①クラスごとの階級カードのスタイル(見習い→トップへ徐々に目立つように)
+  const CLASS_CARD_STYLES = {
+    "見習いクラス": { box: "background:#F0EDE6;border:2px solid #C7BFAE;", text: "#7A6F63", next: "#8A8074" },
+    "新兵クラス": { box: "background:#FBF1DE;border:2px solid #D9B98A;", text: "#8A6A45", next: "#9A7A55" },
+    "隊長クラス": { box: "background:#F7E4CC;border:3px solid #CD8B4E;box-shadow:0 2px 6px rgba(0,0,0,0.06);", text: "#8A5A2E", next: "#96633A" },
+    "指揮官クラス": { box: "background:#EDEDF2;border:3px solid #ABABBA;box-shadow:0 2px 6px rgba(0,0,0,0.07);", text: "#4A4A5C", next: "#5A5A6C" },
+    "幹部クラス": { box: "background:#FBEFC7;border:3px solid #D4C078;box-shadow:0 3px 8px rgba(0,0,0,0.08);", text: "#7A5A1E", next: "#8A6A28" },
+    "将官クラス": { box: "background:#FCE49A;border:4px solid #C9A227;box-shadow:0 3px 10px rgba(201,162,39,0.3);", text: "#6B4E00", next: "#7A5A10" },
+    "最高位": { box: "background:#FDE7A0;border:4px solid #8A6A1E;box-shadow:0 4px 14px rgba(201,162,39,0.4);", text: "#5A3F00", next: "#6B4A10" },
+    "トップ": { box: "background:linear-gradient(135deg,#FDE7A0,#FFF3D0);border:5px solid #8A2A1E;box-shadow:0 6px 20px rgba(201,162,39,0.5);", text: "#5A1A10", next: "#6B2A18" },
+  };
+
+  // ②階級アップ時の決め台詞(クラスが上がるほど畏まる)
+  const RANK_UP_MESSAGES = {
+    "見習いクラス": "やった!",
+    "新兵クラス": "よし!",
+    "隊長クラス": "がんばった!",
+    "指揮官クラス": "この調子で!",
+    "幹部クラス": "見事です",
+    "将官クラス": "お見事です",
+    "最高位": "誠に見事にございます",
+    "トップ": "恐悦至極に存じます",
+  };
+
   const MEDALS = {
     "見習いクラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -12 L-8 -26 L0 -21 L8 -26 L5 -12" fill="#D8D3C8"/><circle r="13" fill="#D8D3C8" stroke="#B5AC9A" stroke-width="1.4"/>` },
     "新兵クラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -21 L-8 -35 L0 -30 L8 -35 L5 -21" fill="#D9B98A"/><g fill="#D9B98A"><g transform="rotate(0)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(72)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(144)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(216)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(288)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g></g><circle r="14" fill="#D9B98A" stroke="#A8825A" stroke-width="1.4"/>` },
@@ -273,7 +300,6 @@
     return "";
   }
 
-  // レア果実名を更新(赤い宝石あまおう→背徳のあまおう、愛の紅マドンナ→紅マドンナ（高級みかん）)
   const RARE_ICONS = {
     "金のぶどう": `<svg viewBox="0 0 40 40"><path d="M20 4 Q24 1 27 4 L25 8 Q22 6 20 8 Q18 6 15 8 L13 4 Q16 1 20 4 Z" fill="#5E8F4A"/><circle cx="20" cy="14" r="4.2" fill="#E8C24A"/><circle cx="14" cy="18" r="4.2" fill="#E8C24A"/><circle cx="26" cy="18" r="4.2" fill="#E8C24A"/><circle cx="10" cy="23" r="4.2" fill="#E8C24A"/><circle cx="20" cy="23" r="4.2" fill="#E8C24A"/><circle cx="30" cy="23" r="4.2" fill="#E8C24A"/><circle cx="14" cy="28" r="4.2" fill="#E8C24A"/><circle cx="26" cy="28" r="4.2" fill="#E8C24A"/><circle cx="20" cy="33" r="3.6" fill="#E8C24A"/></svg>`,
     "背徳のあまおう": `<svg viewBox="0 0 70 70"><path d="M35 12 C50 12 56 26 51 42 C47 56 39 62 35 62 C31 62 23 56 19 42 C14 26 20 12 35 12 Z" fill="#C0392B"/><path d="M27 8 L33 4 L35 10 L37 4 L43 8 L37 7 Z" fill="#5E8F4A"/></svg>`,
@@ -305,7 +331,7 @@
   let weekNavBusy = false;
   let lastSeenRank = null;
   let pendingRankUp = null;
-  let lastSelectedDay = null; // ③直近で選んだ曜日を覚えておく
+  let lastSelectedDay = null;
 
   function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function showToast(message) {
@@ -348,15 +374,17 @@
     });
   }
 
+  // ②階級ごとに決め台詞を変える
   function showRankUpCelebration(rankName, className) {
     const container = document.getElementById("celebration-container");
+    const buttonText = RANK_UP_MESSAGES[className] || "よし!";
     container.innerHTML = `
       <div class="celebration-backdrop"></div>
       <div class="celebration-card golden">
         <p class="celebration-title">階級アップ!</p>
         <div class="celebration-icon">${medalIcon(className, 80)}</div>
         <p class="celebration-name">${rankName}</p>
-        <button class="celebration-close" id="celebration-close-btn">よし!</button>
+        <button class="celebration-close" id="celebration-close-btn">${buttonText}</button>
       </div>
     `;
     container.classList.add("show");
@@ -457,7 +485,6 @@
     }
   }
 
-  // ⑥テスト保存後は、階級だけを軽く取り直して同期する(全データ再取得より高速)
   async function syncRankOnly() {
     try {
       const data = await fetchRankOnly();
@@ -634,7 +661,7 @@
       successEl.classList.add("show");
       renderGrades(document.getElementById("tab-content"));
       showToast("記録しました");
-      syncRankOnly(); // ⑥階級・バッジ演出を裏側で同期
+      syncRankOnly();
     } catch (err) {
       showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
     } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
@@ -677,7 +704,7 @@
     } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
   }
 
-  // ---------- 学習手帳タブ ----------
+  // ---------- 学習手帳タブ(③並び順・説明書きを変更) ----------
   function renderNotebook(el) {
     const missions = currentData.missions || [];
     const presets = currentData.missionPresets || [];
@@ -687,7 +714,6 @@
     const dayDates = DAYS.map((d, i) => addDaysToYMD(weekStart, i));
     const hasAvailableDay = dayDates.some((d) => d >= today);
 
-    // ③直近で選んだ曜日があり、かつ今週で選択可能ならそれを初期値にする
     let defaultDayIndex = dayDates.findIndex((d) => d >= today);
     if (defaultDayIndex === -1) defaultDayIndex = 0;
     if (lastSelectedDay) {
@@ -705,15 +731,15 @@
         ${hasAvailableDay ? `
         <form id="mission-form">
           <div class="field">
+            <label for="mission-day">曜日</label>
+            <select id="mission-day">${DAYS.map((d, i) => { const dateStr = dayDates[i]; const isPast = dateStr < today; return `<option value="${d}" ${isPast ? "disabled" : ""} ${i === defaultDayIndex ? "selected" : ""}>${d}曜日(${formatMD(dateStr)})${isPast ? " - 終了" : ""}</option>`; }).join("")}</select>
+          </div>
+          <div class="field">
             <label for="mission-preset">よく使う項目から選ぶ</label>
             <select id="mission-preset">
               <option value="">— 選択(任意) —</option>
               ${presets.map((p) => `<option value="${escapeHtml(p.content)}" data-category="${escapeHtml(p.category)}">[${p.category}] ${escapeHtml(p.content)}</option>`).join("")}
             </select>
-          </div>
-          <div class="field">
-            <label for="mission-day">曜日</label>
-            <select id="mission-day">${DAYS.map((d, i) => { const dateStr = dayDates[i]; const isPast = dateStr < today; return `<option value="${d}" ${isPast ? "disabled" : ""} ${i === defaultDayIndex ? "selected" : ""}>${d}曜日(${formatMD(dateStr)})${isPast ? " - 終了" : ""}</option>`; }).join("")}</select>
           </div>
           <div class="field">
             <label for="mission-category">区分</label>
@@ -723,9 +749,13 @@
             <label for="mission-content">内容(自由記述)</label>
             <input type="text" id="mission-content" placeholder="例:数学の宿題プリント2枚" />
           </div>
+          <p class="field-note">※書き方の注意点:科目、テキスト名、単元名、ページ数などを入力しよう</p>
           <div class="preset-actions"><button type="button" id="preset-save-btn" class="preset-save-btn">＋ 区分と内容をよく使う項目に登録</button></div>
+          <div id="mission-error" class="msg error"></div>
+          <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
           ${presets.length > 0 ? `
           <div class="preset-list">
+            <p class="preset-list-title">登録した項目の削除</p>
             ${presets.map((p) => `
               <div class="preset-item">
                 <span class="preset-item-text"><span class="preset-item-cat ${p.category === "宿題" ? "homework" : "self"}">${p.category}</span>${escapeHtml(p.content)}</span>
@@ -733,11 +763,10 @@
               </div>
             `).join("")}
           </div>` : ""}
-          <div id="mission-error" class="msg error"></div>
-          <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
         </form>` : `<p class="empty">この週は終了しています。新しいミッションは今週以降の週で追加してください</p>`}
       </div>
       <p class="section-title">この週のミッション</p>
+      <p class="list-note">✓ ミッションが完了したらチェックボックスにチェックを入れよう</p>
       <div class="card" id="mission-list"></div>
     `;
 
@@ -807,7 +836,7 @@
     const btn = document.getElementById("mission-submit-btn");
     errorEl.classList.remove("show");
     if (!content) return showFieldError(errorEl, "内容を入力してください");
-    lastSelectedDay = day; // ③次回のデフォルトに反映
+    lastSelectedDay = day;
     btn.disabled = true; btn.textContent = "追加中...";
     try {
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addMission", studentId, day, category, content, weekStart: selectedWeekStart }) });
@@ -856,7 +885,6 @@
     }
   }
 
-  // ④芽・つぼみ・果実の変化があった時だけ、控えめなメッセージを出す
   function showGardenGrowthMessage(prevGarden, newGarden) {
     if (!prevGarden || !newGarden) return;
     if (newGarden.readyCount > prevGarden.readyCount) { showToast("🍇 果実が実った!「畑」タブで確認してみよう"); return; }
@@ -911,7 +939,6 @@
     return html;
   }
 
-  // ②収穫数の集計を「絵文字の前方一致」で行うように修正(完全一致だと反映されない不具合の対策)
   function renderGarden(el) {
     const harvests = currentData.harvests || [];
     const totalCount = currentData.harvestsTotalCount || 0;
@@ -983,15 +1010,16 @@
     }
   }
 
-  // ---------- 階級一覧タブ ----------
+  // ---------- 階級一覧タブ(①クラスごとにカードのスタイルを変える) ----------
   function renderRanks(el) {
     const rank = currentData.rank || { rankName: "雑用", pointsInCycle: 0, nextRankName: null, pointsToNext: 0, totalPoints: 0, className: "見習いクラス" };
     const isUra = rank.rankName.indexOf("裏・") === 0;
+    const style = CLASS_CARD_STYLES[rank.className] || CLASS_CARD_STYLES["見習いクラス"];
     let html = `
-      <div class="rank-current">
+      <div class="rank-current" style="${style.box}">
         <div class="rank-medal">${medalIcon(rank.className, 70)}</div>
-        <p class="rank-name">${rank.rankName}</p>
-        <p class="rank-next">${rank.nextRankName ? `次は「${rank.nextRankName}」まで あと${rank.pointsToNext}ポイント` : "最高位に到達しています"}</p>
+        <p class="rank-name" style="color:${style.text}">${rank.rankName}</p>
+        <p class="rank-next" style="color:${style.next}">${rank.nextRankName ? `次は「${rank.nextRankName}」まで あと${rank.pointsToNext}ポイント` : "最高位に到達しています"}</p>
       </div>
       <div class="card">
     `;
