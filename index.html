@@ -135,6 +135,14 @@
 
   .preset-actions { margin: -6px 0 14px; }
   .preset-save-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 12.5px; font-weight: 600; }
+  .preset-list { margin-top: 10px; }
+  .preset-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .preset-item:last-child { border-bottom: none; }
+  .preset-item-text { flex: 1; margin-right: 8px; }
+  .preset-item-cat { font-size: 10.5px; padding: 1px 6px; border-radius: 999px; margin-right: 6px; }
+  .preset-item-cat.homework { background: var(--brand-soft); color: var(--brand); }
+  .preset-item-cat.self { background: var(--growth-soft); color: var(--growth); }
+  .preset-delete-btn { background: none; border: none; color: var(--amber); font-size: 12px; padding: 4px 6px; }
 
   .day-block { margin-bottom: 14px; }
   .day-title { font-size: 13px; font-weight: 700; color: var(--brand); margin: 0 0 8px; }
@@ -237,7 +245,7 @@
   ];
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
 
-  // ---------- 勲章(8クラス) ----------
+  // ---------- 勲章(8クラス)。トップのリボンは他と同じ長さに短縮 ----------
   const MEDALS = {
     "見習いクラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -12 L-8 -26 L0 -21 L8 -26 L5 -12" fill="#D8D3C8"/><circle r="13" fill="#D8D3C8" stroke="#B5AC9A" stroke-width="1.4"/>` },
     "新兵クラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -21 L-8 -35 L0 -30 L8 -35 L5 -21" fill="#D9B98A"/><g fill="#D9B98A"><g transform="rotate(0)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(72)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(144)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(216)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(288)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g></g><circle r="14" fill="#D9B98A" stroke="#A8825A" stroke-width="1.4"/>` },
@@ -246,14 +254,13 @@
     "幹部クラス": { vb: "-50 -55 100 100", svg: `<path d="M-9 -27 L-14 -46 L0 -39 L14 -46 L9 -27" fill="#E8C24A"/><path d="M-9 -27 L0 -36 L9 -27" fill="none" stroke="#8A6A1E" stroke-width="1"/><g fill="#E8C24A"><g transform="rotate(0)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(36)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(72)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(108)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(144)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(180)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(216)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(252)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(288)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(324)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g></g><circle r="18" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.5"/><ellipse cx="-6.3" cy="-6.3" rx="7.2" ry="5.4" fill="#FFFFFF" opacity="0.35"/><ellipse cx="5.4" cy="5.4" rx="8.1" ry="6.3" fill="#5A3F1E" opacity="0.18"/><circle r="8" fill="#FFF6D9"/><circle r="3" fill="#C0392B"/>` },
     "将官クラス": { vb: "-50 -55 100 100", svg: `<path d="M-8 -22 L-13 -42 L0 -37 L13 -42 L8 -22" fill="#C9A227"/><path d="M-8 -22 L0 -30 L8 -22" fill="none" stroke="#8A6A1E" stroke-width="1"/><path d="M-6 -20 L-10 -37 L0 -33 L10 -37 L6 -20" fill="#2E3A8C"/><g fill="#C9C9D2" opacity="0.9"><g transform="rotate(45)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g><g transform="rotate(135)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g><g transform="rotate(225)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g><g transform="rotate(315)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g></g><g fill="#C0392B"><g transform="rotate(0)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g><g transform="rotate(90)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g><g transform="rotate(180)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g><g transform="rotate(270)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g></g><g fill="none" stroke="#E8C24A" stroke-width="1.3"><g transform="rotate(0)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g><g transform="rotate(90)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g><g transform="rotate(180)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g><g transform="rotate(270)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g></g><circle r="9" fill="#C0392B" stroke="#E8C24A" stroke-width="1.5"/><circle r="6" fill="#FFFFFF"/><circle r="6" fill="none" stroke="#C0392B" stroke-width="1"/>` },
     "最高位": { vb: "-55 -60 110 110", svg: `<path d="M-9 -24 L-14 -44 L0 -39 L14 -44 L9 -24" fill="#C9A227"/><path d="M-9 -24 L0 -32 L9 -24" fill="none" stroke="#8A6A1E" stroke-width="1"/><path d="M-7 -22 L-11 -39 L0 -35 L11 -39 L7 -22" fill="#2E3A8C"/><circle cx="0" cy="-30" r="3.5" fill="#C9A227" stroke="#8A6A1E" stroke-width="0.8"/><path d="M-3 -32 Q0 -35 3 -32 Q0 -30 -3 -32 Z" fill="#FFF6D9"/><circle r="24" fill="#F2D27A" stroke="#C9A227" stroke-width="1.5"/><circle r="21.5" fill="none" stroke="#FFF6D9" stroke-width="1" opacity="0.6"/><g opacity="0.95"><g transform="rotate(0)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(45)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g><g transform="rotate(90)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(135)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g><g transform="rotate(180)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(225)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g><g transform="rotate(270)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(315)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g></g><g><g transform="rotate(0)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g><g transform="rotate(90)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g><g transform="rotate(180)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g><g transform="rotate(270)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g></g><circle r="10" fill="#C0392B" stroke="#E8C24A" stroke-width="1.8"/><circle r="6.5" fill="#FFFFFF"/><circle r="6.5" fill="none" stroke="#C0392B" stroke-width="1.1"/><circle r="2.2" fill="#E8C24A"/>` },
-    "トップ": { vb: "-55 -135 110 190", svg: `<g><rect x="-16" y="-108" width="32" height="14" rx="3" fill="#C9A227"/><rect x="-9" y="-108" width="18" height="14" fill="#8A2A1E"/><rect x="-18" y="-92" width="36" height="14" rx="3" fill="#C9A227"/><rect x="-10" y="-92" width="20" height="14" fill="#8A2A1E"/><rect x="-20" y="-76" width="40" height="14" rx="3" fill="#C9A227"/><rect x="-11" y="-76" width="22" height="14" fill="#8A2A1E"/><path d="M-9 -63 L-13 -46 L0 -41 L13 -46 L9 -63" fill="#C9A227" stroke="#8A6A1E" stroke-width="1"/><path d="M-6 -61 L-9 -46 L0 -43 L9 -46 L6 -61" fill="#8A2A1E"/></g><g fill="#E8C24A" opacity="0.9"><g transform="rotate(0)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(30)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(60)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(90)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(120)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(150)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(180)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(210)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(240)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(270)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(300)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(330)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g></g><circle r="30" fill="#F2D27A" stroke="#C9A227" stroke-width="1.5"/><circle r="27" fill="none" stroke="#FFF6D9" stroke-width="1" opacity="0.6"/><g><g transform="rotate(0)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(72)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(144)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(216)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(288)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g></g><circle r="12" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.6"/><circle r="8.5" fill="#FFFFFF"/><circle r="8.5" fill="none" stroke="#C0392B" stroke-width="1"/><path d="M0 -5 L1.6 -1.6 L5.5 -1.4 L2.6 1.1 L3.6 4.8 L0 2.8 L-3.6 4.8 L-2.6 1.1 L-5.5 -1.4 L-1.6 -1.6 Z" fill="#2E3A8C"/>` },
+    "トップ": { vb: "-55 -65 110 105", svg: `<path d="M-11 -30 L-17 -52 L0 -46 L17 -52 L11 -30" fill="#C9A227" stroke="#8A6A1E" stroke-width="1"/><path d="M-9 -28 L-14 -47 L0 -42 L14 -47 L9 -28" fill="#2E3A8C"/><g fill="#E8C24A" opacity="0.9"><g transform="rotate(0)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(30)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(60)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(90)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(120)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(150)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(180)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(210)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(240)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(270)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(300)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(330)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g></g><circle r="30" fill="#F2D27A" stroke="#C9A227" stroke-width="1.5"/><circle r="27" fill="none" stroke="#FFF6D9" stroke-width="1" opacity="0.6"/><g><g transform="rotate(0)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(72)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(144)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(216)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(288)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g></g><circle r="12" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.6"/><circle r="8.5" fill="#FFFFFF"/><circle r="8.5" fill="none" stroke="#C0392B" stroke-width="1"/><path d="M0 -5 L1.6 -1.6 L5.5 -1.4 L2.6 1.1 L3.6 4.8 L0 2.8 L-3.6 4.8 L-2.6 1.1 L-5.5 -1.4 L-1.6 -1.6 Z" fill="#2E3A8C"/>` },
   };
   function medalIcon(cls, size) {
     const m = MEDALS[cls] || MEDALS["見習いクラス"];
     return `<svg viewBox="${m.vb}" width="${size}" height="${size}">${m.svg}</svg>`;
   }
 
-  // ---------- バッジ(銅・銀・金) ----------
   function medalSvgBadge(outer, inner, ribbon, label, textColor) {
     return `<svg viewBox="0 0 60 74" width="17" height="21"><path d="M20 30 L13 60 L30 50 L47 60 L40 30" fill="${ribbon}"/><circle cx="30" cy="26" r="21" fill="${outer}" stroke="#5A3F1E" stroke-width="1.5"/><circle cx="30" cy="26" r="14" fill="${inner}"/><text x="30" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="${textColor}">${label}</text></svg>`;
   }
@@ -267,7 +274,6 @@
     return "";
   }
 
-  // ---------- レア果実アイコン ----------
   const RARE_ICONS = {
     "金のぶどう": `<svg viewBox="0 0 40 40"><path d="M20 4 Q24 1 27 4 L25 8 Q22 6 20 8 Q18 6 15 8 L13 4 Q16 1 20 4 Z" fill="#5E8F4A"/><circle cx="20" cy="14" r="4.2" fill="#E8C24A"/><circle cx="14" cy="18" r="4.2" fill="#E8C24A"/><circle cx="26" cy="18" r="4.2" fill="#E8C24A"/><circle cx="10" cy="23" r="4.2" fill="#E8C24A"/><circle cx="20" cy="23" r="4.2" fill="#E8C24A"/><circle cx="30" cy="23" r="4.2" fill="#E8C24A"/><circle cx="14" cy="28" r="4.2" fill="#E8C24A"/><circle cx="26" cy="28" r="4.2" fill="#E8C24A"/><circle cx="20" cy="33" r="3.6" fill="#E8C24A"/></svg>`,
     "赤い宝石あまおう": `<svg viewBox="0 0 70 70"><path d="M35 12 C50 12 56 26 51 42 C47 56 39 62 35 62 C31 62 23 56 19 42 C14 26 20 12 35 12 Z" fill="#C0392B"/><path d="M27 8 L33 4 L35 10 L37 4 L43 8 L37 7 Z" fill="#5E8F4A"/></svg>`,
@@ -298,7 +304,7 @@
   let lastOmikuji = null;
   let weekNavBusy = false;
   let lastSeenRank = null;
-  let pendingRankUp = null; // {rankName, className}
+  let pendingRankUp = null;
 
   function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function showToast(message) {
@@ -328,9 +334,7 @@
         <p class="celebration-title">${fruits.length}個収穫しました!</p>
         <p class="celebration-name">${hasRare ? "レアな実も混ざっていました!" : "お疲れさま!"}</p>
         <div class="celebration-fruit-list">
-          ${Object.keys(tally).map((f) => `
-            <div class="celebration-fruit-item">${fruitIconHtml(f, 28)}<span>×${tally[f]}</span></div>
-          `).join("")}
+          ${Object.keys(tally).map((f) => `<div class="celebration-fruit-item">${fruitIconHtml(f, 28)}<span>×${tally[f]}</span></div>`).join("")}
         </div>
         ${badgesAwarded > 0 ? `<p class="celebration-badge-note">🎉 バッジを${badgesAwarded}個ゲット!</p>` : ""}
         <button class="celebration-close" id="celebration-close-btn">やったね!</button>
@@ -338,8 +342,7 @@
     `;
     container.classList.add("show");
     document.getElementById("celebration-close-btn").addEventListener("click", () => {
-      container.classList.remove("show");
-      container.innerHTML = "";
+      container.classList.remove("show"); container.innerHTML = "";
       if (pendingRankUp) { const r = pendingRankUp; pendingRankUp = null; showRankUpCelebration(r.rankName, r.className); }
     });
   }
@@ -356,9 +359,7 @@
       </div>
     `;
     container.classList.add("show");
-    document.getElementById("celebration-close-btn").addEventListener("click", () => {
-      container.classList.remove("show"); container.innerHTML = "";
-    });
+    document.getElementById("celebration-close-btn").addEventListener("click", () => { container.classList.remove("show"); container.innerHTML = ""; });
   }
 
   function formatDateTime(iso) {
@@ -552,6 +553,23 @@
     document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
   }
 
+  // 保存後は全データを取り直さず、その場のtestsを更新する(軽量化)
+  function mergeTestScoresLocally(testName, submittedSubjects) {
+    currentData.tests = currentData.tests || [];
+    let test = currentData.tests.find((t) => t.testName === testName);
+    if (!test) {
+      test = { testName, subjects: SUBJECTS.map((s) => ({ subject: s, score: null, average: null, target: null })) };
+      currentData.tests.push(test);
+    }
+    submittedSubjects.forEach((sub) => {
+      const entry = test.subjects.find((s) => s.subject === sub.subject);
+      if (!entry) return;
+      if (sub.score !== null) entry.score = sub.score;
+      if (sub.average !== null) entry.average = sub.average;
+      if (sub.target !== null) entry.target = sub.target;
+    });
+  }
+
   async function handleAddScore(e) {
     e.preventDefault();
     const testNameEl = document.getElementById("testName");
@@ -593,8 +611,10 @@
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addTestScores", studentId, testName, subjects }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
+      mergeTestScoresLocally(testName, subjects);
       successEl.classList.add("show");
-      await loadAndRender();
+      renderGrades(document.getElementById("tab-content"));
+      showToast("記録しました");
     } catch (err) {
       showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
     } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
@@ -629,7 +649,11 @@
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadPhoto", studentId, testName, imageBase64: base64, mimeType: "image/jpeg" }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-      await loadAndRender();
+      let test = (currentData.tests || []).find((t) => t.testName === testName);
+      if (!test) { test = { testName, subjects: SUBJECTS.map((s) => ({ subject: s, score: null, average: null, target: null })) }; currentData.tests.push(test); }
+      test.photo = { submittedAt: result.submittedAt, driveFileUrl: result.url };
+      renderGrades(document.getElementById("tab-content"));
+      showToast("成績表をアップロードしました");
     } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
   }
 
@@ -657,10 +681,6 @@
             <select id="mission-day">${DAYS.map((d, i) => { const dateStr = dayDates[i]; const isPast = dateStr < today; return `<option value="${d}" ${isPast ? "disabled" : ""}>${d}曜日(${formatMD(dateStr)})${isPast ? " - 終了" : ""}</option>`; }).join("")}</select>
           </div>
           <div class="field">
-            <label for="mission-category">区分</label>
-            <select id="mission-category">${CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
-          </div>
-          <div class="field">
             <label for="mission-preset">よく使う項目から選ぶ</label>
             <select id="mission-preset">
               <option value="">— 選択(任意) —</option>
@@ -668,10 +688,23 @@
             </select>
           </div>
           <div class="field">
+            <label for="mission-category">区分</label>
+            <select id="mission-category">${CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
+          </div>
+          <div class="field">
             <label for="mission-content">内容(自由記述)</label>
             <input type="text" id="mission-content" placeholder="例:数学の宿題プリント2枚" />
           </div>
           <div class="preset-actions"><button type="button" id="preset-save-btn" class="preset-save-btn">＋ 区分と内容をよく使う項目に登録</button></div>
+          ${presets.length > 0 ? `
+          <div class="preset-list">
+            ${presets.map((p) => `
+              <div class="preset-item">
+                <span class="preset-item-text"><span class="preset-item-cat ${p.category === "宿題" ? "homework" : "self"}">${p.category}</span>${escapeHtml(p.content)}</span>
+                <button type="button" class="preset-delete-btn" data-preset-id="${p.id}">削除</button>
+              </div>
+            `).join("")}
+          </div>` : ""}
           <div id="mission-error" class="msg error"></div>
           <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
         </form>` : `<p class="empty">この週は終了しています。新しいミッションは今週以降の週で追加してください</p>`}
@@ -710,6 +743,7 @@
     document.getElementById("week-next").addEventListener("click", () => changeWeek(7));
     const presetBtn = document.getElementById("preset-save-btn");
     if (presetBtn) presetBtn.addEventListener("click", saveMissionPreset);
+    document.querySelectorAll(".preset-delete-btn").forEach((btn) => btn.addEventListener("click", () => deleteMissionPreset(btn.dataset.presetId)));
     const presetSelect = document.getElementById("mission-preset");
     if (presetSelect) {
       presetSelect.addEventListener("change", (e) => {
@@ -777,6 +811,22 @@
     } catch (err) { showToast("登録に失敗しました。もう一度お試しください。"); }
   }
 
+  async function deleteMissionPreset(id) {
+    const prevPresets = currentData.missionPresets;
+    currentData.missionPresets = (currentData.missionPresets || []).filter((p) => p.id !== id);
+    renderNotebook(document.getElementById("tab-content"));
+    try {
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteMissionPreset", studentId, id }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      showToast("削除しました");
+    } catch (err) {
+      currentData.missionPresets = prevPresets;
+      renderNotebook(document.getElementById("tab-content"));
+      showToast("削除に失敗しました。もう一度お試しください。");
+    }
+  }
+
   async function toggleMission(id) {
     const m = (currentData.missions || []).find((x) => x.id === id);
     if (!m) return;
@@ -797,7 +847,7 @@
     }
   }
 
-  // ---------- 畑タブ(独立ページ・複数株が収穫待ちで並ぶ) ----------
+  // ---------- 畑タブ ----------
   function renderGardenStage() {
     const garden = currentData.garden || { nutrientCount: 0, readyCount: 0, missionsPerStage: 3 };
     const n = garden.nutrientCount;
@@ -842,13 +892,13 @@
         <p style="color: var(--brand); font-weight: 600;">これまでの収穫数: ${totalCount}個</p>
       </div>
       <div class="card">
-        <p class="section-title" style="margin-top:0;">これまでの収穫(ノーマル)</p>
+        <p class="section-title" style="margin-top:0;">これまでの収穫(ノーマル果実)</p>
         <div class="fruit-grid">
           ${FRUIT_LIST.map((f) => counts[f] > 0 ? `<div class="fruit-cell">${f}<span class="count">×${counts[f]}</span></div>` : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`).join("")}
         </div>
       </div>
       <div class="card">
-        <p class="section-title" style="margin-top:0;">これまでの収穫(レア)</p>
+        <p class="section-title" style="margin-top:0;">これまでの収穫(レア果実)</p>
         <div class="fruit-grid">
           ${RARE_NAMES.map((n) => rareCounts[n] > 0 ? `<div class="fruit-cell rare">${RARE_ICONS[n]}<span class="count">×${rareCounts[n]}</span></div>` : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`).join("")}
         </div>
