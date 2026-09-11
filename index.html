@@ -21,18 +21,11 @@
       var urlId = params.get("id");
       var id = urlId || localStorage.getItem(STORAGE_KEY_ID);
       if (!id) return;
-
       var base = window.location.origin + window.location.pathname;
       var manifest = {
-        name: "CONNEC＋ | 個別指導塾コネクト",
-        short_name: "CONNEC＋",
-        start_url: base + "?id=" + id,
-        scope: base,
-        display: "standalone",
-        orientation: "portrait",
-        background_color: "#FFF6EC",
-        theme_color: "#D9720B",
-        lang: "ja",
+        name: "CONNEC＋ | 個別指導塾コネクト", short_name: "CONNEC＋",
+        start_url: base + "?id=" + id, scope: base, display: "standalone",
+        orientation: "portrait", background_color: "#FFF6EC", theme_color: "#D9720B", lang: "ja",
         icons: [
           { src: base + "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
           { src: base + "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
@@ -40,8 +33,7 @@
       };
       var dataUri = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
       var link = document.createElement("link");
-      link.rel = "manifest";
-      link.href = dataUri;
+      link.rel = "manifest"; link.href = dataUri;
       document.head.appendChild(link);
     } catch (err) {}
   })();
@@ -49,7 +41,6 @@
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-
   :root {
     --ink: #1F2A44; --paper: #FFF6EC; --card: #FFFFFF; --line: #E8D9C6;
     --brand: #D9720B; --brand-soft: #FBE7D0;
@@ -61,6 +52,8 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
   body { padding: max(20px, env(safe-area-inset-top)) 16px calc(84px + env(safe-area-inset-bottom)); min-height: 100vh; }
+
+  .loading-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; font-size: 18px; font-weight: 700; color: var(--brand); font-family: 'Zilla Slab', serif; background: var(--paper); }
 
   .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
   h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 22px; margin: 0 0 4px; line-height: 1.25; color: var(--brand); }
@@ -74,10 +67,7 @@
 
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  .field select, .field input[type="text"] {
-    width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
-    font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
-  }
+  .field select, .field input[type="text"] { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
   .field select:focus, .field input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
 
   .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
@@ -109,6 +99,7 @@
   .entry:last-child { border-bottom: none; }
   .entry.total { font-weight: 700; }
   .entry-meta { color: var(--muted); font-size: 12px; display: block; }
+  .score-badges { display: inline-flex; gap: 2px; vertical-align: middle; margin-left: 4px; }
 
   .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
   .badge.done { background: var(--growth-soft); color: var(--growth); }
@@ -139,6 +130,8 @@
   .garden-stage-fg { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; }
   .garden-status { font-size: 13px; color: var(--muted); text-align: center; margin: 4px 0 0; }
   .field-harvest { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; border: none; background: var(--gold-soft); color: #8A6A1E; font-size: 16px; font-weight: 700; text-align: center; }
+  .ready-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
+  .ready-icon { width: 34px; height: 34px; }
 
   .preset-actions { margin: -6px 0 14px; }
   .preset-save-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 12.5px; font-weight: 600; }
@@ -157,28 +150,27 @@
   .day-empty { font-size: 12.5px; color: var(--muted); padding: 4px 0; }
 
   .fruit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .fruit-cell { text-align: center; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 4px; font-size: 24px; }
-  .fruit-cell .count { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .fruit-cell.golden { background: var(--gold-soft); border-color: var(--gold); }
+  .fruit-cell { text-align: center; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; font-size: 22px; }
+  .fruit-cell svg { width: 26px; height: 26px; }
+  .fruit-cell .count { display: block; font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+  .fruit-cell.rare { background: var(--gold-soft); border-color: var(--gold); }
   .fruit-cell.mystery { opacity: 0.5; }
-  .history-fruit-icon { vertical-align: middle; margin-right: 4px; }
+  .history-fruit-icon { vertical-align: middle; margin-right: 4px; width:20px;height:20px; }
 
-  .rank-current { text-align: center; padding: 16px; background: var(--brand-soft); border-radius: 12px; margin-bottom: 16px; }
+  .rank-current { text-align: center; padding: 18px; background: var(--brand-soft); border-radius: 12px; margin-bottom: 16px; }
+  .rank-current .rank-medal { margin-bottom: 6px; }
   .rank-current .rank-name { font-family: 'Zilla Slab', serif; font-size: 24px; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
   .rank-current .rank-next { font-size: 12px; color: var(--muted); }
-  .rank-class-title { font-size: 12px; font-weight: 700; color: var(--muted); margin: 14px 0 6px; }
+  .rank-class-title { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--muted); margin: 14px 0 6px; }
   .rank-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--line); }
   .rank-row.current { font-weight: 700; color: var(--brand); }
   .rank-row .pt { color: var(--muted); font-size: 12px; }
 
   @keyframes omamori-shake {
-    0%,100% { transform: rotate(0deg) scale(1); }
-    20% { transform: rotate(-8deg) scale(1.05); }
-    40% { transform: rotate(7deg) scale(1.05); }
-    60% { transform: rotate(-6deg) scale(1.08); }
-    80% { transform: rotate(5deg) scale(1.05); }
+    0%,100% { transform: rotate(0deg) scale(1); } 20% { transform: rotate(-8deg) scale(1.05); }
+    40% { transform: rotate(7deg) scale(1.05); } 60% { transform: rotate(-6deg) scale(1.08); } 80% { transform: rotate(5deg) scale(1.05); }
   }
-  .omikuji-coins { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
+  .omikuji-coins { font-size: 14px; font-weight: 600; margin: 0 0 12px; display:flex; align-items:center; justify-content:center; gap:6px; }
   .omamori-icon { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 12px; background: var(--gold-soft); display: flex; align-items: center; justify-content: center; font-size: 30px; }
   .omamori-icon.drawing { animation: omamori-shake 0.5s ease-in-out infinite; }
   .omamori-en { font-size: 19px; font-weight: 500; margin: 0 0 6px; }
@@ -198,36 +190,24 @@
   #celebration-container.show { display: flex; }
   .celebration-backdrop { position: absolute; inset: 0; background: rgba(31, 42, 68, 0.55); }
   @keyframes celebration-pop {
-    0% { opacity: 0; transform: scale(0.75) translateY(10px); }
-    60% { opacity: 1; transform: scale(1.06) translateY(0); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
+    0% { opacity: 0; transform: scale(0.75) translateY(10px); } 60% { opacity: 1; transform: scale(1.06) translateY(0); } 100% { opacity: 1; transform: scale(1) translateY(0); }
   }
-  @keyframes celebration-sparkle {
-    0%, 100% { opacity: 0.4; transform: scale(0.9) rotate(0deg); }
-    50% { opacity: 1; transform: scale(1.15) rotate(15deg); }
-  }
-  .celebration-card {
-    position: relative; background: var(--card); border-radius: 18px; padding: 28px 24px 22px;
-    text-align: center; max-width: 300px; width: 100%; animation: celebration-pop 0.4s cubic-bezier(.2,.9,.3,1.3);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-  }
+  .celebration-card { position: relative; background: var(--card); border-radius: 18px; padding: 28px 24px 22px; text-align: center; max-width: 320px; width: 100%; max-height: 80vh; overflow-y: auto; animation: celebration-pop 0.4s cubic-bezier(.2,.9,.3,1.3); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
   .celebration-card.golden { background: linear-gradient(180deg, #FFF8E4, #ffffff); }
-  .celebration-sparkle { position: absolute; font-size: 20px; animation: celebration-sparkle 1.4s ease-in-out infinite; }
-  .celebration-sparkle.s1 { top: 6px; left: 14px; animation-delay: 0s; }
-  .celebration-sparkle.s2 { top: 14px; right: 18px; animation-delay: 0.3s; }
-  .celebration-sparkle.s3 { bottom: 10px; left: 22px; animation-delay: 0.6s; }
-  .celebration-icon { font-size: 56px; line-height: 1; margin-bottom: 10px; }
-  .celebration-icon svg { width: 64px; height: 64px; }
+  .celebration-icon { font-size: 48px; line-height: 1; margin-bottom: 10px; }
+  .celebration-icon svg { width: 60px; height: 60px; }
   .celebration-title { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
-  .celebration-name { font-family: 'Zilla Slab', serif; font-size: 22px; font-weight: 700; color: var(--brand); margin: 0 0 18px; }
-  .celebration-name.golden-text { color: var(--gold); }
-  .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
+  .celebration-name { font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: var(--brand); margin: 0 0 14px; }
+  .celebration-fruit-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 14px; }
+  .celebration-fruit-item { text-align: center; font-size: 11px; color: var(--muted); }
+  .celebration-fruit-item svg, .celebration-fruit-item span.emoji { width: 28px; height: 28px; display: block; margin: 0 auto 2px; font-size: 22px; }
   .celebration-badge-note { font-size: 12px; color: var(--growth); font-weight: 600; margin: 0 0 14px; }
+  .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
 </style>
 </head>
 <body>
 
-<div id="app">学ぶ人は変える人だ</div>
+<div id="app"><div class="loading-screen">学ぶ人は変える人だ</div></div>
 <div id="toast-container"></div>
 <div id="celebration-container"></div>
 
@@ -256,67 +236,55 @@
     { name: "元帥", threshold: 272, cls: "最高位" }, { name: "総帥", threshold: 300, cls: "トップ" },
   ];
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
-  const GOLDEN_MARK = "grapes";
 
-  const GOLDEN_GRAPE_SVG = `<svg viewBox="0 0 40 40" style="vertical-align:middle;">
-    <path d="M20 4 Q24 1 27 4 L25 8 Q22 6 20 8 Q18 6 15 8 L13 4 Q16 1 20 4 Z" fill="#5E8F4A"/>
-    <circle cx="20" cy="14" r="4.2" fill="#E8C24A"/>
-    <circle cx="14" cy="18" r="4.2" fill="#E8C24A"/>
-    <circle cx="26" cy="18" r="4.2" fill="#E8C24A"/>
-    <circle cx="10" cy="23" r="4.2" fill="#E8C24A"/>
-    <circle cx="20" cy="23" r="4.2" fill="#E8C24A"/>
-    <circle cx="30" cy="23" r="4.2" fill="#E8C24A"/>
-    <circle cx="14" cy="28" r="4.2" fill="#E8C24A"/>
-    <circle cx="26" cy="28" r="4.2" fill="#E8C24A"/>
-    <circle cx="20" cy="33" r="3.6" fill="#E8C24A"/>
-  </svg>`;
-
-  const FIELD_BG_SVG = `<svg viewBox="0 0 300 160" preserveAspectRatio="none">
-    <rect x="0" y="0" width="300" height="100" fill="#EAF3DD"/>
-    <rect x="0" y="100" width="300" height="60" fill="#96754C"/>
-    <path d="M0 114 Q75 108 150 114 T300 114" fill="none" stroke="#7A5B3A" stroke-width="2"/>
-    <path d="M0 130 Q75 124 150 130 T300 130" fill="none" stroke="#7A5B3A" stroke-width="2"/>
-    <path d="M0 146 Q75 140 150 146 T300 146" fill="none" stroke="#7A5B3A" stroke-width="2"/>
-    <path d="M18 100 Q20 92 24 100 Q26 93 30 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M256 100 Q258 92 262 100 Q264 93 268 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/>
-  </svg>`;
-
-  const SPROUT_ICON = `<svg width="92" height="108" viewBox="0 0 100 118">
-    <ellipse cx="50" cy="98" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
-    <path d="M50 100 Q45 76 50 56" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
-    <path d="M50 56 Q28 49 23 63 Q35 68 50 56 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
-    <path d="M50 56 Q72 49 77 63 Q65 68 50 56 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
-  </svg>`;
-
-  const BUD_ICON = `<svg width="92" height="118" viewBox="0 0 100 128">
-    <ellipse cx="50" cy="108" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
-    <path d="M50 110 Q44 82 50 54" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
-    <path d="M50 90 Q27 82 23 96 Q36 101 50 90 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
-    <path d="M50 90 Q73 82 77 96 Q64 101 50 90 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
-    <ellipse cx="50" cy="34" rx="20" ry="26" fill="#7FBE6C" stroke="#2F5A26" stroke-width="1.4"/>
-    <line x1="50" y1="12" x2="50" y2="56" stroke="#4C8A3E" stroke-width="1.6"/>
-  </svg>`;
-
-  const MYSTERY_ICON = `<svg width="92" height="118" viewBox="0 0 100 128">
-    <ellipse cx="50" cy="108" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/>
-    <path d="M50 110 Q44 68 50 26" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/>
-    <path d="M50 88 Q27 80 23 94 Q36 99 50 88 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/>
-    <path d="M50 88 Q73 80 77 94 Q64 99 50 88 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/>
-    <circle cx="50" cy="34" r="28" fill="#FBF0D0" stroke="#C99A2E" stroke-width="2" stroke-dasharray="3 3"/>
-    <text x="50" y="44" text-anchor="middle" font-size="30" font-weight="700" fill="#8A6A1E">?</text>
-  </svg>`;
-
-  function medalSvg(outer, inner, ribbon, label, textColor) {
-    return `<svg viewBox="0 0 60 74" width="42" height="52">
-      <path d="M20 30 L13 60 L30 50 L47 60 L40 30" fill="${ribbon}"/>
-      <circle cx="30" cy="26" r="21" fill="${outer}" stroke="#5A3F1E" stroke-width="1.5"/>
-      <circle cx="30" cy="26" r="14" fill="${inner}"/>
-      <text x="30" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="${textColor}">${label}</text>
-    </svg>`;
+  // ---------- 勲章(8クラス) ----------
+  const MEDALS = {
+    "見習いクラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -12 L-8 -26 L0 -21 L8 -26 L5 -12" fill="#D8D3C8"/><circle r="13" fill="#D8D3C8" stroke="#B5AC9A" stroke-width="1.4"/>` },
+    "新兵クラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -21 L-8 -35 L0 -30 L8 -35 L5 -21" fill="#D9B98A"/><g fill="#D9B98A"><g transform="rotate(0)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(72)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(144)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(216)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(288)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g></g><circle r="14" fill="#D9B98A" stroke="#A8825A" stroke-width="1.4"/>` },
+    "隊長クラス": { vb: "-40 -50 80 90", svg: `<path d="M-6 -22 L-10 -38 L0 -32 L10 -38 L6 -22" fill="#CD8B4E"/><path d="M-6 -22 L0 -29 L6 -22" fill="none" stroke="#8A5A2E" stroke-width="1"/><g fill="#CD8B4E"><g transform="rotate(0)"><path d="M-3.5 -15 L0 -22 L3.5 -15 Z"/></g><g transform="rotate(72)"><path d="M-3.5 -15 L0 -22 L3.5 -15 Z"/></g><g transform="rotate(144)"><path d="M-3.5 -15 L0 -22 L3.5 -15 Z"/></g><g transform="rotate(216)"><path d="M-3.5 -15 L0 -22 L3.5 -15 Z"/></g><g transform="rotate(288)"><path d="M-3.5 -15 L0 -22 L3.5 -15 Z"/></g></g><circle r="15" fill="#CD8B4E" stroke="#8A5A2E" stroke-width="1.4"/><circle r="6" fill="#F5D9A8"/>` },
+    "指揮官クラス": { vb: "-40 -50 80 90", svg: `<path d="M-7 -23 L-11 -40 L0 -33 L11 -40 L7 -23" fill="#C9C9D2"/><path d="M-7 -23 L0 -30 L7 -23" fill="none" stroke="#8A8A96" stroke-width="1"/><g fill="#C9C9D2"><g transform="rotate(0)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g><g transform="rotate(45)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g><g transform="rotate(90)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g><g transform="rotate(135)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g><g transform="rotate(180)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g><g transform="rotate(225)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g><g transform="rotate(270)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g><g transform="rotate(315)"><path d="M-3.5 -16 L0 -23 L3.5 -16 Z"/></g></g><circle r="16" fill="#C9C9D2" stroke="#8A8A96" stroke-width="1.4"/><circle r="7" fill="#F0F0F5"/>` },
+    "幹部クラス": { vb: "-50 -55 100 100", svg: `<path d="M-9 -27 L-14 -46 L0 -39 L14 -46 L9 -27" fill="#E8C24A"/><path d="M-9 -27 L0 -36 L9 -27" fill="none" stroke="#8A6A1E" stroke-width="1"/><g fill="#E8C24A"><g transform="rotate(0)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(36)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(72)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(108)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(144)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(180)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(216)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(252)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(288)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g><g transform="rotate(324)"><path d="M-4 -18 L0 -27 L4 -18 Z"/></g></g><circle r="18" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.5"/><ellipse cx="-6.3" cy="-6.3" rx="7.2" ry="5.4" fill="#FFFFFF" opacity="0.35"/><ellipse cx="5.4" cy="5.4" rx="8.1" ry="6.3" fill="#5A3F1E" opacity="0.18"/><circle r="8" fill="#FFF6D9"/><circle r="3" fill="#C0392B"/>` },
+    "将官クラス": { vb: "-50 -55 100 100", svg: `<path d="M-8 -22 L-13 -42 L0 -37 L13 -42 L8 -22" fill="#C9A227"/><path d="M-8 -22 L0 -30 L8 -22" fill="none" stroke="#8A6A1E" stroke-width="1"/><path d="M-6 -20 L-10 -37 L0 -33 L10 -37 L6 -20" fill="#2E3A8C"/><g fill="#C9C9D2" opacity="0.9"><g transform="rotate(45)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g><g transform="rotate(135)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g><g transform="rotate(225)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g><g transform="rotate(315)"><path d="M-3 -20 L0 -30 L3 -20 Z"/></g></g><g fill="#C0392B"><g transform="rotate(0)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g><g transform="rotate(90)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g><g transform="rotate(180)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g><g transform="rotate(270)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7 Z" stroke="#8A2A1E" stroke-width="1.2"/></g></g><g fill="none" stroke="#E8C24A" stroke-width="1.3"><g transform="rotate(0)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g><g transform="rotate(90)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g><g transform="rotate(180)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g><g transform="rotate(270)"><path d="M-5 -7 L-13 -27 Q0 -23 13 -27 L5 -7"/></g></g><circle r="9" fill="#C0392B" stroke="#E8C24A" stroke-width="1.5"/><circle r="6" fill="#FFFFFF"/><circle r="6" fill="none" stroke="#C0392B" stroke-width="1"/>` },
+    "最高位": { vb: "-55 -60 110 110", svg: `<path d="M-9 -24 L-14 -44 L0 -39 L14 -44 L9 -24" fill="#C9A227"/><path d="M-9 -24 L0 -32 L9 -24" fill="none" stroke="#8A6A1E" stroke-width="1"/><path d="M-7 -22 L-11 -39 L0 -35 L11 -39 L7 -22" fill="#2E3A8C"/><circle cx="0" cy="-30" r="3.5" fill="#C9A227" stroke="#8A6A1E" stroke-width="0.8"/><path d="M-3 -32 Q0 -35 3 -32 Q0 -30 -3 -32 Z" fill="#FFF6D9"/><circle r="24" fill="#F2D27A" stroke="#C9A227" stroke-width="1.5"/><circle r="21.5" fill="none" stroke="#FFF6D9" stroke-width="1" opacity="0.6"/><g opacity="0.95"><g transform="rotate(0)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(45)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g><g transform="rotate(90)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(135)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g><g transform="rotate(180)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(225)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g><g transform="rotate(270)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#C9C9D2"/></g><g transform="rotate(315)"><path d="M-3 -22 L0 -33 L3 -22 Z" fill="#E8C24A"/></g></g><g><g transform="rotate(0)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g><g transform="rotate(90)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g><g transform="rotate(180)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g><g transform="rotate(270)"><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8 Z" fill="#C0392B" stroke="#8A2A1E" stroke-width="1.2"/><path d="M-6 -8 L-15 -30 Q0 -26 15 -30 L6 -8" fill="none" stroke="#E8C24A" stroke-width="1.3"/><circle cx="0" cy="-29" r="2.6" fill="#2E3A8C" stroke="#E8C24A" stroke-width="0.8"/></g></g><circle r="10" fill="#C0392B" stroke="#E8C24A" stroke-width="1.8"/><circle r="6.5" fill="#FFFFFF"/><circle r="6.5" fill="none" stroke="#C0392B" stroke-width="1.1"/><circle r="2.2" fill="#E8C24A"/>` },
+    "トップ": { vb: "-55 -135 110 190", svg: `<g><rect x="-16" y="-108" width="32" height="14" rx="3" fill="#C9A227"/><rect x="-9" y="-108" width="18" height="14" fill="#8A2A1E"/><rect x="-18" y="-92" width="36" height="14" rx="3" fill="#C9A227"/><rect x="-10" y="-92" width="20" height="14" fill="#8A2A1E"/><rect x="-20" y="-76" width="40" height="14" rx="3" fill="#C9A227"/><rect x="-11" y="-76" width="22" height="14" fill="#8A2A1E"/><path d="M-9 -63 L-13 -46 L0 -41 L13 -46 L9 -63" fill="#C9A227" stroke="#8A6A1E" stroke-width="1"/><path d="M-6 -61 L-9 -46 L0 -43 L9 -46 L6 -61" fill="#8A2A1E"/></g><g fill="#E8C24A" opacity="0.9"><g transform="rotate(0)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(30)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(60)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(90)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(120)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(150)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(180)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(210)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(240)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(270)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(300)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g><g transform="rotate(330)"><path d="M-3 -30 L0 -42 L3 -30 Z"/></g></g><circle r="30" fill="#F2D27A" stroke="#C9A227" stroke-width="1.5"/><circle r="27" fill="none" stroke="#FFF6D9" stroke-width="1" opacity="0.6"/><g><g transform="rotate(0)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(72)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(144)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(216)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g><g transform="rotate(288)"><path d="M-8 -9 L-19 -33 Q0 -28 19 -33 L8 -9 Z" fill="#C0392B" stroke="#E8C24A" stroke-width="1.6"/><path d="M-7 -12 L-15.5 -29 Q0 -25 15.5 -29 L7 -12" fill="none" stroke="#FFFFFF" stroke-width="1.3" opacity="0.85"/></g></g><circle r="12" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.6"/><circle r="8.5" fill="#FFFFFF"/><circle r="8.5" fill="none" stroke="#C0392B" stroke-width="1"/><path d="M0 -5 L1.6 -1.6 L5.5 -1.4 L2.6 1.1 L3.6 4.8 L0 2.8 L-3.6 4.8 L-2.6 1.1 L-5.5 -1.4 L-1.6 -1.6 Z" fill="#2E3A8C"/>` },
+  };
+  function medalIcon(cls, size) {
+    const m = MEDALS[cls] || MEDALS["見習いクラス"];
+    return `<svg viewBox="${m.vb}" width="${size}" height="${size}">${m.svg}</svg>`;
   }
-  const BRONZE_BADGE_SVG = medalSvg("#CD8B4E", "#B5651D", "#B5651D", "銅", "#FBE7D0");
-  const SILVER_BADGE_SVG = medalSvg("#D7D9DE", "#AEB0B8", "#AEB0B8", "銀", "#FFFFFF");
-  const GOLD_BADGE_SVG = medalSvg("#E8C24A", "#C99A2E", "#C99A2E", "金", "#FFF8E4");
+
+  // ---------- バッジ(銅・銀・金) ----------
+  function medalSvgBadge(outer, inner, ribbon, label, textColor) {
+    return `<svg viewBox="0 0 60 74" width="17" height="21"><path d="M20 30 L13 60 L30 50 L47 60 L40 30" fill="${ribbon}"/><circle cx="30" cy="26" r="21" fill="${outer}" stroke="#5A3F1E" stroke-width="1.5"/><circle cx="30" cy="26" r="14" fill="${inner}"/><text x="30" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="${textColor}">${label}</text></svg>`;
+  }
+  const BRONZE_BADGE_SVG = medalSvgBadge("#CD8B4E", "#B5651D", "#B5651D", "銅", "#FBE7D0");
+  const SILVER_BADGE_SVG = medalSvgBadge("#D7D9DE", "#AEB0B8", "#AEB0B8", "銀", "#FFFFFF");
+  const GOLD_BADGE_SVG = medalSvgBadge("#E8C24A", "#C99A2E", "#C99A2E", "金", "#FFF8E4");
+  function badgeForDiff(diff) {
+    if (diff >= 20) return GOLD_BADGE_SVG;
+    if (diff >= 10) return SILVER_BADGE_SVG;
+    if (diff >= 1) return BRONZE_BADGE_SVG;
+    return "";
+  }
+
+  // ---------- レア果実アイコン ----------
+  const RARE_ICONS = {
+    "金のぶどう": `<svg viewBox="0 0 40 40"><path d="M20 4 Q24 1 27 4 L25 8 Q22 6 20 8 Q18 6 15 8 L13 4 Q16 1 20 4 Z" fill="#5E8F4A"/><circle cx="20" cy="14" r="4.2" fill="#E8C24A"/><circle cx="14" cy="18" r="4.2" fill="#E8C24A"/><circle cx="26" cy="18" r="4.2" fill="#E8C24A"/><circle cx="10" cy="23" r="4.2" fill="#E8C24A"/><circle cx="20" cy="23" r="4.2" fill="#E8C24A"/><circle cx="30" cy="23" r="4.2" fill="#E8C24A"/><circle cx="14" cy="28" r="4.2" fill="#E8C24A"/><circle cx="26" cy="28" r="4.2" fill="#E8C24A"/><circle cx="20" cy="33" r="3.6" fill="#E8C24A"/></svg>`,
+    "赤い宝石あまおう": `<svg viewBox="0 0 70 70"><path d="M35 12 C50 12 56 26 51 42 C47 56 39 62 35 62 C31 62 23 56 19 42 C14 26 20 12 35 12 Z" fill="#C0392B"/><path d="M27 8 L33 4 L35 10 L37 4 L43 8 L37 7 Z" fill="#5E8F4A"/></svg>`,
+    "沖縄のマンゴー": `<svg viewBox="0 0 70 70"><path d="M35 16 C50 16 56 30 51 46 C46 60 38 66 35 66 C32 66 24 60 19 46 C14 30 20 16 35 16 Z" fill="#E8973A"/><path d="M27 12 L33 6 L35 14 L37 6 L43 12 L37 11 Z" fill="#5E8F4A"/></svg>`,
+    "コネコネの実": `<svg viewBox="0 0 70 70"><circle cx="35" cy="37" r="27" fill="#D9720B"/><path d="M35 14 Q52 18 50 35 Q48 50 35 52 Q23 50 23 38" fill="none" stroke="#FBE7D0" stroke-width="3.4" stroke-linecap="round"/><path d="M32 12 L35 7 L29 7 Z" fill="#5E8F4A"/></svg>`,
+    "愛の紅マドンナ": `<svg viewBox="0 0 70 70"><circle cx="35" cy="38" r="26" fill="#E8973A"/><path d="M17 18 Q23 8 33 8" fill="none" stroke="#C99A2E" stroke-width="2.5" stroke-linecap="round"/><path d="M53 18 Q47 8 37 8" fill="none" stroke="#C99A2E" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    "ミラヴェイユのマカロン": `<svg viewBox="0 0 70 70"><ellipse cx="35" cy="22" rx="20" ry="11" fill="#F5E6A8"/><ellipse cx="35" cy="48" rx="20" ry="11" fill="#F5E6A8"/><ellipse cx="35" cy="35" rx="18" ry="8" fill="#F7C9D9"/></svg>`,
+    "幻のシャインマスカット": `<svg viewBox="0 0 70 70"><path d="M35 10 Q45 4 54 10 L50 20 Q42 15 35 20 Q28 15 20 20 L16 10 Q25 4 35 10 Z" fill="#5E8F4A"/><circle cx="35" cy="27" r="8" fill="#EAF3C8"/><circle cx="22" cy="35" r="8" fill="#EAF3C8"/><circle cx="48" cy="35" r="8" fill="#EAF3C8"/><circle cx="14" cy="47" r="8" fill="#EAF3C8"/><circle cx="35" cy="47" r="8" fill="#EAF3C8"/><circle cx="56" cy="47" r="8" fill="#EAF3C8"/><circle cx="22" cy="59" r="8" fill="#EAF3C8"/><circle cx="48" cy="59" r="8" fill="#EAF3C8"/></svg>`,
+  };
+  const RARE_NAMES = Object.keys(RARE_ICONS);
+
+  const FIVE_YEN_SVG = `<svg viewBox="0 0 40 40" width="22" height="22"><circle cx="20" cy="20" r="17" fill="#C9A227" stroke="#8A6A1E" stroke-width="1.5"/><rect x="14" y="14" width="12" height="12" fill="#FFF6EC"/></svg>`;
+
+  const FIELD_BG_SVG = `<svg viewBox="0 0 300 160" preserveAspectRatio="none"><rect x="0" y="0" width="300" height="100" fill="#EAF3DD"/><rect x="0" y="100" width="300" height="60" fill="#96754C"/><path d="M0 114 Q75 108 150 114 T300 114" fill="none" stroke="#7A5B3A" stroke-width="2"/><path d="M0 130 Q75 124 150 130 T300 130" fill="none" stroke="#7A5B3A" stroke-width="2"/><path d="M0 146 Q75 140 150 146 T300 146" fill="none" stroke="#7A5B3A" stroke-width="2"/><path d="M18 100 Q20 92 24 100 Q26 93 30 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/><path d="M256 100 Q258 92 262 100 Q264 93 268 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/></svg>`;
+  const SPROUT_ICON = `<svg width="92" height="108" viewBox="0 0 100 118"><ellipse cx="50" cy="98" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/><path d="M50 100 Q45 76 50 56" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/><path d="M50 56 Q28 49 23 63 Q35 68 50 56 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/><path d="M50 56 Q72 49 77 63 Q65 68 50 56 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/></svg>`;
+  const BUD_ICON = `<svg width="92" height="118" viewBox="0 0 100 128"><ellipse cx="50" cy="108" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/><path d="M50 110 Q44 82 50 54" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/><path d="M50 90 Q27 82 23 96 Q36 101 50 90 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/><path d="M50 90 Q73 82 77 96 Q64 101 50 90 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/><ellipse cx="50" cy="34" rx="20" ry="26" fill="#7FBE6C" stroke="#2F5A26" stroke-width="1.4"/><line x1="50" y1="12" x2="50" y2="56" stroke="#4C8A3E" stroke-width="1.6"/></svg>`;
+  const MYSTERY_ICON = `<svg width="34" height="34" viewBox="0 0 100 108"><path d="M50 94 Q44 58 50 18" fill="none" stroke="#4C7A3D" stroke-width="5" stroke-linecap="round"/><path d="M50 78 Q30 71 27 84 Q38 88 50 78 Z" fill="#5E8F4A"/><path d="M50 78 Q70 71 73 84 Q62 88 50 78 Z" fill="#6FA357"/><circle cx="50" cy="30" r="27" fill="#FBF0D0" stroke="#C99A2E" stroke-width="2" stroke-dasharray="3 3"/><text x="50" y="40" text-anchor="middle" font-size="30" font-weight="700" fill="#8A6A1E">?</text></svg>`;
 
   const params = new URLSearchParams(window.location.search);
   const STORAGE_KEY_ID = "connect-student-id";
@@ -329,42 +297,42 @@
   let selectedWeekStart = null;
   let lastOmikuji = null;
   let weekNavBusy = false;
+  let lastSeenRank = null;
+  let pendingRankUp = null; // {rankName, className}
 
-  function escapeHtml(str) {
-    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
+  function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function showToast(message) {
     const container = document.getElementById("toast-container");
     if (!container) return;
     const el = document.createElement("div");
-    el.className = "toast";
-    el.textContent = message;
+    el.className = "toast"; el.textContent = message;
     container.appendChild(el);
     requestAnimationFrame(() => el.classList.add("show"));
-    setTimeout(() => {
-      el.classList.remove("show");
-      setTimeout(() => el.remove(), 300);
-    }, 2500);
+    setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 300); }, 2500);
   }
 
-  function showHarvestCelebration(fruit, badgeAwarded) {
-    const container = document.getElementById("celebration-container");
-    const isGolden = fruit.indexOf(GOLDEN_MARK) === 0;
-    const iconHtml = isGolden ? GOLDEN_GRAPE_SVG : `<span>${fruit.split(" ")[0]}</span>`;
-    const nameText = isGolden ? "金のぶどう" : fruit.replace(/^\S+\s/, "");
+  function fruitIconHtml(name, size) {
+    const isRare = RARE_ICONS[name];
+    if (isRare) return `<span style="display:inline-block;width:${size}px;height:${size}px;">${RARE_ICONS[name]}</span>`;
+    return `<span style="font-size:${size}px;line-height:1;">${name}</span>`;
+  }
 
+  function showHarvestCelebration(fruits, badgesAwarded) {
+    const container = document.getElementById("celebration-container");
+    const tally = {};
+    fruits.forEach((f) => { tally[f] = (tally[f] || 0) + 1; });
+    const hasRare = fruits.some((f) => RARE_ICONS[f]);
     container.innerHTML = `
       <div class="celebration-backdrop"></div>
-      <div class="celebration-card ${isGolden ? "golden" : ""}">
-        ${isGolden ? `
-          <span class="celebration-sparkle s1">✨</span>
-          <span class="celebration-sparkle s2">✨</span>
-          <span class="celebration-sparkle s3">✨</span>
-        ` : ""}
-        <div class="celebration-icon">${iconHtml}</div>
-        <p class="celebration-title">${isGolden ? "激レア収穫!" : "収穫しました"}</p>
-        <p class="celebration-name ${isGolden ? "golden-text" : ""}">${nameText}</p>
-        ${badgeAwarded ? `<p class="celebration-badge-note">🎉 果物10個達成でバッジも1つゲット!</p>` : ""}
+      <div class="celebration-card ${hasRare ? "golden" : ""}">
+        <p class="celebration-title">${fruits.length}個収穫しました!</p>
+        <p class="celebration-name">${hasRare ? "レアな実も混ざっていました!" : "お疲れさま!"}</p>
+        <div class="celebration-fruit-list">
+          ${Object.keys(tally).map((f) => `
+            <div class="celebration-fruit-item">${fruitIconHtml(f, 28)}<span>×${tally[f]}</span></div>
+          `).join("")}
+        </div>
+        ${badgesAwarded > 0 ? `<p class="celebration-badge-note">🎉 バッジを${badgesAwarded}個ゲット!</p>` : ""}
         <button class="celebration-close" id="celebration-close-btn">やったね!</button>
       </div>
     `;
@@ -372,6 +340,24 @@
     document.getElementById("celebration-close-btn").addEventListener("click", () => {
       container.classList.remove("show");
       container.innerHTML = "";
+      if (pendingRankUp) { const r = pendingRankUp; pendingRankUp = null; showRankUpCelebration(r.rankName, r.className); }
+    });
+  }
+
+  function showRankUpCelebration(rankName, className) {
+    const container = document.getElementById("celebration-container");
+    container.innerHTML = `
+      <div class="celebration-backdrop"></div>
+      <div class="celebration-card golden">
+        <p class="celebration-title">階級アップ!</p>
+        <div class="celebration-icon">${medalIcon(className, 80)}</div>
+        <p class="celebration-name">${rankName}</p>
+        <button class="celebration-close" id="celebration-close-btn">よし!</button>
+      </div>
+    `;
+    container.classList.add("show");
+    document.getElementById("celebration-close-btn").addEventListener("click", () => {
+      container.classList.remove("show"); container.innerHTML = "";
     });
   }
 
@@ -380,27 +366,14 @@
     const d = new Date(iso);
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
-  function formatDate(iso) {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return `${d.getMonth() + 1}/${d.getDate()}`;
-  }
+  function formatDate(iso) { if (!iso) return ""; const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}`; }
   function addDaysToYMD(ymd, days) {
-    const d = new Date(ymd + "T00:00:00");
-    d.setDate(d.getDate() + days);
-    const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
-  function formatMD(ymd) {
-    const d = new Date(ymd + "T00:00:00");
-    return `${d.getMonth() + 1}/${d.getDate()}`;
-  }
-  function todayYMD() {
-    const d = new Date();
+    const d = new Date(ymd + "T00:00:00"); d.setDate(d.getDate() + days);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
+  function formatMD(ymd) { const d = new Date(ymd + "T00:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; }
+  function todayYMD() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 
-  // 5教科合計・9教科合計は、スプレッドシートの値を見ずにアプリ側でその場で計算する
   function calcTotal(subjects, list) {
     const relevant = subjects.filter((s) => list.indexOf(s.subject) !== -1 && s.score !== null);
     if (relevant.length === 0) return null;
@@ -427,11 +400,8 @@
       return;
     }
     await loadAndRender();
-
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js").catch(() => {});
-      });
+      window.addEventListener("load", () => { navigator.serviceWorker.register("service-worker.js").catch(() => {}); });
     }
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
@@ -449,7 +419,6 @@
     const res = await fetch(url);
     return res.json();
   }
-
   async function fetchMissionsOnly(weekStart) {
     const url = `${GAS_URL}?id=${encodeURIComponent(studentId)}&week=${encodeURIComponent(weekStart)}&missionsOnly=1`;
     const res = await fetch(url);
@@ -457,28 +426,28 @@
   }
 
   async function loadAndRender() {
-    if (!currentData) appEl.innerHTML = LOADING_TEXT;
+    if (!currentData) appEl.innerHTML = `<div class="loading-screen">${LOADING_TEXT}</div>`;
     let data;
-    try {
-      data = await fetchData();
-    } catch (err) {
-      appEl.innerHTML = `<div class="id-error">通信に失敗しました。電波の良い場所でもう一度お試しください。</div>`;
-      return;
-    }
-    if (!data.ok) {
-      appEl.innerHTML = `<div class="id-error">リンクが無効です。講師に確認してください。</div>`;
-      return;
-    }
+    try { data = await fetchData(); }
+    catch (err) { appEl.innerHTML = `<div class="id-error">通信に失敗しました。電波の良い場所でもう一度お試しください。</div>`; return; }
+    if (!data.ok) { appEl.innerHTML = `<div class="id-error">リンクが無効です。講師に確認してください。</div>`; return; }
     if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
+
+    const rankChanged = lastSeenRank !== null && data.rank && data.rank.rankName !== lastSeenRank;
+    if (data.rank) lastSeenRank = data.rank.rankName;
+
     currentData = data;
     if (!selectedWeekStart) selectedWeekStart = data.weekStart;
     renderShell();
+
+    if (rankChanged) {
+      const info = { rankName: data.rank.rankName, className: data.rank.className };
+      const celebrationOpen = document.getElementById("celebration-container").classList.contains("show");
+      if (celebrationOpen) pendingRankUp = info; else showRankUpCelebration(info.rankName, info.className);
+    }
   }
 
-  function switchTab(tab) {
-    currentTab = tab;
-    renderShell();
-  }
+  function switchTab(tab) { currentTab = tab; renderShell(); }
 
   function renderShell() {
     const data = currentData;
@@ -490,15 +459,12 @@
       <nav class="tabbar">
         <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>私の成績表</button>
         <button class="tab-btn ${currentTab === "notebook" ? "active" : ""}" data-tab="notebook"><span class="tab-icon">📔</span>学習手帳</button>
-        <button class="tab-btn ${currentTab === "garden" ? "active" : ""}" data-tab="garden"><span class="tab-icon">🍇</span>収穫</button>
+        <button class="tab-btn ${currentTab === "garden" ? "active" : ""}" data-tab="garden"><span class="tab-icon">🌾</span>畑</button>
         <button class="tab-btn ${currentTab === "ranks" ? "active" : ""}" data-tab="ranks"><span class="tab-icon">🎖️</span>階級</button>
         <button class="tab-btn ${currentTab === "omikuji" ? "active" : ""}" data-tab="omikuji"><span class="tab-icon">⛩️</span>お御籤</button>
       </nav>
     `;
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
-    });
-
+    document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
     const contentEl = document.getElementById("tab-content");
     if (currentTab === "grades") renderGrades(contentEl);
     else if (currentTab === "notebook") renderNotebook(contentEl);
@@ -515,10 +481,7 @@
         <form id="entry-form">
           <div class="field">
             <label for="testName">テスト名</label>
-            <select id="testName">
-              <option value="">選択してください</option>
-              ${TEST_NAMES.map((t) => `<option value="${t}">${t}</option>`).join("")}
-            </select>
+            <select id="testName"><option value="">選択してください</option>${TEST_NAMES.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
           </div>
           <div class="subject-grid">
             <div class="subject-grid-header"><span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span></div>
@@ -535,7 +498,6 @@
           <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
         </form>
       </div>
-
       <div class="card info-card">
         <p class="info-title">バッジについて</p>
         <p>目標点・平均点を上回った差に応じて、自動でバッジがもらえます。バッジは階級のポイントにもなります。</p>
@@ -545,7 +507,6 @@
           <div class="badge-legend-item">${GOLD_BADGE_SVG}<p class="diff">+20点〜</p></div>
         </div>
       </div>
-
       <p class="section-title">テストごとの記録</p>
       <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
     `;
@@ -559,17 +520,22 @@
       const total9 = calcTotal(t.subjects, SUBJECTS);
       card.innerHTML = `
         <div class="test-header"><p class="test-name">${t.testName}</p></div>
-        ${filledSubjects.map((s) => `
+        ${filledSubjects.map((s) => {
+          let badges = "";
+          if (s.score !== null && s.target !== null) { const b = badgeForDiff(s.score - s.target); if (b) badges += b; }
+          if (s.score !== null && s.average !== null) { const b = badgeForDiff(s.score - s.average); if (b) badges += b; }
+          return `
           <div class="entry">
             <div>${s.subject}</div>
             <div style="text-align:right">
-              ${s.score !== null ? `${s.score}点` : "-"}
+              ${s.score !== null ? `${s.score}点` : "-"}${badges ? `<span class="score-badges">${badges}</span>` : ""}
               <span class="entry-meta">
                 ${s.target !== null ? `目標${s.target}点` : ""}
                 ${s.average !== null ? `${s.target !== null ? " / " : ""}平均${s.average}点` : ""}
               </span>
             </div>
-          </div>`).join("")}
+          </div>`;
+        }).join("")}
         <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
         <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
         <div class="photo-row">
@@ -583,9 +549,7 @@
       testsListEl.appendChild(card);
     });
     document.getElementById("entry-form").addEventListener("submit", handleAddScore);
-    document.querySelectorAll(".photo-input").forEach((input) => {
-      input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName));
-    });
+    document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
   }
 
   async function handleAddScore(e) {
@@ -594,14 +558,11 @@
     const errorEl = document.getElementById("form-error");
     const successEl = document.getElementById("form-success");
     const btn = document.getElementById("submit-btn");
-    errorEl.classList.remove("show");
-    successEl.classList.remove("show");
-
+    errorEl.classList.remove("show"); successEl.classList.remove("show");
     const testName = testNameEl.value;
     if (!testName) return showFieldError(errorEl, "テスト名を選択してください");
 
-    const subjects = [];
-    let validationError = "";
+    const subjects = []; let validationError = "";
     SUBJECTS.forEach((subject) => {
       if (validationError) return;
       const scoreInput = document.querySelector(`input[data-subject="${subject}"][data-field="score"]`);
@@ -609,48 +570,34 @@
       const targetInput = document.querySelector(`input[data-subject="${subject}"][data-field="target"]`);
       const scoreRaw = scoreInput.value, avgRaw = avgInput.value, targetRaw = targetInput.value;
       if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return;
-
       const parseOrError = (raw, label) => {
         if (raw === "") return null;
         const n = Number(raw);
         if (Number.isNaN(n) || n < 0 || n > 100) { validationError = `${subject}の${label}は0〜100の数字で入力してください`; return null; }
         return n;
       };
-      const target = parseOrError(targetRaw, "目標点");
-      if (validationError) return;
-      const score = parseOrError(scoreRaw, "点数");
-      if (validationError) return;
-      const average = parseOrError(avgRaw, "平均点");
-      if (validationError) return;
-
+      const target = parseOrError(targetRaw, "目標点"); if (validationError) return;
+      const score = parseOrError(scoreRaw, "点数"); if (validationError) return;
+      const average = parseOrError(avgRaw, "平均点"); if (validationError) return;
       if (target !== null) {
         const prev = getPreviousScore(subject, testName);
         if (prev !== null && target < prev) { validationError = `${subject}の目標点は、前回の点数(${prev}点)以上にしよう`; return; }
       }
       subjects.push({ subject, score, average, target });
     });
-
     if (validationError) return showFieldError(errorEl, validationError);
     if (subjects.length === 0) return showFieldError(errorEl, "少なくとも1科目は入力してください");
 
-    btn.disabled = true;
-    btn.textContent = "保存中...";
+    btn.disabled = true; btn.textContent = "保存中...";
     try {
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "addTestScores", studentId, testName, subjects }),
-      });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addTestScores", studentId, testName, subjects }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       successEl.classList.add("show");
       await loadAndRender();
     } catch (err) {
       showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "この結果を記録する";
-    }
+    } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
   }
 
   function showFieldError(el, msg) { el.textContent = msg; el.classList.add("show"); }
@@ -663,68 +610,36 @@
         img.onload = () => {
           const scale = Math.min(1, maxWidth / img.width);
           const canvas = document.createElement("canvas");
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.width = img.width * scale; canvas.height = img.height * scale;
+          const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           resolve(canvas.toDataURL("image/jpeg", quality).split(",")[1]);
         };
-        img.onerror = reject;
-        img.src = reader.result;
+        img.onerror = reject; img.src = reader.result;
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.onerror = reject; reader.readAsDataURL(file);
     });
   }
-
   async function handlePhotoSelected(e, testName) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const label = e.target.closest(".photo-btn");
     const originalText = label.childNodes[0].textContent;
     label.childNodes[0].textContent = "アップロード中...";
     try {
       const base64 = await compressImage(file);
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "uploadPhoto", studentId, testName, imageBase64: base64, mimeType: "image/jpeg" }),
-      });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadPhoto", studentId, testName, imageBase64: base64, mimeType: "image/jpeg" }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       await loadAndRender();
-    } catch (err) {
-      showToast("成績表のアップロードに失敗しました。もう一度お試しください。");
-      label.childNodes[0].textContent = originalText;
-    }
+    } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
   }
 
-  // ---------- 学習手帳タブ ----------
-  function renderGardenStage() {
-    const garden = currentData.garden || { nutrientCount: 0, missionsPerStage: 3 };
-    const n = garden.nutrientCount;
-    let iconSvg = "", statusText = "まだ何も植えていません。ミッションを完了すると育ち始めます", showHarvest = false;
-    if (n === 1) { iconSvg = SPROUT_ICON; statusText = "芽が出た!"; }
-    else if (n === 2) { iconSvg = BUD_ICON; statusText = "つぼみがふくらんできた"; }
-    else if (n >= garden.missionsPerStage) { iconSvg = MYSTERY_ICON; statusText = "何かが実りそう…"; showHarvest = true; }
-
-    return `
-      <div class="garden-stage-wrap">
-        <div class="garden-stage-bg">${FIELD_BG_SVG}</div>
-        <div class="garden-stage-fg">${iconSvg}</div>
-      </div>
-      <p class="garden-status">${statusText}</p>
-      ${showHarvest ? `<button id="harvest-btn" class="field-harvest">🎁 タップして収穫する</button>` : ""}
-    `;
-  }
-
+  // ---------- 学習手帳タブ(畑の表示なし) ----------
   function renderNotebook(el) {
     const missions = currentData.missions || [];
     const presets = currentData.missionPresets || [];
     const weekStart = selectedWeekStart || currentData.weekStart;
     const weekEnd = addDaysToYMD(weekStart, 6);
     const today = todayYMD();
-
     const dayDates = DAYS.map((d, i) => addDaysToYMD(weekStart, i));
     const hasAvailableDay = dayDates.some((d) => d >= today);
 
@@ -734,24 +649,12 @@
         <span class="week-label">${formatMD(weekStart)}(月)〜${formatMD(weekEnd)}(日)</span>
         <button id="week-next" ${weekNavBusy ? "disabled" : ""}>次週 →</button>
       </div>
-
-      <div class="card" id="garden-card">
-        <p class="section-title" style="margin-top:0;">畑</p>
-        ${renderGardenStage()}
-      </div>
-
       <div class="card">
         ${hasAvailableDay ? `
         <form id="mission-form">
           <div class="field">
             <label for="mission-day">曜日</label>
-            <select id="mission-day">
-              ${DAYS.map((d, i) => {
-                const dateStr = dayDates[i];
-                const isPast = dateStr < today;
-                return `<option value="${d}" ${isPast ? "disabled" : ""}>${d}曜日(${formatMD(dateStr)})${isPast ? " - 終了" : ""}</option>`;
-              }).join("")}
-            </select>
+            <select id="mission-day">${DAYS.map((d, i) => { const dateStr = dayDates[i]; const isPast = dateStr < today; return `<option value="${d}" ${isPast ? "disabled" : ""}>${d}曜日(${formatMD(dateStr)})${isPast ? " - 終了" : ""}</option>`; }).join("")}</select>
           </div>
           <div class="field">
             <label for="mission-category">区分</label>
@@ -761,21 +664,18 @@
             <label for="mission-preset">よく使う項目から選ぶ</label>
             <select id="mission-preset">
               <option value="">— 選択(任意) —</option>
-              ${presets.map((p) => `<option value="${escapeHtml(p.content)}">${escapeHtml(p.content)}</option>`).join("")}
+              ${presets.map((p) => `<option value="${escapeHtml(p.content)}" data-category="${escapeHtml(p.category)}">[${p.category}] ${escapeHtml(p.content)}</option>`).join("")}
             </select>
           </div>
           <div class="field">
             <label for="mission-content">内容(自由記述)</label>
             <input type="text" id="mission-content" placeholder="例:数学の宿題プリント2枚" />
           </div>
-          <div class="preset-actions">
-            <button type="button" id="preset-save-btn" class="preset-save-btn">＋ この内容をよく使う項目に登録</button>
-          </div>
+          <div class="preset-actions"><button type="button" id="preset-save-btn" class="preset-save-btn">＋ 区分と内容をよく使う項目に登録</button></div>
           <div id="mission-error" class="msg error"></div>
           <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
         </form>` : `<p class="empty">この週は終了しています。新しいミッションは今週以降の週で追加してください</p>`}
       </div>
-
       <p class="section-title">この週のミッション</p>
       <div class="card" id="mission-list"></div>
     `;
@@ -787,19 +687,15 @@
       const block = document.createElement("div");
       block.className = "day-block";
       block.innerHTML = `<p class="day-title">${day}曜日(${formatMD(dayDates[i])})</p>`;
-      if (dayMissions.length === 0) {
-        block.innerHTML += `<p class="day-empty">まだミッションがありません</p>`;
-      } else {
+      if (dayMissions.length === 0) block.innerHTML += `<p class="day-empty">まだミッションがありません</p>`;
+      else {
         dayMissions.forEach((m) => {
           const done = m.completed === true || m.completed === "TRUE" || m.completed === "true";
           const item = document.createElement("div");
           item.className = "mission-item";
           item.innerHTML = `
             <div class="mission-checkbox ${done ? "checked" : ""}" data-id="${m.id}">${done ? "✓" : ""}</div>
-            <div class="mission-text ${done ? "done" : ""}">
-              ${escapeHtml(m.content)}
-              <span class="mission-cat ${m.category === "宿題" ? "homework" : "self"}">${m.category}</span>
-            </div>
+            <div class="mission-text ${done ? "done" : ""}">${escapeHtml(m.content)}<span class="mission-cat ${m.category === "宿題" ? "homework" : "self"}">${m.category}</span></div>
           `;
           block.appendChild(item);
         });
@@ -807,9 +703,7 @@
       listEl.appendChild(block);
     });
 
-    document.querySelectorAll(".mission-checkbox").forEach((cb) => {
-      cb.addEventListener("click", () => toggleMission(cb.dataset.id));
-    });
+    document.querySelectorAll(".mission-checkbox").forEach((cb) => cb.addEventListener("click", () => toggleMission(cb.dataset.id)));
     const form = document.getElementById("mission-form");
     if (form) form.addEventListener("submit", handleAddMission);
     document.getElementById("week-prev").addEventListener("click", () => changeWeek(-7));
@@ -819,32 +713,26 @@
     const presetSelect = document.getElementById("mission-preset");
     if (presetSelect) {
       presetSelect.addEventListener("change", (e) => {
-        if (e.target.value) document.getElementById("mission-content").value = e.target.value;
+        const opt = e.target.selectedOptions[0];
+        if (opt && opt.value) {
+          document.getElementById("mission-content").value = opt.value;
+          if (opt.dataset.category) document.getElementById("mission-category").value = opt.dataset.category;
+        }
       });
     }
-    const harvestBtn = document.getElementById("harvest-btn");
-    if (harvestBtn) harvestBtn.addEventListener("click", harvestGarden);
   }
 
-  // 週の切り替えは、ミッションだけを軽く取り直す専用の通信で行う(全データの再読み込みをしない)
   async function changeWeek(days) {
     if (weekNavBusy) return;
     weekNavBusy = true;
     renderNotebook(document.getElementById("tab-content"));
-
     const newWeekStart = addDaysToYMD(selectedWeekStart || currentData.weekStart, days);
     try {
       const data = await fetchMissionsOnly(newWeekStart);
       if (!data.ok) throw new Error(data.error || "failed");
-      selectedWeekStart = data.weekStart;
-      currentData.weekStart = data.weekStart;
-      currentData.missions = data.missions;
-    } catch (err) {
-      showToast("週の切り替えに失敗しました。もう一度お試しください。");
-    } finally {
-      weekNavBusy = false;
-      renderNotebook(document.getElementById("tab-content"));
-    }
+      selectedWeekStart = data.weekStart; currentData.weekStart = data.weekStart; currentData.missions = data.missions;
+    } catch (err) { showToast("週の切り替えに失敗しました。もう一度お試しください。"); }
+    finally { weekNavBusy = false; renderNotebook(document.getElementById("tab-content")); }
   }
 
   async function handleAddMission(e) {
@@ -857,55 +745,36 @@
     const btn = document.getElementById("mission-submit-btn");
     errorEl.classList.remove("show");
     if (!content) return showFieldError(errorEl, "内容を入力してください");
-
-    btn.disabled = true;
-    btn.textContent = "追加中...";
+    btn.disabled = true; btn.textContent = "追加中...";
     try {
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "addMission", studentId, day, category, content, weekStart: selectedWeekStart }),
-      });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addMission", studentId, day, category, content, weekStart: selectedWeekStart }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-
       currentData.missions = currentData.missions || [];
-      currentData.missions.push({
-        id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""),
-        day, category, content, completed: false, completedAt: "",
-      });
+      currentData.missions.push({ id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""), day, category, content, completed: false, completedAt: "" });
       contentInput.value = "";
       renderNotebook(document.getElementById("tab-content"));
       showToast("ミッションを追加しました");
-    } catch (err) {
-      showFieldError(errorEl, err.message || "追加に失敗しました。もう一度お試しください。");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "ミッションを追加";
-    }
+    } catch (err) { showFieldError(errorEl, err.message || "追加に失敗しました。もう一度お試しください。"); }
+    finally { btn.disabled = false; btn.textContent = "ミッションを追加"; }
   }
 
   async function saveMissionPreset() {
+    const category = document.getElementById("mission-category").value;
     const contentInput = document.getElementById("mission-content");
     const content = contentInput.value.trim();
     if (!content) { showToast("登録する内容を先に入力してください"); return; }
     try {
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "addMissionPreset", studentId, content }),
-      });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addMissionPreset", studentId, category, content }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       if (!result.alreadyExists) {
         currentData.missionPresets = currentData.missionPresets || [];
-        currentData.missionPresets.push({ id: result.id, content: result.content });
+        currentData.missionPresets.push({ id: result.id, category: result.category, content: result.content });
       }
       renderNotebook(document.getElementById("tab-content"));
       showToast("よく使う項目に登録しました");
-    } catch (err) {
-      showToast("登録に失敗しました。もう一度お試しください。");
-    }
+    } catch (err) { showToast("登録に失敗しました。もう一度お試しください。"); }
   }
 
   async function toggleMission(id) {
@@ -914,23 +783,13 @@
     const prevCompleted = m.completed === true || m.completed === "TRUE" || m.completed === "true";
     m.completed = !prevCompleted;
     renderNotebook(document.getElementById("tab-content"));
-
     try {
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "toggleMission", studentId, id }),
-      });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "toggleMission", studentId, id }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       m.completed = result.completed;
       currentData.garden = result.garden;
       renderNotebook(document.getElementById("tab-content"));
-
-      const gardenCard = document.getElementById("garden-card");
-      if (gardenCard && m.completed) {
-        gardenCard.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
     } catch (err) {
       m.completed = prevCompleted;
       renderNotebook(document.getElementById("tab-content"));
@@ -938,83 +797,106 @@
     }
   }
 
-  async function harvestGarden() {
-    const btn = document.getElementById("harvest-btn");
-    if (btn) { btn.disabled = true; btn.textContent = "収穫中..."; }
-    try {
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "harvestGarden", studentId }),
-      });
-      const result = await res.json();
-      if (!result.ok) throw new Error(result.error || "failed");
+  // ---------- 畑タブ(独立ページ・複数株が収穫待ちで並ぶ) ----------
+  function renderGardenStage() {
+    const garden = currentData.garden || { nutrientCount: 0, readyCount: 0, missionsPerStage: 3 };
+    const n = garden.nutrientCount;
+    let iconSvg = "", statusText = "まだ何も植えていません。学習手帳でミッションを完了すると育ち始めます";
+    if (n === 1) { iconSvg = SPROUT_ICON; statusText = "芽が出た!"; }
+    else if (n === 2) { iconSvg = BUD_ICON; statusText = "つぼみがふくらんできた"; }
+    else if (garden.readyCount > 0 && n === 0) { statusText = "次の株を育て始めています"; }
 
-      currentData.garden = { nutrientCount: 0, missionsPerStage: currentData.garden.missionsPerStage };
-      currentData.harvests = currentData.harvests || [];
-      currentData.harvests.unshift({ studentId, fruit: result.fruit, harvestedAt: new Date().toISOString() });
-      currentData.harvestsTotalCount = result.totalHarvests || ((currentData.harvestsTotalCount || 0) + 1);
-
-      renderNotebook(document.getElementById("tab-content"));
-      showHarvestCelebration(result.fruit, result.badgeAwarded);
-
-      loadAndRender();
-    } catch (err) {
-      showToast("収穫に失敗しました。もう一度お試しください。");
-      if (btn) { btn.disabled = false; btn.textContent = "🎁 タップして収穫する"; }
+    let html = `
+      <div class="garden-stage-wrap">
+        <div class="garden-stage-bg">${FIELD_BG_SVG}</div>
+        <div class="garden-stage-fg">${iconSvg}</div>
+      </div>
+      <p class="garden-status">${statusText}</p>
+    `;
+    if (garden.readyCount > 0) {
+      html += `<div class="ready-row">${Array(garden.readyCount).fill(0).map(() => `<div class="ready-icon">${MYSTERY_ICON}</div>`).join("")}</div>`;
+      html += `<button id="harvest-btn" class="field-harvest">🎁 ${garden.readyCount}個をまとめて収穫する</button>`;
     }
+    return html;
   }
 
-  // ---------- 収穫コレクションタブ ----------
   function renderGarden(el) {
     const harvests = currentData.harvests || [];
     const totalCount = currentData.harvestsTotalCount || 0;
-    const remainder = totalCount === 0 ? 10 : (10 - (totalCount % 10)) % 10 || 10;
-    const counts = {};
-    FRUIT_LIST.forEach((f) => (counts[f] = 0));
-    let goldenCount = 0;
+    const counts = {}; FRUIT_LIST.forEach((f) => (counts[f] = 0));
+    const rareCounts = {}; RARE_NAMES.forEach((n) => (rareCounts[n] = 0));
     harvests.forEach((h) => {
-      if (h.fruit.indexOf(GOLDEN_MARK) === 0) { goldenCount += 1; return; }
-      const emoji = FRUIT_LIST.find((f) => h.fruit.indexOf(f) === 0);
-      if (emoji) counts[emoji] += 1;
+      const stripped = h.fruit.indexOf("rare ") === 0 ? h.fruit.slice(5) : h.fruit;
+      if (rareCounts.hasOwnProperty(stripped)) { rareCounts[stripped] += 1; return; }
+      if (counts.hasOwnProperty(h.fruit)) counts[h.fruit] += 1;
     });
 
     el.innerHTML = `
+      <div class="card">
+        <p class="section-title" style="margin-top:0;">畑</p>
+        ${renderGardenStage()}
+      </div>
       <div class="card info-card">
         <p class="info-title">収穫でもらえるバッジ</p>
-        <p>果物を10個収穫するごとに、自動でバッジが1つもらえます。バッジは階級のポイントにもなります。</p>
-        <p style="color: var(--brand); font-weight: 600;">これまでの収穫数: ${totalCount}個(あと${remainder}個で次のバッジ!)</p>
+        <p>果物10個分の価値が貯まるごとに、自動でバッジが1つもらえます(レア果実は10個分、幻のシャインマスカットだけ50個分の価値があります)。</p>
+        <p style="color: var(--brand); font-weight: 600;">これまでの収穫数: ${totalCount}個</p>
       </div>
-
       <div class="card">
-        <p class="section-title" style="margin-top:0;">これまでの収穫</p>
+        <p class="section-title" style="margin-top:0;">これまでの収穫(ノーマル)</p>
         <div class="fruit-grid">
-          ${FRUIT_LIST.map((f) => counts[f] > 0
-            ? `<div class="fruit-cell">${f}<span class="count">×${counts[f]}</span></div>`
-            : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`
-          ).join("")}
-          ${goldenCount > 0
-            ? `<div class="fruit-cell golden">${GOLDEN_GRAPE_SVG}<span class="count">×${goldenCount}</span></div>`
-            : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`}
+          ${FRUIT_LIST.map((f) => counts[f] > 0 ? `<div class="fruit-cell">${f}<span class="count">×${counts[f]}</span></div>` : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`).join("")}
+        </div>
+      </div>
+      <div class="card">
+        <p class="section-title" style="margin-top:0;">これまでの収穫(レア)</p>
+        <div class="fruit-grid">
+          ${RARE_NAMES.map((n) => rareCounts[n] > 0 ? `<div class="fruit-cell rare">${RARE_ICONS[n]}<span class="count">×${rareCounts[n]}</span></div>` : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`).join("")}
         </div>
       </div>
       <p class="section-title">収穫履歴</p>
       <div class="card">
         ${harvests.length === 0 ? '<p class="empty">まだ収穫がありません</p>' : harvests.map((h) => {
-          const isGolden = h.fruit.indexOf(GOLDEN_MARK) === 0;
-          const display = isGolden ? `${GOLDEN_GRAPE_SVG}<span class="history-fruit-icon">金のぶどう</span>` : h.fruit;
-          return `<div class="entry"><div>${display}</div><div class="entry-meta">${formatDate(h.harvestedAt)}</div></div>`;
+          const isRare = h.fruit.indexOf("rare ") === 0;
+          const stripped = isRare ? h.fruit.slice(5) : h.fruit;
+          const iconHtml = isRare ? `<span class="history-fruit-icon" style="display:inline-block;">${RARE_ICONS[stripped] || ""}</span>` : "";
+          return `<div class="entry"><div>${iconHtml}${stripped}</div><div class="entry-meta">${formatDate(h.harvestedAt)}</div></div>`;
         }).join("")}
       </div>
     `;
+    const harvestBtn = document.getElementById("harvest-btn");
+    if (harvestBtn) harvestBtn.addEventListener("click", harvestGarden);
+  }
+
+  async function harvestGarden() {
+    const btn = document.getElementById("harvest-btn");
+    if (btn) { btn.disabled = true; btn.textContent = "収穫中..."; }
+    try {
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "harvestGarden", studentId }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+
+      currentData.garden = result.garden;
+      currentData.harvests = currentData.harvests || [];
+      const now = new Date().toISOString();
+      result.fruits.forEach((f) => currentData.harvests.unshift({ studentId, fruit: f, harvestedAt: now }));
+      currentData.harvestsTotalCount = (currentData.harvestsTotalCount || 0) + result.fruits.length;
+
+      renderGarden(document.getElementById("tab-content"));
+      showHarvestCelebration(result.fruits, result.badgesAwarded);
+      loadAndRender();
+    } catch (err) {
+      showToast("収穫に失敗しました。もう一度お試しください。");
+      if (btn) { btn.disabled = false; btn.textContent = "🎁 まとめて収穫する"; }
+    }
   }
 
   // ---------- 階級一覧タブ ----------
   function renderRanks(el) {
-    const rank = currentData.rank || { rankName: "雑用", pointsInCycle: 0, nextRankName: null, pointsToNext: 0, totalPoints: 0 };
+    const rank = currentData.rank || { rankName: "雑用", pointsInCycle: 0, nextRankName: null, pointsToNext: 0, totalPoints: 0, className: "見習いクラス" };
     const isUra = rank.rankName.indexOf("裏・") === 0;
     let html = `
       <div class="rank-current">
+        <div class="rank-medal">${medalIcon(rank.className, 70)}</div>
         <p class="rank-name">${rank.rankName}</p>
         <p class="rank-next">${rank.nextRankName ? `次は「${rank.nextRankName}」まで あと${rank.pointsToNext}ポイント` : "最高位に到達しています"}</p>
       </div>
@@ -1022,7 +904,7 @@
     `;
     let lastCls = "";
     RANKS.forEach((r) => {
-      if (r.cls !== lastCls) { html += `<p class="rank-class-title">${r.cls}</p>`; lastCls = r.cls; }
+      if (r.cls !== lastCls) { html += `<div class="rank-class-title">${medalIcon(r.cls, 22)}<span>${r.cls}</span></div>`; lastCls = r.cls; }
       const displayName = isUra ? "裏・" + r.name : r.name;
       const isCurrent = displayName === rank.rankName;
       html += `<div class="rank-row ${isCurrent ? "current" : ""}"><span>${displayName}</span><span class="pt">${r.threshold}pt</span></div>`;
@@ -1035,14 +917,11 @@
   function renderOmikuji(el) {
     const coins = currentData.coins || 0;
     const canDraw = coins >= 1;
-
     el.innerHTML = `
       <div class="card" style="text-align:center;">
-        <p class="omikuji-coins">🪙 お賽銭: ${coins}枚</p>
+        <p class="omikuji-coins">${FIVE_YEN_SVG} お賽銭: ${coins}枚</p>
         <div class="omamori-icon" id="omamori-icon">⛩️</div>
-        <button class="submit" id="omamori-btn" ${canDraw ? "" : "disabled"}>
-          ${canDraw ? "本日のお御籤をひく" : "お賽銭が足りません"}
-        </button>
+        <button class="submit" id="omamori-btn" ${canDraw ? "" : "disabled"}>${canDraw ? "本日のお御籤をひく" : "お賽銭が足りません"}</button>
         <div id="omamori-result" style="margin-top:1.25rem; ${lastOmikuji ? "" : "display:none;"} text-align:left; border-top:1px solid var(--line); padding-top:1rem;">
           <p class="omamori-en">${lastOmikuji ? lastOmikuji.en : ""}</p>
           <p class="omamori-ja">${lastOmikuji ? lastOmikuji.ja : ""}</p>
@@ -1057,42 +936,27 @@
     const btn = document.getElementById("omamori-btn");
     const icon = document.getElementById("omamori-icon");
     const result = document.getElementById("omamori-result");
-    btn.disabled = true;
-    icon.classList.add("drawing");
-    result.style.display = "none";
-
+    btn.disabled = true; icon.classList.add("drawing"); result.style.display = "none";
     try {
       const [res] = await Promise.all([
-        fetch(GAS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "drawOmikuji", studentId }),
-        }),
+        fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "drawOmikuji", studentId }) }),
         new Promise((r) => setTimeout(r, 2000)),
       ]);
       const data = await res.json();
       icon.classList.remove("drawing");
-      if (!data.ok) {
-        showToast(data.error || "取得に失敗しました。もう一度お試しください。");
-        btn.disabled = false;
-        return;
-      }
-
+      if (!data.ok) { showToast(data.error || "取得に失敗しました。もう一度お試しください。"); btn.disabled = false; return; }
       lastOmikuji = { en: data.en, ja: data.ja, advice: data.advice };
       document.querySelector(".omamori-en").textContent = data.en;
       document.querySelector(".omamori-ja").textContent = data.ja;
       document.querySelector(".omamori-advice").textContent = data.advice;
       result.style.display = "block";
-
       if (currentData) currentData.coins = data.coins;
       const stillCanDraw = data.coins >= 1;
       btn.textContent = stillCanDraw ? "もう一度ひく" : "お賽銭が足りません";
       btn.disabled = !stillCanDraw;
-      document.querySelector(".omikuji-coins").textContent = `🪙 お賽銭: ${data.coins}枚`;
+      document.querySelector(".omikuji-coins").innerHTML = `${FIVE_YEN_SVG} お賽銭: ${data.coins}枚`;
     } catch (err) {
-      icon.classList.remove("drawing");
-      btn.disabled = false;
-      btn.textContent = "本日のお御籤をひく";
+      icon.classList.remove("drawing"); btn.disabled = false; btn.textContent = "本日のお御籤をひく";
       showToast("取得に失敗しました。もう一度お試しください。");
     }
   }
