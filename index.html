@@ -171,7 +171,7 @@
   .fruit-cell.mystery { opacity: 0.5; }
   .history-fruit-icon { vertical-align: middle; margin-right: 4px; width:20px;height:20px; }
 
-  .rank-current { text-align: center; padding: 18px; border-radius: 12px; margin-bottom: 16px; transition: none; }
+  .rank-current { text-align: center; padding: 18px; border-radius: 12px; margin-bottom: 16px; }
   .rank-current .rank-medal { margin-bottom: 6px; }
   .rank-current .rank-name { font-family: 'Zilla Slab', serif; font-size: 24px; font-weight: 700; margin: 0 0 4px; }
   .rank-current .rank-next { font-size: 12px; }
@@ -279,7 +279,6 @@
     return "";
   }
 
-  // 後光背景(放射状の光+白い星型でフチがピンク)を共通で埋め込んだレア果実イラスト
   const HALO = `<g fill="#F4D35E"><g transform="rotate(0)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(22.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(45)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(67.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(90)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(112.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(135)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(157.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(180)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(202.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(225)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(247.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(270)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(292.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(315)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(337.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g></g><circle r="44" fill="#F4D35E" opacity="0.22"/><circle r="32" fill="#F7E08C" opacity="0.35"/><circle r="23" fill="#FFF3C4" opacity="0.55"/><g fill="#FFFFFF" stroke="#F06FA0" stroke-width="1" vector-effect="non-scaling-stroke"><g transform="translate(-36,-15) scale(3)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(33,-22) scale(2.4)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(-30,24) scale(2.6)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(32,28) scale(3.2)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(0,-42) scale(2)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g></g>`;
 
   function rareIconSvg(iconInner) {
@@ -426,7 +425,34 @@
     return null;
   }
 
+  // プレビュー用のダミーデータ(通信を一切行わず、階級・果実コンプリート状態を表示するためのもの)
+  function buildCompletePreviewData() {
+    const allFruitNames = [...FRUIT_LIST, ...RARE_NAMES.map((n) => "rare " + n)];
+    const now = new Date().toISOString();
+    return {
+      ok: true,
+      studentName: "プレビュー 太郎",
+      tests: [],
+      weekStart: todayYMD(),
+      missions: [],
+      missionPresets: [],
+      garden: { nutrientCount: 0, readyCount: 0, missionsPerStage: 3 },
+      harvests: allFruitNames.map((f) => ({ studentId: "preview", fruit: f, harvestedAt: now })),
+      harvestsTotalCount: 999,
+      rank: { rankName: "総帥", totalPoints: 300, pointsInCycle: 300, nextRankName: null, pointsToNext: 0, className: "トップ" },
+      coins: 99,
+    };
+  }
+
   async function init() {
+    const previewMode = params.get("preview");
+    if (previewMode === "complete") {
+      currentData = buildCompletePreviewData();
+      selectedWeekStart = currentData.weekStart;
+      lastSeenRank = currentData.rank.rankName;
+      renderShell();
+      return;
+    }
     if (!studentId) {
       appEl.innerHTML = `<div class="id-error">専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。</div>`;
       return;
@@ -706,7 +732,7 @@
     } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
   }
 
-  // ---------- 学習手帳タブ(繰り返し設定を追加) ----------
+  // ---------- 学習手帳タブ(繰り返し設定を追加
   function renderNotebook(el) {
     const missions = currentData.missions || [];
     const presets = currentData.missionPresets || [];
