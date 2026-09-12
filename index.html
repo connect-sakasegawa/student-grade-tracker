@@ -70,6 +70,23 @@
   .field select, .field input[type="text"] { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
   .field select:focus, .field input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
   .field-note { font-size: 11.5px; color: var(--muted); margin: -8px 0 14px; line-height: 1.4; }
+  .advice-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--growth); background: var(--growth-soft); color: var(--growth); font-size: 12.5px; font-weight: 600; margin: -6px 0 14px; }
+
+  #advice-modal { position: fixed; inset: 0; z-index: 45; display: none; align-items: flex-end; justify-content: center; }
+  #advice-modal.show { display: flex; }
+  .advice-backdrop { position: absolute; inset: 0; background: rgba(31, 42, 68, 0.5); }
+  .advice-sheet { position: relative; background: var(--card); border-radius: 18px 18px 0 0; width: 100%; max-width: 480px; max-height: 82vh; overflow-y: auto; padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); }
+  .advice-sheet-title { font-family: 'Zilla Slab', serif; font-size: 18px; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
+  .advice-sheet-sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+  .advice-subject-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .advice-subject-tab { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--muted); font-size: 12.5px; font-weight: 600; }
+  .advice-subject-tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .advice-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .advice-item:last-child { border-bottom: none; }
+  .advice-order { flex-shrink: 0; width: 22px; height: 22px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .advice-item-text { font-size: 13.5px; line-height: 1.5; }
+  .advice-item-material { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .advice-close-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; margin-top: 12px; }
 
   .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
   .msg.error { color: #B3441E; background: #FCEBE3; }
@@ -224,6 +241,7 @@
 <div id="app"><div class="loading-screen">学ぶ人は変える人だ</div></div>
 <div id="toast-container"></div>
 <div id="celebration-container"></div>
+<div id="advice-modal"></div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
@@ -786,6 +804,7 @@
             <input type="text" id="mission-content" placeholder="例:数学の宿題プリント2枚" />
           </div>
           <p class="field-note">※書き方の注意点:科目、テキスト名、単元名、ページ数などを入力しよう</p>
+          <button type="button" id="advice-open-btn" class="advice-btn">📖 自主学習のアドバイスを見る</button>
           <div class="preset-actions"><button type="button" id="preset-save-btn" class="preset-save-btn">＋ 区分と内容をよく使う項目に登録</button></div>
           <div id="mission-error" class="msg error"></div>
           <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
@@ -835,6 +854,8 @@
     if (form) form.addEventListener("submit", handleAddMission);
     document.getElementById("week-prev").addEventListener("click", () => changeWeek(-7));
     document.getElementById("week-next").addEventListener("click", () => changeWeek(7));
+    const adviceBtn = document.getElementById("advice-open-btn");
+    if (adviceBtn) adviceBtn.addEventListener("click", openAdviceModal);
     const presetBtn = document.getElementById("preset-save-btn");
     if (presetBtn) presetBtn.addEventListener("click", saveMissionPreset);
     document.querySelectorAll(".preset-delete-btn").forEach((btn) => btn.addEventListener("click", () => deleteMissionPreset(btn.dataset.presetId)));
@@ -848,6 +869,61 @@
         }
       });
     }
+    
+  // ---------- 自主学習アドバイス ----------
+  let adviceSelectedSubject = null;
+
+  function openAdviceModal() {
+    const advice = currentData.studyAdvice || [];
+    if (advice.length === 0) { showToast("アドバイスのデータがまだありません"); return; }
+    const subjects = [...new Set(advice.map((a) => a.subject))];
+    if (!adviceSelectedSubject || subjects.indexOf(adviceSelectedSubject) === -1) adviceSelectedSubject = subjects[0];
+
+    const modal = document.getElementById("advice-modal");
+    modal.innerHTML = `
+      <div class="advice-backdrop" id="advice-backdrop"></div>
+      <div class="advice-sheet">
+        <p class="advice-sheet-title">自主学習のアドバイス</p>
+        <p class="advice-sheet-sub">科目を選んで、取り組む順番の参考にしよう</p>
+        <div class="advice-subject-tabs">
+          ${subjects.map((s) => `<button type="button" class="advice-subject-tab ${s === adviceSelectedSubject ? "active" : ""}" data-subject="${s}">${s}</button>`).join("")}
+        </div>
+        <div id="advice-list"></div>
+        <button type="button" class="advice-close-btn" id="advice-close-btn">閉じる</button>
+      </div>
+    `;
+    modal.classList.add("show");
+    renderAdviceList();
+
+    document.getElementById("advice-backdrop").addEventListener("click", closeAdviceModal);
+    document.getElementById("advice-close-btn").addEventListener("click", closeAdviceModal);
+    document.querySelectorAll(".advice-subject-tab").forEach((btn) => {
+      btn.addEventListener("click", () => { adviceSelectedSubject = btn.dataset.subject; openAdviceModal(); });
+    });
+  }
+
+  function renderAdviceList() {
+    const advice = (currentData.studyAdvice || [])
+      .filter((a) => a.subject === adviceSelectedSubject)
+      .sort((a, b) => Number(a.order) - Number(b.order));
+    const listEl = document.getElementById("advice-list");
+    if (!listEl) return;
+    listEl.innerHTML = advice.map((a) => `
+      <div class="advice-item">
+        <div class="advice-order">${a.order}</div>
+        <div>
+          <div class="advice-item-text">${escapeHtml(a.content)}</div>
+          <div class="advice-item-material">教材:${escapeHtml(a.material)}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function closeAdviceModal() {
+    const modal = document.getElementById("advice-modal");
+    modal.classList.remove("show");
+    modal.innerHTML = "";
+  }
   }
 
   async function changeWeek(days) {
