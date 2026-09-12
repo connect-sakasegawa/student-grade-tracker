@@ -158,12 +158,15 @@
   .mission-cat { font-size: 11px; padding: 2px 7px; border-radius: 999px; margin-left: 6px; }
   .mission-cat.homework { background: var(--brand-soft); color: var(--brand); }
   .mission-cat.self { background: var(--growth-soft); color: var(--growth); }
+  .mission-repeat-flag { font-size: 11px; margin-left: 4px; }
   .day-empty { font-size: 12.5px; color: var(--muted); padding: 4px 0; }
 
   .fruit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .fruit-cell { text-align: center; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; font-size: 22px; }
   .fruit-cell svg { width: 26px; height: 26px; }
+  .fruit-cell.rare svg { width: 38px; height: 38px; }
   .fruit-cell .count { display: block; font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+  .fruit-cell .fruit-name { display: block; font-size: 10px; color: #8A6A1E; font-weight: 700; margin-top: 4px; line-height: 1.3; }
   .fruit-cell.rare { background: var(--gold-soft); border-color: var(--gold); }
   .fruit-cell.mystery { opacity: 0.5; }
   .history-fruit-icon { vertical-align: middle; margin-right: 4px; width:20px;height:20px; }
@@ -211,7 +214,7 @@
   .celebration-name { font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: var(--brand); margin: 0 0 14px; }
   .celebration-fruit-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 14px; }
   .celebration-fruit-item { text-align: center; font-size: 11px; color: var(--muted); }
-  .celebration-fruit-item svg, .celebration-fruit-item span.emoji { width: 28px; height: 28px; display: block; margin: 0 auto 2px; font-size: 22px; }
+  .celebration-fruit-item svg, .celebration-fruit-item span.emoji { width: 32px; height: 32px; display: block; margin: 0 auto 2px; font-size: 22px; }
   .celebration-badge-note { font-size: 12px; color: var(--growth); font-weight: 600; margin: 0 0 14px; }
   .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
 </style>
@@ -248,30 +251,6 @@
   ];
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
 
-  // ①クラスごとの階級カードのスタイル(見習い→トップへ徐々に目立つように)
-  const CLASS_CARD_STYLES = {
-    "見習いクラス": { box: "background:#F0EDE6;border:2px solid #C7BFAE;", text: "#7A6F63", next: "#8A8074" },
-    "新兵クラス": { box: "background:#FBF1DE;border:2px solid #D9B98A;", text: "#8A6A45", next: "#9A7A55" },
-    "隊長クラス": { box: "background:#F7E4CC;border:3px solid #CD8B4E;box-shadow:0 2px 6px rgba(0,0,0,0.06);", text: "#8A5A2E", next: "#96633A" },
-    "指揮官クラス": { box: "background:#EDEDF2;border:3px solid #ABABBA;box-shadow:0 2px 6px rgba(0,0,0,0.07);", text: "#4A4A5C", next: "#5A5A6C" },
-    "幹部クラス": { box: "background:#FBEFC7;border:3px solid #D4C078;box-shadow:0 3px 8px rgba(0,0,0,0.08);", text: "#7A5A1E", next: "#8A6A28" },
-    "将官クラス": { box: "background:#FCE49A;border:4px solid #C9A227;box-shadow:0 3px 10px rgba(201,162,39,0.3);", text: "#6B4E00", next: "#7A5A10" },
-    "最高位": { box: "background:#FDE7A0;border:4px solid #8A6A1E;box-shadow:0 4px 14px rgba(201,162,39,0.4);", text: "#5A3F00", next: "#6B4A10" },
-    "トップ": { box: "background:linear-gradient(135deg,#FDE7A0,#FFF3D0);border:5px solid #8A2A1E;box-shadow:0 6px 20px rgba(201,162,39,0.5);", text: "#5A1A10", next: "#6B2A18" },
-  };
-
-  // ②階級アップ時の決め台詞(クラスが上がるほど畏まる)
-  const RANK_UP_MESSAGES = {
-    "見習いクラス": "やった!",
-    "新兵クラス": "よし!",
-    "隊長クラス": "がんばった!",
-    "指揮官クラス": "この調子で!",
-    "幹部クラス": "見事です",
-    "将官クラス": "お見事です",
-    "最高位": "誠に見事にございます",
-    "トップ": "恐悦至極に存じます",
-  };
-
   const MEDALS = {
     "見習いクラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -12 L-8 -26 L0 -21 L8 -26 L5 -12" fill="#D8D3C8"/><circle r="13" fill="#D8D3C8" stroke="#B5AC9A" stroke-width="1.4"/>` },
     "新兵クラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -21 L-8 -35 L0 -30 L8 -35 L5 -21" fill="#D9B98A"/><g fill="#D9B98A"><g transform="rotate(0)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(72)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(144)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(216)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g><g transform="rotate(288)"><path d="M-3 -14 L0 -19 L3 -14 Z"/></g></g><circle r="14" fill="#D9B98A" stroke="#A8825A" stroke-width="1.4"/>` },
@@ -300,14 +279,22 @@
     return "";
   }
 
+  // 後光背景(放射状の光+白い星型でフチがピンク)を共通で埋め込んだレア果実イラスト
+  const HALO = `<g fill="#F4D35E"><g transform="rotate(0)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(22.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(45)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(67.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(90)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(112.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(135)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(157.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(180)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(202.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(225)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(247.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(270)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(292.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g><g transform="rotate(315)"><path d="M-2 -20 L0 -58 L2 -20 Z" opacity="0.55"/></g><g transform="rotate(337.5)"><path d="M-2 -20 L0 -52 L2 -20 Z" opacity="0.35"/></g></g><circle r="44" fill="#F4D35E" opacity="0.22"/><circle r="32" fill="#F7E08C" opacity="0.35"/><circle r="23" fill="#FFF3C4" opacity="0.55"/><g fill="#FFFFFF" stroke="#F06FA0" stroke-width="1" vector-effect="non-scaling-stroke"><g transform="translate(-36,-15) scale(3)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(33,-22) scale(2.4)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(-30,24) scale(2.6)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(32,28) scale(3.2)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g><g transform="translate(0,-42) scale(2)"><path d="M0,-1 L0.3,-0.3 L1,0 L0.3,0.3 L0,1 L-0.3,0.3 L-1,0 L-0.3,-0.3 Z" vector-effect="non-scaling-stroke"/></g></g>`;
+
+  function rareIconSvg(iconInner) {
+    return `<svg viewBox="-62 -62 124 124">${HALO}${iconInner}</svg>`;
+  }
+
   const RARE_ICONS = {
-    "金のぶどう": `<svg viewBox="0 0 40 40"><path d="M20 4 Q24 1 27 4 L25 8 Q22 6 20 8 Q18 6 15 8 L13 4 Q16 1 20 4 Z" fill="#5E8F4A"/><circle cx="20" cy="14" r="4.2" fill="#E8C24A"/><circle cx="14" cy="18" r="4.2" fill="#E8C24A"/><circle cx="26" cy="18" r="4.2" fill="#E8C24A"/><circle cx="10" cy="23" r="4.2" fill="#E8C24A"/><circle cx="20" cy="23" r="4.2" fill="#E8C24A"/><circle cx="30" cy="23" r="4.2" fill="#E8C24A"/><circle cx="14" cy="28" r="4.2" fill="#E8C24A"/><circle cx="26" cy="28" r="4.2" fill="#E8C24A"/><circle cx="20" cy="33" r="3.6" fill="#E8C24A"/></svg>`,
-    "背徳のあまおう": `<svg viewBox="0 0 70 70"><path d="M35 12 C50 12 56 26 51 42 C47 56 39 62 35 62 C31 62 23 56 19 42 C14 26 20 12 35 12 Z" fill="#C0392B"/><path d="M27 8 L33 4 L35 10 L37 4 L43 8 L37 7 Z" fill="#5E8F4A"/></svg>`,
-    "沖縄のマンゴー": `<svg viewBox="0 0 70 70"><path d="M35 16 C50 16 56 30 51 46 C46 60 38 66 35 66 C32 66 24 60 19 46 C14 30 20 16 35 16 Z" fill="#E8973A"/><path d="M27 12 L33 6 L35 14 L37 6 L43 12 L37 11 Z" fill="#5E8F4A"/></svg>`,
-    "コネコネの実": `<svg viewBox="0 0 70 70"><circle cx="35" cy="37" r="27" fill="#D9720B"/><path d="M35 14 Q52 18 50 35 Q48 50 35 52 Q23 50 23 38" fill="none" stroke="#FBE7D0" stroke-width="3.4" stroke-linecap="round"/><path d="M32 12 L35 7 L29 7 Z" fill="#5E8F4A"/></svg>`,
-    "紅マドンナ（高級みかん）": `<svg viewBox="0 0 70 70"><circle cx="35" cy="38" r="26" fill="#E8973A"/><path d="M17 18 Q23 8 33 8" fill="none" stroke="#C99A2E" stroke-width="2.5" stroke-linecap="round"/><path d="M53 18 Q47 8 37 8" fill="none" stroke="#C99A2E" stroke-width="2.5" stroke-linecap="round"/></svg>`,
-    "ミラヴェイユのマカロン": `<svg viewBox="0 0 70 70"><ellipse cx="35" cy="22" rx="20" ry="11" fill="#F5E6A8"/><ellipse cx="35" cy="48" rx="20" ry="11" fill="#F5E6A8"/><ellipse cx="35" cy="35" rx="18" ry="8" fill="#F7C9D9"/></svg>`,
-    "幻のシャインマスカット": `<svg viewBox="0 0 70 70"><path d="M35 10 Q45 4 54 10 L50 20 Q42 15 35 20 Q28 15 20 20 L16 10 Q25 4 35 10 Z" fill="#5E8F4A"/><circle cx="35" cy="27" r="8" fill="#EAF3C8"/><circle cx="22" cy="35" r="8" fill="#EAF3C8"/><circle cx="48" cy="35" r="8" fill="#EAF3C8"/><circle cx="14" cy="47" r="8" fill="#EAF3C8"/><circle cx="35" cy="47" r="8" fill="#EAF3C8"/><circle cx="56" cy="47" r="8" fill="#EAF3C8"/><circle cx="22" cy="59" r="8" fill="#EAF3C8"/><circle cx="48" cy="59" r="8" fill="#EAF3C8"/></svg>`,
+    "金のぶどう": rareIconSvg(`<path d="M0 -30 Q6 -34 10 -30 L8 -22 Q3 -27 0 -22 Q-3 -27 -8 -22 L-10 -30 Q-6 -34 0 -30 Z" fill="#5E8F4A" stroke="#3F6633" stroke-width="1"/><circle cx="0" cy="-8" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="-10" cy="0" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="10" cy="0" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="-14" cy="11" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="0" cy="11" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="14" cy="11" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="-7" cy="22" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="7" cy="22" r="7" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/><circle cx="0" cy="32" r="6" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.2"/>`),
+    "背徳のあまおう": rareIconSvg(`<path d="M0 -21 C22 -21 30 -6 24 15 C18 33 8 40 0 40 C-8 40 -18 33 -24 15 C-30 -6 -22 -21 0 -21 Z" fill="#C0392B" stroke="#7A2318" stroke-width="1.6"/><path d="M-8 -25 L0 -31 L8 -25 Z" fill="#5E8F4A"/><circle cx="-9" cy="-8" r="1.6" fill="#F4D35E"/><circle cx="9" cy="-8" r="1.6" fill="#F4D35E"/><circle cx="0" cy="2" r="1.6" fill="#F4D35E"/><circle cx="-14" cy="8" r="1.6" fill="#F4D35E"/><circle cx="14" cy="8" r="1.6" fill="#F4D35E"/><circle cx="-8" cy="20" r="1.6" fill="#F4D35E"/><circle cx="8" cy="20" r="1.6" fill="#F4D35E"/><circle cx="0" cy="30" r="1.6" fill="#F4D35E"/>`),
+    "沖縄のマンゴー": rareIconSvg(`<path d="M0 -17 C22 -17 30 0 24 21 C18 36 8 42 0 42 C-8 42 -18 36 -24 21 C-30 0 -22 -17 0 -17 Z" fill="#E8973A" stroke="#B36A1E" stroke-width="1.6"/><path d="M-8 -21 L0 -27 L8 -21 Z" fill="#5E8F4A"/>`),
+    "コネコネの実": rareIconSvg(`<circle r="26" fill="#D9720B" stroke="#8A4E1F" stroke-width="1.6"/><path d="M0 -21 Q16 -17 14 -1 Q12 13 0 15 Q-11 13 -11 2" fill="none" stroke="#FBE7D0" stroke-width="3.4" stroke-linecap="round"/><path d="M-3 -25 L0 -30 L-6 -30 Z" fill="#5E8F4A"/>`),
+    "紅マドンナ（高級みかん）": rareIconSvg(`<circle cy="4" r="25" fill="#E8973A" stroke="#B36A1E" stroke-width="1.6"/><path d="M-16 -21 Q-10 -30 -1 -30" fill="none" stroke="#C99A2E" stroke-width="2.4" stroke-linecap="round"/><path d="M16 -21 Q10 -30 1 -30" fill="none" stroke="#C99A2E" stroke-width="2.4" stroke-linecap="round"/><circle cx="-8" cy="-5" r="4" fill="#F2B25C" opacity="0.7"/>`),
+    "ミラヴェイユのマカロン": rareIconSvg(`<ellipse cy="-15" rx="22" ry="12" fill="#F5E6A8" stroke="#B89A4A" stroke-width="1.3"/><ellipse cy="15" rx="22" ry="12" fill="#F5E6A8" stroke="#B89A4A" stroke-width="1.3"/><ellipse r="18" ry="8" fill="#F7C9D9"/>`),
+    "幻のシャインマスカット": rareIconSvg(`<path d="M0 -30 Q6 -34 10 -30 L8 -22 Q3 -27 0 -22 Q-3 -27 -8 -22 L-10 -30 Q-6 -34 0 -30 Z" fill="#5E8F4A" stroke="#3F6633" stroke-width="1"/><circle cx="0" cy="-8" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-10" cy="0" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="10" cy="0" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-14" cy="11" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="0" cy="11" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="14" cy="11" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-7" cy="22" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="7" cy="22" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="0" cy="32" r="6" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-3" cy="-10" r="2" fill="#FFFFFF" opacity="0.85"/>`),
+    "女王の洋梨": rareIconSvg(`<path d="M0 -14 C9 -14 12 -5 10 4 C16 9 21 20 18 29 C15 38 6 40 0 40 C-6 40 -15 38 -18 29 C-21 20 -16 9 -10 4 C-12 -5 -9 -14 0 -14 Z" fill="#C7D97A" stroke="#7A9B3E" stroke-width="1.5"/><circle cx="-6" cy="13" r="1.8" fill="#FFFDE8" opacity="0.7"/><circle cx="5" cy="23" r="1.8" fill="#FFFDE8" opacity="0.7"/><circle cx="-3" cy="27" r="1.8" fill="#FFFDE8" opacity="0.7"/><path d="M0 -14 L0 -23" stroke="#6B4226" stroke-width="1.8" stroke-linecap="round"/><path d="M-1 -21 Q-9 -24 -11 -17 Q-5 -14 0 -18" fill="#5E8F4A" stroke="#3F6633" stroke-width="0.9"/>`),
   };
   const RARE_NAMES = Object.keys(RARE_ICONS);
 
@@ -319,23 +306,6 @@
   const MYSTERY_ICON = `<svg width="34" height="34" viewBox="0 0 100 108"><path d="M50 94 Q44 58 50 18" fill="none" stroke="#4C7A3D" stroke-width="5" stroke-linecap="round"/><path d="M50 78 Q30 71 27 84 Q38 88 50 78 Z" fill="#5E8F4A"/><path d="M50 78 Q70 71 73 84 Q62 88 50 78 Z" fill="#6FA357"/><circle cx="50" cy="30" r="27" fill="#FBF0D0" stroke="#C99A2E" stroke-width="2" stroke-dasharray="3 3"/><text x="50" y="40" text-anchor="middle" font-size="30" font-weight="700" fill="#8A6A1E">?</text></svg>`;
 
   const params = new URLSearchParams(window.location.search);
-    function buildCompletePreviewData() {
-    const allFruitNames = [...FRUIT_LIST, ...RARE_NAMES.map((n) => "rare " + n)];
-    const now = new Date().toISOString();
-    return {
-      ok: true,
-      studentName: "プレビュー 太郎",
-      tests: [],
-      weekStart: todayYMD(),
-      missions: [],
-      missionPresets: [],
-      garden: { nutrientCount: 0, readyCount: 0, missionsPerStage: 3 },
-      harvests: allFruitNames.map((f) => ({ studentId: "preview", fruit: f, harvestedAt: now })),
-      harvestsTotalCount: 999,
-      rank: { rankName: "総帥", totalPoints: 300, pointsInCycle: 300, nextRankName: null, pointsToNext: 0, className: "トップ" },
-      coins: 99,
-    };
-  }
   const STORAGE_KEY_ID = "connect-student-id";
   const urlId = params.get("id");
   const studentId = urlId || localStorage.getItem(STORAGE_KEY_ID);
@@ -378,7 +348,7 @@
         <p class="celebration-title">${fruits.length}個収穫しました!</p>
         <p class="celebration-name">${hasRare ? "レアな実も混ざっていました!" : "お疲れさま!"}</p>
         <div class="celebration-fruit-list">
-          ${Object.keys(tally).map((f) => `<div class="celebration-fruit-item">${fruitIconHtml(f, 28)}<span>×${tally[f]}</span></div>`).join("")}
+          ${Object.keys(tally).map((f) => `<div class="celebration-fruit-item">${fruitIconHtml(f, 32)}<span>×${tally[f]}</span></div>`).join("")}
         </div>
         ${badgesAwarded > 0 ? `<p class="celebration-badge-note">🎉 バッジを${badgesAwarded}個ゲット!</p>` : ""}
         <button class="celebration-close" id="celebration-close-btn">やったね!</button>
@@ -391,7 +361,11 @@
     });
   }
 
-  // ②階級ごとに決め台詞を変える
+  const RANK_UP_MESSAGES = {
+    "見習いクラス": "やった!", "新兵クラス": "よし!", "隊長クラス": "がんばった!",
+    "指揮官クラス": "この調子で!", "幹部クラス": "見事です", "将官クラス": "お見事です",
+    "最高位": "誠に見事にございます", "トップ": "恐悦至極に存じます",
+  };
   function showRankUpCelebration(rankName, className) {
     const container = document.getElementById("celebration-container");
     const buttonText = RANK_UP_MESSAGES[className] || "よし!";
@@ -407,6 +381,17 @@
     container.classList.add("show");
     document.getElementById("celebration-close-btn").addEventListener("click", () => { container.classList.remove("show"); container.innerHTML = ""; });
   }
+
+  const CLASS_CARD_STYLES = {
+    "見習いクラス": { box: "background:#F0EDE6;border:2px solid #C7BFAE;", text: "#7A6F63", next: "#8A8074" },
+    "新兵クラス": { box: "background:#FBF1DE;border:2px solid #D9B98A;", text: "#8A6A45", next: "#9A7A55" },
+    "隊長クラス": { box: "background:#F7E4CC;border:3px solid #CD8B4E;box-shadow:0 2px 6px rgba(0,0,0,0.06);", text: "#8A5A2E", next: "#96633A" },
+    "指揮官クラス": { box: "background:#EDEDF2;border:3px solid #ABABBA;box-shadow:0 2px 6px rgba(0,0,0,0.07);", text: "#4A4A5C", next: "#5A5A6C" },
+    "幹部クラス": { box: "background:#FBEFC7;border:3px solid #D4C078;box-shadow:0 3px 8px rgba(0,0,0,0.08);", text: "#7A5A1E", next: "#8A6A28" },
+    "将官クラス": { box: "background:#FCE49A;border:4px solid #C9A227;box-shadow:0 3px 10px rgba(201,162,39,0.3);", text: "#6B4E00", next: "#7A5A10" },
+    "最高位": { box: "background:#FDE7A0;border:4px solid #8A6A1E;box-shadow:0 4px 14px rgba(201,162,39,0.4);", text: "#5A3F00", next: "#6B4A10" },
+    "トップ": { box: "background:linear-gradient(135deg,#FDE7A0,#FFF3D0);border:5px solid #8A2A1E;box-shadow:0 6px 20px rgba(201,162,39,0.5);", text: "#5A1A10", next: "#6B2A18" },
+  };
 
   function formatDateTime(iso) {
     if (!iso) return "";
@@ -442,14 +427,6 @@
   }
 
   async function init() {
-      const previewMode = params.get("preview");
-  if (previewMode === "complete") {
-    currentData = buildCompletePreviewData();
-    selectedWeekStart = currentData.weekStart;
-    lastSeenRank = currentData.rank.rankName;
-    renderShell();
-    return;
-  }
     if (!studentId) {
       appEl.innerHTML = `<div class="id-error">専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。</div>`;
       return;
@@ -729,7 +706,7 @@
     } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
   }
 
-  // ---------- 学習手帳タブ(③並び順・説明書きを変更) ----------
+  // ---------- 学習手帳タブ(繰り返し設定を追加) ----------
   function renderNotebook(el) {
     const missions = currentData.missions || [];
     const presets = currentData.missionPresets || [];
@@ -758,6 +735,14 @@
           <div class="field">
             <label for="mission-day">曜日</label>
             <select id="mission-day">${DAYS.map((d, i) => { const dateStr = dayDates[i]; const isPast = dateStr < today; return `<option value="${d}" ${isPast ? "disabled" : ""} ${i === defaultDayIndex ? "selected" : ""}>${d}曜日(${formatMD(dateStr)})${isPast ? " - 終了" : ""}</option>`; }).join("")}</select>
+          </div>
+          <div class="field">
+            <label for="mission-repeat">繰り返し設定</label>
+            <select id="mission-repeat">
+              <option value="">繰り返さない</option>
+              <option value="daily">毎日繰り返す</option>
+              <option value="weekly">毎週この曜日に繰り返す</option>
+            </select>
           </div>
           <div class="field">
             <label for="mission-preset">よく使う項目から選ぶ</label>
@@ -791,7 +776,7 @@
         </form>` : `<p class="empty">この週は終了しています。新しいミッションは今週以降の週で追加してください</p>`}
       </div>
       <p class="section-title">この週のミッション</p>
-      <p class="list-note">✓ ミッションが完了したらチェックボックスにチェックを入れよう</p>
+      <p class="list-note">✓ ミッションが完了したらチェックボックスにチェックを入れよう(🔁は繰り返し設定されたミッションです)</p>
       <div class="card" id="mission-list"></div>
     `;
 
@@ -806,11 +791,12 @@
       else {
         dayMissions.forEach((m) => {
           const done = m.completed === true || m.completed === "TRUE" || m.completed === "true";
+          const isRecurring = !!m.recurringId;
           const item = document.createElement("div");
           item.className = "mission-item";
           item.innerHTML = `
             <div class="mission-checkbox ${done ? "checked" : ""}" data-id="${m.id}">${done ? "✓" : ""}</div>
-            <div class="mission-text ${done ? "done" : ""}">${escapeHtml(m.content)}<span class="mission-cat ${m.category === "宿題" ? "homework" : "self"}">${m.category}</span></div>
+            <div class="mission-text ${done ? "done" : ""}">${escapeHtml(m.content)}<span class="mission-cat ${m.category === "宿題" ? "homework" : "self"}">${m.category}</span>${isRecurring ? `<span class="mission-repeat-flag">🔁</span>` : ""}</div>
           `;
           block.appendChild(item);
         });
@@ -854,6 +840,7 @@
   async function handleAddMission(e) {
     e.preventDefault();
     const day = document.getElementById("mission-day").value;
+    const repeat = document.getElementById("mission-repeat").value;
     const category = document.getElementById("mission-category").value;
     const contentInput = document.getElementById("mission-content");
     const content = contentInput.value.trim();
@@ -864,14 +851,15 @@
     lastSelectedDay = day;
     btn.disabled = true; btn.textContent = "追加中...";
     try {
-      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addMission", studentId, day, category, content, weekStart: selectedWeekStart }) });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addMission", studentId, day, category, content, weekStart: selectedWeekStart, repeat }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       currentData.missions = currentData.missions || [];
-      currentData.missions.push({ id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""), day, category, content, completed: false, completedAt: "" });
+      currentData.missions.push({ id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""), day, category, content, completed: false, completedAt: "", recurringId: result.recurringId || "" });
       contentInput.value = "";
+      document.getElementById("mission-repeat").value = "";
       renderNotebook(document.getElementById("tab-content"));
-      showToast("ミッションを追加しました");
+      showToast(repeat ? "ミッションを追加しました(繰り返し設定あり)" : "ミッションを追加しました");
     } catch (err) { showFieldError(errorEl, err.message || "追加に失敗しました。もう一度お試しください。"); }
     finally { btn.disabled = false; btn.textContent = "ミッションを追加"; }
   }
@@ -983,7 +971,7 @@
       </div>
       <div class="card info-card">
         <p class="info-title">収穫でもらえるバッジ</p>
-        <p>果物10個分の価値が貯まるごとに、自動でバッジが1つもらえます(レア果実は10個分、幻のシャインマスカットだけ50個分の価値があります)。</p>
+        <p>レア果実は1個につきバッジ10個分の価値があります。ただし1種類だけ、バッジ50個分の価値がある「幻の果実」が存在します。この価値が合計10個分たまるごとに、自動でバッジが1つもらえます。</p>
         <p style="color: var(--brand); font-weight: 600;">これまでの収穫数: ${totalCount}個</p>
       </div>
       <div class="card">
@@ -995,7 +983,10 @@
       <div class="card">
         <p class="section-title" style="margin-top:0;">これまでの収穫(レア果実)</p>
         <div class="fruit-grid">
-          ${RARE_NAMES.map((n) => rareCounts[n] > 0 ? `<div class="fruit-cell rare">${RARE_ICONS[n]}<span class="count">×${rareCounts[n]}</span></div>` : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`).join("")}
+          ${RARE_NAMES.map((n) => rareCounts[n] > 0
+            ? `<div class="fruit-cell rare">${RARE_ICONS[n]}<span class="fruit-name">${n}</span><span class="count">×${rareCounts[n]}</span></div>`
+            : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`
+          ).join("")}
         </div>
       </div>
       <p class="section-title">収穫履歴</p>
@@ -1035,7 +1026,7 @@
     }
   }
 
-  // ---------- 階級一覧タブ(①クラスごとにカードのスタイルを変える) ----------
+  // ---------- 階級一覧タブ ----------
   function renderRanks(el) {
     const rank = currentData.rank || { rankName: "雑用", pointsInCycle: 0, nextRankName: null, pointsToNext: 0, totalPoints: 0, className: "見習いクラス" };
     const isUra = rank.rankName.indexOf("裏・") === 0;
