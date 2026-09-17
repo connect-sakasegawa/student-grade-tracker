@@ -70,23 +70,6 @@
   .field select, .field input[type="text"] { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
   .field select:focus, .field input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
   .field-note { font-size: 11.5px; color: var(--muted); margin: -8px 0 14px; line-height: 1.4; }
-  .advice-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--growth); background: var(--growth-soft); color: var(--growth); font-size: 12.5px; font-weight: 600; margin: -6px 0 14px; }
-
-  #advice-modal { position: fixed; inset: 0; z-index: 45; display: none; align-items: flex-end; justify-content: center; }
-  #advice-modal.show { display: flex; }
-  .advice-backdrop { position: absolute; inset: 0; background: rgba(31, 42, 68, 0.5); }
-  .advice-sheet { position: relative; background: var(--card); border-radius: 18px 18px 0 0; width: 100%; max-width: 480px; max-height: 82vh; overflow-y: auto; padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); }
-  .advice-sheet-title { font-family: 'Zilla Slab', serif; font-size: 18px; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
-  .advice-sheet-sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
-  .advice-subject-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-  .advice-subject-tab { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--muted); font-size: 12.5px; font-weight: 600; }
-  .advice-subject-tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
-  .advice-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .advice-item:last-child { border-bottom: none; }
-  .advice-order { flex-shrink: 0; width: 22px; height: 22px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-  .advice-item-text { font-size: 13.5px; line-height: 1.5; }
-  .advice-item-material { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
-  .advice-close-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; margin-top: 12px; }
 
   .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
   .msg.error { color: #B3441E; background: #FCEBE3; }
@@ -197,16 +180,15 @@
   .rank-row.current { font-weight: 700; color: var(--brand); }
   .rank-row .pt { color: var(--muted); font-size: 12px; }
 
-  @keyframes omamori-shake {
-    0%,100% { transform: rotate(0deg) scale(1); } 20% { transform: rotate(-8deg) scale(1.05); }
-    40% { transform: rotate(7deg) scale(1.05); } 60% { transform: rotate(-6deg) scale(1.08); } 80% { transform: rotate(5deg) scale(1.05); }
-  }
-  .omikuji-coins { font-size: 14px; font-weight: 600; margin: 0 0 12px; display:flex; align-items:center; justify-content:center; gap:6px; }
-  .omamori-icon { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 12px; background: var(--gold-soft); display: flex; align-items: center; justify-content: center; font-size: 30px; }
-  .omamori-icon.drawing { animation: omamori-shake 0.5s ease-in-out infinite; }
-  .omamori-en { font-size: 19px; font-weight: 500; margin: 0 0 6px; }
-  .omamori-ja { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
-  .omamori-advice { font-size: 13px; color: #B3441E; margin: 0; }
+  .schedule-updated-note { font-size: 12px; color: var(--muted); text-align: right; margin: 0 0 14px; }
+  .schedule-day-block { margin-bottom: 12px; }
+  .schedule-day-title { font-size: 13px; font-weight: 700; color: var(--brand); margin: 0 0 6px; }
+  .schedule-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-bottom: 1px solid var(--line); border-radius: 6px; }
+  .schedule-row:last-child { border-bottom: none; }
+  .schedule-row.changed { background: #FFF6C4; }
+  .schedule-period { font-size: 12px; font-weight: 700; color: var(--muted); width: 44px; flex-shrink: 0; }
+  .schedule-subject { font-size: 14px; font-weight: 600; }
+  .schedule-changed-flag { font-size: 10.5px; color: #8A6A1E; font-weight: 700; margin-left: auto; }
 
   .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
   .tab-btn { flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
@@ -234,6 +216,23 @@
   .celebration-fruit-item svg, .celebration-fruit-item span.emoji { width: 32px; height: 32px; display: block; margin: 0 auto 2px; font-size: 22px; }
   .celebration-badge-note { font-size: 12px; color: var(--growth); font-weight: 600; margin: 0 0 14px; }
   .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
+  .advice-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--growth); background: var(--growth-soft); color: var(--growth); font-size: 12.5px; font-weight: 600; margin: -6px 0 14px; }
+
+  #advice-modal { position: fixed; inset: 0; z-index: 45; display: none; align-items: flex-end; justify-content: center; }
+  #advice-modal.show { display: flex; }
+  .advice-backdrop { position: absolute; inset: 0; background: rgba(31, 42, 68, 0.5); }
+  .advice-sheet { position: relative; background: var(--card); border-radius: 18px 18px 0 0; width: 100%; max-width: 480px; max-height: 82vh; overflow-y: auto; padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); }
+  .advice-sheet-title { font-family: 'Zilla Slab', serif; font-size: 18px; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
+  .advice-sheet-sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+  .advice-subject-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .advice-subject-tab { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--muted); font-size: 12.5px; font-weight: 600; }
+  .advice-subject-tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .advice-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .advice-item:last-child { border-bottom: none; }
+  .advice-order { flex-shrink: 0; width: 22px; height: 22px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .advice-item-text { font-size: 13.5px; line-height: 1.5; }
+  .advice-item-material { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .advice-close-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -310,12 +309,10 @@
     "コネコネの実": rareIconSvg(`<circle r="26" fill="#D9720B" stroke="#8A4E1F" stroke-width="1.6"/><path d="M0 -21 Q16 -17 14 -1 Q12 13 0 15 Q-11 13 -11 2" fill="none" stroke="#FBE7D0" stroke-width="3.4" stroke-linecap="round"/><path d="M-3 -25 L0 -30 L-6 -30 Z" fill="#5E8F4A"/>`),
     "紅マドンナ（高級みかん）": rareIconSvg(`<circle cy="4" r="25" fill="#E8973A" stroke="#B36A1E" stroke-width="1.6"/><path d="M-16 -21 Q-10 -30 -1 -30" fill="none" stroke="#C99A2E" stroke-width="2.4" stroke-linecap="round"/><path d="M16 -21 Q10 -30 1 -30" fill="none" stroke="#C99A2E" stroke-width="2.4" stroke-linecap="round"/><circle cx="-8" cy="-5" r="4" fill="#F2B25C" opacity="0.7"/>`),
     "ミラヴェイユのマカロン": rareIconSvg(`<ellipse cy="-15" rx="22" ry="12" fill="#F5E6A8" stroke="#B89A4A" stroke-width="1.3"/><ellipse cy="15" rx="22" ry="12" fill="#F5E6A8" stroke="#B89A4A" stroke-width="1.3"/><ellipse r="18" ry="8" fill="#F7C9D9"/>`),
-    "女王の洋梨": rareIconSvg(`<path d="M0 -14 C9 -14 12 -5 10 4 C16 9 21 20 18 29 C15 38 6 40 0 40 C-6 40 -15 38 -18 29 C-21 20 -16 9 -10 4 C-12 -5 -9 -14 0 -14 Z" fill="#C7D97A" stroke="#7A9B3E" stroke-width="1.5"/><circle cx="-6" cy="13" r="1.8" fill="#FFFDE8" opacity="0.7"/><circle cx="5" cy="23" r="1.8" fill="#FFFDE8" opacity="0.7"/><circle cx="-3" cy="27" r="1.8" fill="#FFFDE8" opacity="0.7"/><path d="M0 -14 L0 -23" stroke="#6B4226" stroke-width="1.8" stroke-linecap="round"/><path d="M-1 -21 Q-9 -24 -11 -17 Q-5 -14 0 -18" fill="#5E8F4A" stroke="#3F6633" stroke-width="0.9"/>`),
     "幻のシャインマスカット": rareIconSvg(`<path d="M0 -30 Q6 -34 10 -30 L8 -22 Q3 -27 0 -22 Q-3 -27 -8 -22 L-10 -30 Q-6 -34 0 -30 Z" fill="#5E8F4A" stroke="#3F6633" stroke-width="1"/><circle cx="0" cy="-8" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-10" cy="0" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="10" cy="0" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-14" cy="11" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="0" cy="11" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="14" cy="11" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-7" cy="22" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="7" cy="22" r="7" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="0" cy="32" r="6" fill="#EAF3C8" stroke="#7A9B5E" stroke-width="1.2"/><circle cx="-3" cy="-10" r="2" fill="#FFFFFF" opacity="0.85"/>`),
+    "女王の洋梨": rareIconSvg(`<path d="M0 -14 C9 -14 12 -5 10 4 C16 9 21 20 18 29 C15 38 6 40 0 40 C-6 40 -15 38 -18 29 C-21 20 -16 9 -10 4 C-12 -5 -9 -14 0 -14 Z" fill="#C7D97A" stroke="#7A9B3E" stroke-width="1.5"/><circle cx="-6" cy="13" r="1.8" fill="#FFFDE8" opacity="0.7"/><circle cx="5" cy="23" r="1.8" fill="#FFFDE8" opacity="0.7"/><circle cx="-3" cy="27" r="1.8" fill="#FFFDE8" opacity="0.7"/><path d="M0 -14 L0 -23" stroke="#6B4226" stroke-width="1.8" stroke-linecap="round"/><path d="M-1 -21 Q-9 -24 -11 -17 Q-5 -14 0 -18" fill="#5E8F4A" stroke="#3F6633" stroke-width="0.9"/>`),
   };
   const RARE_NAMES = Object.keys(RARE_ICONS);
-
-  const FIVE_YEN_SVG = `<svg viewBox="0 0 40 40" width="22" height="22"><circle cx="20" cy="20" r="17" fill="#C9A227" stroke="#8A6A1E" stroke-width="1.5"/><rect x="14" y="14" width="12" height="12" fill="#FFF6EC"/></svg>`;
 
   const FIELD_BG_SVG = `<svg viewBox="0 0 300 160" preserveAspectRatio="none"><rect x="0" y="0" width="300" height="100" fill="#EAF3DD"/><rect x="0" y="100" width="300" height="60" fill="#96754C"/><path d="M0 114 Q75 108 150 114 T300 114" fill="none" stroke="#7A5B3A" stroke-width="2"/><path d="M0 130 Q75 124 150 130 T300 130" fill="none" stroke="#7A5B3A" stroke-width="2"/><path d="M0 146 Q75 140 150 146 T300 146" fill="none" stroke="#7A5B3A" stroke-width="2"/><path d="M18 100 Q20 92 24 100 Q26 93 30 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/><path d="M256 100 Q258 92 262 100 Q264 93 268 100" fill="none" stroke="#5E8F4A" stroke-width="2.4" stroke-linecap="round"/></svg>`;
   const SPROUT_ICON = `<svg width="92" height="108" viewBox="0 0 100 118"><ellipse cx="50" cy="98" rx="46" ry="16" fill="#FFFFFF" opacity="0.55"/><path d="M50 100 Q45 76 50 56" fill="none" stroke="#3B6130" stroke-width="5" stroke-linecap="round"/><path d="M50 56 Q28 49 23 63 Q35 68 50 56 Z" fill="#4C8A3E" stroke="#2F5A26" stroke-width="1.2"/><path d="M50 56 Q72 49 77 63 Q65 68 50 56 Z" fill="#63A854" stroke="#2F5A26" stroke-width="1.2"/></svg>`;
@@ -331,7 +328,6 @@
   let currentData = null;
   let currentTab = "grades";
   let selectedWeekStart = null;
-  let lastOmikuji = null;
   let weekNavBusy = false;
   let lastSeenRank = null;
   let pendingRankUp = null;
@@ -443,34 +439,7 @@
     return null;
   }
 
-  // プレビュー用のダミーデータ(通信を一切行わず、階級・果実コンプリート状態を表示するためのもの)
-  function buildCompletePreviewData() {
-    const allFruitNames = [...FRUIT_LIST, ...RARE_NAMES.map((n) => "rare " + n)];
-    const now = new Date().toISOString();
-    return {
-      ok: true,
-      studentName: "プレビュー 太郎",
-      tests: [],
-      weekStart: todayYMD(),
-      missions: [],
-      missionPresets: [],
-      garden: { nutrientCount: 0, readyCount: 0, missionsPerStage: 3 },
-      harvests: allFruitNames.map((f) => ({ studentId: "preview", fruit: f, harvestedAt: now })),
-      harvestsTotalCount: 999,
-      rank: { rankName: "総帥", totalPoints: 300, pointsInCycle: 300, nextRankName: null, pointsToNext: 0, className: "トップ" },
-      coins: 99,
-    };
-  }
-
   async function init() {
-    const previewMode = params.get("preview");
-    if (previewMode === "complete") {
-      currentData = buildCompletePreviewData();
-      selectedWeekStart = currentData.weekStart;
-      lastSeenRank = currentData.rank.rankName;
-      renderShell();
-      return;
-    }
     if (!studentId) {
       appEl.innerHTML = `<div class="id-error">専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。</div>`;
       return;
@@ -555,7 +524,7 @@
         <button class="tab-btn ${currentTab === "notebook" ? "active" : ""}" data-tab="notebook"><span class="tab-icon">📔</span>学習手帳</button>
         <button class="tab-btn ${currentTab === "garden" ? "active" : ""}" data-tab="garden"><span class="tab-icon">🌾</span>畑</button>
         <button class="tab-btn ${currentTab === "ranks" ? "active" : ""}" data-tab="ranks"><span class="tab-icon">🎖️</span>階級</button>
-        <button class="tab-btn ${currentTab === "omikuji" ? "active" : ""}" data-tab="omikuji"><span class="tab-icon">⛩️</span>お御籤</button>
+        <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール</button>
       </nav>
     `;
     document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
@@ -564,7 +533,7 @@
     else if (currentTab === "notebook") renderNotebook(contentEl);
     else if (currentTab === "garden") renderGarden(contentEl);
     else if (currentTab === "ranks") renderRanks(contentEl);
-    else if (currentTab === "omikuji") renderOmikuji(contentEl);
+    else if (currentTab === "schedule") renderSchedule(contentEl);
   }
 
   // ---------- 成績表タブ ----------
@@ -750,7 +719,7 @@
     } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
   }
 
-  // ---------- 学習手帳タブ(繰り返し設定を追加
+  // ---------- 学習手帳タブ ----------
   function renderNotebook(el) {
     const missions = currentData.missions || [];
     const presets = currentData.missionPresets || [];
@@ -854,8 +823,6 @@
     if (form) form.addEventListener("submit", handleAddMission);
     document.getElementById("week-prev").addEventListener("click", () => changeWeek(-7));
     document.getElementById("week-next").addEventListener("click", () => changeWeek(7));
-    const adviceBtn = document.getElementById("advice-open-btn");
-    if (adviceBtn) adviceBtn.addEventListener("click", openAdviceModal);
     const presetBtn = document.getElementById("preset-save-btn");
     if (presetBtn) presetBtn.addEventListener("click", saveMissionPreset);
     document.querySelectorAll(".preset-delete-btn").forEach((btn) => btn.addEventListener("click", () => deleteMissionPreset(btn.dataset.presetId)));
@@ -869,61 +836,8 @@
         }
       });
     }
-    
-  // ---------- 自主学習アドバイス ----------
-  let adviceSelectedSubject = null;
-
-  function openAdviceModal() {
-    const advice = currentData.studyAdvice || [];
-    if (advice.length === 0) { showToast("アドバイスのデータがまだありません"); return; }
-    const subjects = [...new Set(advice.map((a) => a.subject))];
-    if (!adviceSelectedSubject || subjects.indexOf(adviceSelectedSubject) === -1) adviceSelectedSubject = subjects[0];
-
-    const modal = document.getElementById("advice-modal");
-    modal.innerHTML = `
-      <div class="advice-backdrop" id="advice-backdrop"></div>
-      <div class="advice-sheet">
-        <p class="advice-sheet-title">自主学習のアドバイス</p>
-        <p class="advice-sheet-sub">科目を選んで、取り組む順番の参考にしよう</p>
-        <div class="advice-subject-tabs">
-          ${subjects.map((s) => `<button type="button" class="advice-subject-tab ${s === adviceSelectedSubject ? "active" : ""}" data-subject="${s}">${s}</button>`).join("")}
-        </div>
-        <div id="advice-list"></div>
-        <button type="button" class="advice-close-btn" id="advice-close-btn">閉じる</button>
-      </div>
-    `;
-    modal.classList.add("show");
-    renderAdviceList();
-
-    document.getElementById("advice-backdrop").addEventListener("click", closeAdviceModal);
-    document.getElementById("advice-close-btn").addEventListener("click", closeAdviceModal);
-    document.querySelectorAll(".advice-subject-tab").forEach((btn) => {
-      btn.addEventListener("click", () => { adviceSelectedSubject = btn.dataset.subject; openAdviceModal(); });
-    });
-  }
-
-  function renderAdviceList() {
-    const advice = (currentData.studyAdvice || [])
-      .filter((a) => a.subject === adviceSelectedSubject)
-      .sort((a, b) => Number(a.order) - Number(b.order));
-    const listEl = document.getElementById("advice-list");
-    if (!listEl) return;
-    listEl.innerHTML = advice.map((a) => `
-      <div class="advice-item">
-        <div class="advice-order">${a.order}</div>
-        <div>
-          <div class="advice-item-text">${escapeHtml(a.content)}</div>
-          <div class="advice-item-material">教材:${escapeHtml(a.material)}</div>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function closeAdviceModal() {
-    const modal = document.getElementById("advice-modal");
-    modal.classList.remove("show");
-    modal.innerHTML = "";
-  }
+    const adviceBtn = document.getElementById("advice-open-btn");
+    if (adviceBtn) adviceBtn.addEventListener("click", openAdviceModal);
   }
 
   async function changeWeek(days) {
@@ -1031,6 +945,61 @@
     }
   }
 
+  // ---------- 自主学習アドバイス ----------
+  let adviceSelectedSubject = null;
+
+  function openAdviceModal() {
+    const advice = currentData.studyAdvice || [];
+    if (advice.length === 0) { showToast("アドバイスのデータがまだありません"); return; }
+    const subjects = [...new Set(advice.map((a) => a.subject))];
+    if (!adviceSelectedSubject || subjects.indexOf(adviceSelectedSubject) === -1) adviceSelectedSubject = subjects[0];
+
+    const modal = document.getElementById("advice-modal");
+    modal.innerHTML = `
+      <div class="advice-backdrop" id="advice-backdrop"></div>
+      <div class="advice-sheet">
+        <p class="advice-sheet-title">自主学習のアドバイス</p>
+        <p class="advice-sheet-sub">科目を選んで、取り組む順番の参考にしよう</p>
+        <div class="advice-subject-tabs">
+          ${subjects.map((s) => `<button type="button" class="advice-subject-tab ${s === adviceSelectedSubject ? "active" : ""}" data-subject="${s}">${s}</button>`).join("")}
+        </div>
+        <div id="advice-list"></div>
+        <button type="button" class="advice-close-btn" id="advice-close-btn">閉じる</button>
+      </div>
+    `;
+    modal.classList.add("show");
+    renderAdviceList();
+
+    document.getElementById("advice-backdrop").addEventListener("click", closeAdviceModal);
+    document.getElementById("advice-close-btn").addEventListener("click", closeAdviceModal);
+    document.querySelectorAll(".advice-subject-tab").forEach((btn) => {
+      btn.addEventListener("click", () => { adviceSelectedSubject = btn.dataset.subject; openAdviceModal(); });
+    });
+  }
+
+  function renderAdviceList() {
+    const advice = (currentData.studyAdvice || [])
+      .filter((a) => a.subject === adviceSelectedSubject)
+      .sort((a, b) => Number(a.order) - Number(b.order));
+    const listEl = document.getElementById("advice-list");
+    if (!listEl) return;
+    listEl.innerHTML = advice.map((a) => `
+      <div class="advice-item">
+        <div class="advice-order">${a.order}</div>
+        <div>
+          <div class="advice-item-text">${escapeHtml(a.content)}</div>
+          <div class="advice-item-material">教材:${escapeHtml(a.material)}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function closeAdviceModal() {
+    const modal = document.getElementById("advice-modal");
+    modal.classList.remove("show");
+    modal.innerHTML = "";
+  }
+
   // ---------- 畑タブ ----------
   function renderGardenStage() {
     const garden = currentData.garden || { nutrientCount: 0, readyCount: 0, missionsPerStage: 3 };
@@ -1085,7 +1054,7 @@
       <div class="card">
         <p class="section-title" style="margin-top:0;">これまでの収穫(レア果実)</p>
         <div class="fruit-grid">
-         ${RARE_NAMES.map((n) => rareCounts[n] > 0
+          ${RARE_NAMES.map((n) => rareCounts[n] > 0
             ? `<div class="fruit-cell rare"><span class="fruit-name">${n}</span>${RARE_ICONS[n]}<span class="count">×${rareCounts[n]}</span></div>`
             : `<div class="fruit-cell mystery">❔<span class="count">???</span></div>`
           ).join("")}
@@ -1152,52 +1121,54 @@
     el.innerHTML = html;
   }
 
-  // ---------- お御籤タブ ----------
-  function renderOmikuji(el) {
-    const coins = currentData.coins || 0;
-    const canDraw = coins >= 1;
-    el.innerHTML = `
-      <div class="card" style="text-align:center;">
-        <p class="omikuji-coins">${FIVE_YEN_SVG} お賽銭: ${coins}枚</p>
-        <div class="omamori-icon" id="omamori-icon">⛩️</div>
-        <button class="submit" id="omamori-btn" ${canDraw ? "" : "disabled"}>${canDraw ? "本日のお御籤をひく" : "お賽銭が足りません"}</button>
-        <div id="omamori-result" style="margin-top:1.25rem; ${lastOmikuji ? "" : "display:none;"} text-align:left; border-top:1px solid var(--line); padding-top:1rem;">
-          <p class="omamori-en">${lastOmikuji ? lastOmikuji.en : ""}</p>
-          <p class="omamori-ja">${lastOmikuji ? lastOmikuji.ja : ""}</p>
-          <p class="omamori-advice">${lastOmikuji ? lastOmikuji.advice : ""}</p>
-        </div>
-      </div>
-    `;
-    if (canDraw) document.getElementById("omamori-btn").addEventListener("click", drawOmikuji);
-  }
+  // ---------- スケジュールタブ ----------
+  function renderSchedule(el) {
+    const rows = currentData.schedule || [];
+    const updatedAt = currentData.scheduleUpdatedAt;
 
-  async function drawOmikuji() {
-    const btn = document.getElementById("omamori-btn");
-    const icon = document.getElementById("omamori-icon");
-    const result = document.getElementById("omamori-result");
-    btn.disabled = true; icon.classList.add("drawing"); result.style.display = "none";
-    try {
-      const [res] = await Promise.all([
-        fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "drawOmikuji", studentId }) }),
-        new Promise((r) => setTimeout(r, 2000)),
-      ]);
-      const data = await res.json();
-      icon.classList.remove("drawing");
-      if (!data.ok) { showToast(data.error || "取得に失敗しました。もう一度お試しください。"); btn.disabled = false; return; }
-      lastOmikuji = { en: data.en, ja: data.ja, advice: data.advice };
-      document.querySelector(".omamori-en").textContent = data.en;
-      document.querySelector(".omamori-ja").textContent = data.ja;
-      document.querySelector(".omamori-advice").textContent = data.advice;
-      result.style.display = "block";
-      if (currentData) currentData.coins = data.coins;
-      const stillCanDraw = data.coins >= 1;
-      btn.textContent = stillCanDraw ? "もう一度ひく" : "お賽銭が足りません";
-      btn.disabled = !stillCanDraw;
-      document.querySelector(".omikuji-coins").innerHTML = `${FIVE_YEN_SVG} お賽銭: ${data.coins}枚`;
-    } catch (err) {
-      icon.classList.remove("drawing"); btn.disabled = false; btn.textContent = "本日のお御籤をひく";
-      showToast("取得に失敗しました。もう一度お試しください。");
+    if (rows.length === 0) {
+      el.innerHTML = `
+        <div class="card">
+          <p class="section-title" style="margin-top:0;">今月のスケジュール</p>
+          <p class="empty">今月のスケジュールはまだ登録されていません</p>
+        </div>
+      `;
+      return;
     }
+
+    const byDate = {};
+    rows.forEach((r) => {
+      if (!byDate[r.date]) byDate[r.date] = [];
+      byDate[r.date].push(r);
+    });
+    const dates = Object.keys(byDate).sort();
+
+    let html = `<div class="card">`;
+    html += `<p class="section-title" style="margin-top:0;">今月のスケジュール</p>`;
+    if (updatedAt) html += `<p class="schedule-updated-note">最終更新:${formatDateTime(updatedAt)}</p>`;
+    dates.forEach((date) => {
+      const dayRows = byDate[date].slice().sort((a, b) => {
+        const pa = Number(String(a.period).match(/(\d+)/)?.[1] || 99);
+        const pb = Number(String(b.period).match(/(\d+)/)?.[1] || 99);
+        return pa - pb;
+      });
+      const dow = dayRows[0].dow;
+      html += `<div class="schedule-day-block">`;
+      html += `<p class="schedule-day-title">${formatMD(date)}(${dow})</p>`;
+      dayRows.forEach((r) => {
+        const isChanged = r.changed === true || r.changed === "TRUE" || r.changed === "true";
+        html += `
+          <div class="schedule-row ${isChanged ? "changed" : ""}">
+            <span class="schedule-period">${escapeHtml(r.period)}</span>
+            <span class="schedule-subject">${escapeHtml(r.subject)}</span>
+            ${isChanged ? `<span class="schedule-changed-flag">更新あり</span>` : ""}
+          </div>
+        `;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+    el.innerHTML = html;
   }
 
   init();
