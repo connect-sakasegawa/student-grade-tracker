@@ -53,11 +53,15 @@
   html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
   body { padding: max(20px, env(safe-area-inset-top)) 16px calc(84px + env(safe-area-inset-bottom)); min-height: 100vh; }
 
-  .loading-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; font-size: 18px; font-weight: 700; color: var(--brand); font-family: 'Zilla Slab', serif; background: var(--paper); }
+  .loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: var(--paper); }
+  .loading-title { font-family: 'Zilla Slab', serif; font-weight: 700; font-size: 24px; color: var(--brand); margin: 0 0 10px; }
+  .loading-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
 
   .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
   h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 22px; margin: 0 0 4px; line-height: 1.25; color: var(--brand); }
-  .student-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+  .student-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  .header-rank-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; color: var(--brand); font-weight: 700; }
+  .header-rank-badge svg { display: block; }
 
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
   .info-card { background: var(--paper); border: 1px dashed var(--line); }
@@ -181,15 +185,20 @@
   .rank-row .pt { color: var(--muted); font-size: 12px; }
 
   .schedule-updated-note { font-size: 12px; color: var(--muted); text-align: right; margin: 0 0 14px; }
-  .schedule-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -18px; padding: 0 18px; }
-  .schedule-table { border-collapse: collapse; width: 100%; min-width: 480px; }
-  .schedule-table th, .schedule-table td { border: 1px solid var(--line); padding: 6px 4px; text-align: center; font-size: 11.5px; white-space: nowrap; }
-  .schedule-table th { background: var(--paper); color: var(--muted); font-weight: 700; font-size: 10.5px; }
-  .schedule-table td.schedule-daycell { background: var(--paper); font-weight: 700; color: var(--ink); text-align: left; padding-left: 8px; }
+  .schedule-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .schedule-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  .schedule-col-date { width: 66px; }
+  .schedule-table th, .schedule-table td { border: 1px solid var(--line); padding: 4px 2px; text-align: center; font-size: 10px; overflow: hidden; }
+  .schedule-table th { background: var(--paper); color: var(--muted); font-weight: 700; }
+  .schedule-table th.schedule-time-row { font-weight: 500; font-size: 8.5px; color: var(--muted); }
+  .schedule-table td.schedule-daycell { background: var(--paper); font-weight: 700; color: var(--ink); text-align: left; padding-left: 4px; font-size: 10px; white-space: normal; line-height: 1.3; }
   .schedule-table tr.schedule-today td { background: #FBE7D0; }
   .schedule-table td.schedule-cell-changed { background: #FFF6C4; font-weight: 700; color: #8A6A1E; }
   .schedule-legend { font-size: 11px; color: var(--muted); margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
   .schedule-legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #FFF6C4; border: 1px solid var(--line); }
+  .schedule-notes-list { margin: 0; padding-left: 18px; }
+  .schedule-notes-list li { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 4px; }
+  .schedule-notes-list li:last-child { margin-bottom: 0; }
 
   .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
   .tab-btn { flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
@@ -212,9 +221,14 @@
   .celebration-icon svg { width: 60px; height: 60px; }
   .celebration-title { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
   .celebration-name { font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: var(--brand); margin: 0 0 14px; }
-  .celebration-fruit-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 14px; }
+  .celebration-fruit-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 0 0 14px; }
   .celebration-fruit-item { text-align: center; font-size: 11px; color: var(--muted); }
   .celebration-fruit-item svg, .celebration-fruit-item span.emoji { width: 32px; height: 32px; display: block; margin: 0 auto 2px; font-size: 22px; }
+  .celebration-fruit-item.rare-item { flex-basis: 100%; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 10px; padding: 10px; }
+  .celebration-fruit-item.rare-item svg { width: 44px; height: 44px; }
+  .celebration-rare-label { font-size: 10.5px; color: #8A6A1E; font-weight: 700; margin-top: 2px; }
+  .celebration-rare-name { font-size: 14px; color: var(--ink); font-weight: 700; margin-top: 2px; }
+  .celebration-rare-badge { font-size: 12px; color: var(--brand); font-weight: 700; margin-top: 4px; }
   .celebration-badge-note { font-size: 12px; color: var(--growth); font-weight: 600; margin: 0 0 14px; }
   .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
   .advice-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--growth); background: var(--growth-soft); color: var(--growth); font-size: 12.5px; font-weight: 600; margin: -6px 0 14px; }
@@ -238,14 +252,14 @@
 </head>
 <body>
 
-<div id="app"><div class="loading-screen">学ぶ人は変える人だ</div></div>
+<div id="app"><div class="loading-screen"><p class="loading-title">CONNEC＋</p><p class="loading-sub">『自分ひとりで勉強できる力と姿勢を育む』</p></div></div>
 <div id="toast-container"></div>
 <div id="celebration-container"></div>
 <div id="advice-modal"></div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
-  const LOADING_TEXT = "学ぶ人は変える人だ";
+  const LOADING_TEXT = `<p class="loading-title">CONNEC＋</p><p class="loading-sub">『自分ひとりで勉強できる力と姿勢を育む』</p>`;
 
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
   const MAIN5_SUBJECTS = ["国語", "社会", "数学", "理科", "英語"];
@@ -268,6 +282,19 @@
     { name: "元帥", threshold: 272, cls: "最高位" }, { name: "総帥", threshold: 300, cls: "トップ" },
   ];
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
+
+  // レア果実の等級(見た目上の等級と、獲得できるバッジの色を紐づける。サーバー側のRARE_FRUITSと同じ対応)
+  const RARE_TIER = {
+    "幻のシャインマスカット": "gold",
+    "コネコネの実": "silver",
+    "金のぶどう": "silver",
+    "背徳のあまおう": "silver",
+    "沖縄のマンゴー": "silver",
+    "紅マドンナ（高級みかん）": "silver",
+    "ミラヴェイユのマカロン": "silver",
+    "女王の洋梨": "silver",
+  };
+  const TIER_LABEL = { bronze: "銅", silver: "銀", gold: "金" };
 
   const MEDALS = {
     "見習いクラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -12 L-8 -26 L0 -21 L8 -26 L5 -12" fill="#D8D3C8"/><circle r="13" fill="#D8D3C8" stroke="#B5AC9A" stroke-width="1.4"/>` },
@@ -346,25 +373,51 @@
   }
 
   function fruitIconHtml(name, size) {
-    const isRare = RARE_ICONS[name];
-    if (isRare) return `<span style="display:inline-block;width:${size}px;height:${size}px;">${RARE_ICONS[name]}</span>`;
+    const bare = name.indexOf("rare ") === 0 ? name.slice(5) : name;
+    const isRare = RARE_ICONS[bare];
+    if (isRare) return `<span style="display:inline-block;width:${size}px;height:${size}px;">${RARE_ICONS[bare]}</span>`;
     return `<span style="font-size:${size}px;line-height:1;">${name}</span>`;
   }
 
+  // 収穫演出:通常果実はアイコン+個数、レア果実は「レア果実」ラベル+名前+獲得バッジを大きく表示
   function showHarvestCelebration(fruits, badgesAwarded) {
     const container = document.getElementById("celebration-container");
     const tally = {};
-    fruits.forEach((f) => { tally[f] = (tally[f] || 0) + 1; });
-    const hasRare = fruits.some((f) => RARE_ICONS[f]);
+    fruits.forEach((f) => {
+      const isRare = f.indexOf("rare ") === 0;
+      const bare = isRare ? f.slice(5) : f;
+      const key = (isRare ? "rare:" : "normal:") + bare;
+      if (!tally[key]) tally[key] = { name: bare, isRare, count: 0 };
+      tally[key].count += 1;
+    });
+    const items = Object.values(tally);
+    const hasRare = items.some((i) => i.isRare);
+    const rareBadgeCount = items.filter((i) => i.isRare).reduce((sum, i) => sum + i.count, 0);
+    const normalBadgeCount = Math.max(0, badgesAwarded - rareBadgeCount);
+
+    const itemsHtml = items.map((item) => {
+      if (item.isRare) {
+        const tier = RARE_TIER[item.name] || "silver";
+        const tierLabel = TIER_LABEL[tier];
+        return `
+          <div class="celebration-fruit-item rare-item">
+            ${fruitIconHtml(item.name, 44)}
+            <div class="celebration-rare-label">レア果実</div>
+            <div class="celebration-rare-name">${escapeHtml(item.name)}${item.count > 1 ? ` ×${item.count}` : ""}</div>
+            <div class="celebration-rare-badge">${tierLabel}バッジを${item.count}個ゲット!</div>
+          </div>
+        `;
+      }
+      return `<div class="celebration-fruit-item">${fruitIconHtml(item.name, 32)}<span>×${item.count}</span></div>`;
+    }).join("");
+
     container.innerHTML = `
       <div class="celebration-backdrop"></div>
       <div class="celebration-card ${hasRare ? "golden" : ""}">
         <p class="celebration-title">${fruits.length}個収穫しました!</p>
         <p class="celebration-name">${hasRare ? "レアな実も混ざっていました!" : "お疲れさま!"}</p>
-        <div class="celebration-fruit-list">
-          ${Object.keys(tally).map((f) => `<div class="celebration-fruit-item">${fruitIconHtml(f, 32)}<span>×${tally[f]}</span></div>`).join("")}
-        </div>
-        ${badgesAwarded > 0 ? `<p class="celebration-badge-note">🎉 バッジを${badgesAwarded}個ゲット!</p>` : ""}
+        <div class="celebration-fruit-list">${itemsHtml}</div>
+        ${normalBadgeCount > 0 ? `<p class="celebration-badge-note">🎉 銅バッジを${normalBadgeCount}個ゲット!</p>` : ""}
         <button class="celebration-close" id="celebration-close-btn">やったね!</button>
       </div>
     `;
@@ -507,7 +560,7 @@
       if (!data.ok) return;
       checkRankChange(data.rank);
       currentData.rank = data.rank;
-      if (currentTab === "ranks") renderRanks(document.getElementById("tab-content"));
+      renderShell();
     } catch (err) {}
   }
 
@@ -515,10 +568,11 @@
 
   function renderShell() {
     const data = currentData;
+    const rank = data.rank;
     appEl.innerHTML = `
       <p class="eyebrow">個別指導塾コネクト</p>
       <h1>CONNEC＋</h1>
-      <p class="student-name">${data.studentName} さん</p>
+      <p class="student-name">${data.studentName} さん${rank ? `<span class="header-rank-badge">${medalIcon(rank.className, 18)}${escapeHtml(rank.rankName)}</span>` : ""}</p>
       <div id="tab-content"></div>
       <nav class="tabbar">
         <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>私の成績表</button>
@@ -792,6 +846,7 @@
       </div>
       <p class="section-title">この週のミッション</p>
       <p class="list-note">✓ ミッションが完了したらチェックボックスにチェックを入れよう(🔁は繰り返し設定されたミッションです)</p>
+      <p class="list-note">🍓 ミッションを3つクリアしたら果実が成るから畑を確認してみてね♪</p>
       <div class="card" id="mission-list"></div>
     `;
 
@@ -1043,7 +1098,7 @@
       </div>
       <div class="card info-card">
         <p class="info-title">収穫でもらえるバッジ</p>
-        <p>レア果実は1個につきバッジ10個分の価値があります。ただし1種類だけ、バッジ50個分の価値がある「幻の果実」が存在します。この価値が合計10個分たまるごとに、自動でバッジが1つもらえます。</p>
+        <p>果実を収穫すると階級バッジと交換できます。ノーマル果実10個で銅バッジ1つ、レア果実1個で銀バッジ1つ、激レア果実1個で金バッジ1つと自動で交換されます。</p>
         <p style="color: var(--brand); font-weight: 600;">これまでの収穫数: ${totalCount}個</p>
       </div>
       <div class="card">
@@ -1122,8 +1177,9 @@
     el.innerHTML = html;
   }
 
-  // ---------- スケジュールタブ(当月1日〜末日までを表にし、1限〜6限を列にして表示。空きコマは空白) ----------
+  // ---------- スケジュールタブ(1限〜6限の下に時間表示、日付列の幅固定、注意書き追加) ----------
   const SCHEDULE_PERIODS = ["1限", "2限", "3限", "4限", "5限", "6限"];
+  const SCHEDULE_TIMES = ["13:00〜14:20", "14:30〜15:50", "16:00〜17:20", "17:30〜18:50", "19:00〜20:20", "20:30〜21:50"];
   const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
 
   function renderSchedule(el) {
@@ -1153,15 +1209,17 @@
 
     let html = `<div class="card">`;
     html += `<p class="section-title" style="margin-top:0;">${monthNum}月のスケジュール</p>`;
-    if (updatedAt) html += `<p class="schedule-updated-note">最終更新:${formatDateTime(updatedAt)}</p>`;
+    if (updatedAt) html += `<p class="schedule-updated-note">最終更新:${formatDate(updatedAt)}</p>`;
 
-    html += `<div class="schedule-scroll"><table class="schedule-table"><thead><tr><th>日付</th>${SCHEDULE_PERIODS.map((p) => `<th>${p}</th>`).join("")}</tr></thead><tbody>`;
+    html += `<div class="schedule-scroll"><table class="schedule-table"><colgroup><col class="schedule-col-date" />${SCHEDULE_PERIODS.map(() => `<col />`).join("")}</colgroup>`;
+    html += `<thead><tr><th rowspan="2">日付</th>${SCHEDULE_PERIODS.map((p) => `<th>${p}</th>`).join("")}</tr>`;
+    html += `<tr>${SCHEDULE_TIMES.map((t) => `<th class="schedule-time-row">${t}</th>`).join("")}</tr></thead><tbody>`;
 
     for (let day = 1; day <= daysInMonth; day++) {
       const dateCompact = `${year}${String(monthNum).padStart(2, "0")}${String(day).padStart(2, "0")}`;
       const dow = SCHEDULE_DOW[new Date(year, monthNum - 1, day).getDay()];
       const isToday = dateCompact === todayCompact;
-      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell">${monthNum}/${day}(${dow})</td>`;
+      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell">${monthNum}/${day}<br>(${dow})</td>`;
       SCHEDULE_PERIODS.forEach((period) => {
         const cell = cellMap[`${dateCompact}_${period}`];
         if (!cell) { html += `<td></td>`; return; }
@@ -1172,8 +1230,18 @@
     }
 
     html += `</tbody></table></div>`;
-    html += `<p class="schedule-legend"><span class="schedule-legend-swatch"></span>前回から変わったコマ</p>`;
+    html += `<p class="schedule-legend"><span class="schedule-legend-swatch"></span>前回から日時が変更になったコマ</p>`;
     html += `</div>`;
+
+    html += `<div class="card info-card">`;
+    html += `<p class="info-title">注意</p>`;
+    html += `<ol class="schedule-notes-list">`;
+    html += `<li>授業をお休みされる場合は授業開始の2時間前までにご連絡ください。</li>`;
+    html += `<li>事前のご連絡のないお休み、また振替授業をお休みされた場合は振替の対象外となりますのでご注意ください。</li>`;
+    html += `<li>講師の都合で授業日時を変更させていただく場合がございます。予めご了承ください。</li>`;
+    html += `</ol>`;
+    html += `</div>`;
+
     el.innerHTML = html;
   }
 
