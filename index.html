@@ -125,7 +125,9 @@
   
   .test-date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
   .test-date-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .test-date-name { font-size: 13px; font-weight: 600; flex-shrink: 0; width: 132px; }
+  .test-date-row { flex-wrap: wrap; }
+  .test-date-name { font-size: 11.5px; font-weight: 600; flex-shrink: 0; width: 100%; white-space: nowrap; margin-bottom: 4px; }
+  .test-date-input-wrap { width: 100%; }
   .test-date-input-wrap { flex: 1; display: flex; align-items: center; gap: 6px; }
   .test-date-input-wrap input[type="date"] { flex: 1; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff; color: var(--ink); }
   .test-date-input-wrap input[type="date"]:disabled { background: var(--paper); color: var(--muted); }
@@ -778,6 +780,10 @@
   }
       async function handleSetTestDate(testName, testDate) {
     if (!testDate) return;
+    // 既に保存済みの日付と同じ場合(=カレンダーの誤発火など)は、何もしない
+    const testDates = currentData.testDates || [];
+    const existing = testDates.find((t) => t.testName === testName);
+    if (existing && existing.testDate === testDate) return;
     try {
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "setTestDate", studentId, testName, testDate }) });
       const result = await res.json();
