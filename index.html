@@ -136,6 +136,9 @@
   .test-date-locked-flag { font-size: 10.5px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
   .test-date-save-btn { padding: 7px 10px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 12px; font-weight: 600; flex-shrink: 0; }
   .test-date-save-btn:disabled { opacity: 0.4; }
+  .test-date-select-group { display: flex; gap: 4px; flex: 1; min-width: 0; }
+  .test-date-select-group select { flex: 1; min-width: 0; padding: 6px 2px; border: 1px solid var(--line); border-radius: 6px; font-size: 11.5px; font-family: inherit; background: #fff; color: var(--ink); }
+  .test-date-fixed { font-size: 13px; font-weight: 600; color: var(--ink); }
   .badge-legend { display: flex; justify-content: space-around; margin-top: 10px; }
   .badge-legend-item { text-align: center; flex: 1; }
   .badge-legend-item .diff { font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -498,12 +501,42 @@
       else if (info.daysUntil === 0) countdownHtml = `<span class="test-date-countdown today">本日!</span>`;
       else countdownHtml = `<span class="test-date-locked-flag">終了</span>`;
     }
+
+    if (info.locked) {
+      const parts = info.testDate.split("-");
+      return `
+        <div class="test-date-row">
+          <span class="test-date-name">${testName}</span>
+          <div class="test-date-input-wrap">
+            <span class="test-date-fixed">${Number(parts[1])}/${Number(parts[2])}</span>
+            ${countdownHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    const currentYear = new Date().getFullYear();
+    const years = [currentYear, currentYear + 1, currentYear + 2];
+    let selY = "", selM = "", selD = "";
+    if (info.testDate) {
+      const parts = info.testDate.split("-");
+      selY = String(Number(parts[0])); selM = String(Number(parts[1])); selD = String(Number(parts[2]));
+    }
+    const yearOptions = `<option value="" disabled ${selY === "" ? "selected" : ""}>年</option>` + years.map((y) => `<option value="${y}" ${String(y) === selY ? "selected" : ""}>${y}年</option>`).join("");
+    const monthOptions = `<option value="" disabled ${selM === "" ? "selected" : ""}>月</option>` + Array.from({ length: 12 }, (_, i) => i + 1).map((mo) => `<option value="${mo}" ${String(mo) === selM ? "selected" : ""}>${mo}月</option>`).join("");
+    const dayOptions = `<option value="" disabled ${selD === "" ? "selected" : ""}>日</option>` + Array.from({ length: 31 }, (_, i) => i + 1).map((da) => `<option value="${da}" ${String(da) === selD ? "selected" : ""}>${da}日</option>`).join("");
+    const allFilled = selY !== "" && selM !== "" && selD !== "";
+
     return `
       <div class="test-date-row">
         <span class="test-date-name">${testName}</span>
         <div class="test-date-input-wrap">
-          <input type="date" id="test-date-input-${testName}" data-test-name="${testName}" value="${info.testDate || ""}" ${info.locked ? "disabled" : ""} />
-          ${info.locked ? "" : `<button type="button" class="test-date-save-btn" data-test-name="${testName}">設定</button>`}
+          <div class="test-date-select-group" data-test-name="${testName}">
+            <select class="test-date-select-y">${yearOptions}</select>
+            <select class="test-date-select-m">${monthOptions}</select>
+            <select class="test-date-select-d">${dayOptions}</select>
+          </div>
+          <button type="button" class="test-date-save-btn" data-test-name="${testName}" ${allFilled ? "" : "disabled"}>設定</button>
           ${countdownHtml}
         </div>
       </div>
@@ -710,11 +743,26 @@
     });
     document.getElementById("entry-form").addEventListener("submit", handleAddScore);
     document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
+    document.querySelectorAll(".test-date-select-group").forEach((group) => {
+      const testName = group.dataset.testName;
+      const selects = group.querySelectorAll("select");
+      const btn = document.querySelector(`.test-date-save-btn[data-test-name="${testName}"]`);
+      selects.forEach((s) => s.addEventListener("change", () => {
+        const filled = Array.from(selects).every((sel) => sel.value !== "");
+        if (btn) btn.disabled = !filled;
+      }));
+    });
     document.querySelectorAll(".test-date-save-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const testName = btn.dataset.testName;
-        const input = document.getElementById(`test-date-input-${testName}`);
-        if (input) handleSetTestDate(testName, input.value);
+        const group = document.querySelector(`.test-date-select-group[data-test-name="${testName}"]`);
+        if (!group) return;
+        const y = group.querySelector(".test-date-select-y").value;
+        const m = group.querySelector(".test-date-select-m").value;
+        const d = group.querySelector(".test-date-select-d").value;
+        if (!y || !m || !d) return;
+        const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        handleSetTestDate(testName, dateStr);
       });
     });
   }
