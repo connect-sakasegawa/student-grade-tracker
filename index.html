@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
 <title>CONNEC＋ | 個別指導塾コネクト</title>
 
 <meta name="theme-color" content="#D9720B" />
@@ -54,7 +55,7 @@
   body { padding: max(20px, env(safe-area-inset-top)) 16px calc(84px + env(safe-area-inset-bottom)); min-height: 100vh; }
 
   .loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: var(--paper); }
-  .loading-title { font-family: 'Zilla Slab', serif; font-weight: 700; font-size: 24px; color: var(--brand); margin: 0 0 10px; }
+  .loading-title { font-family: 'Zilla Slab', serif; font-weight: 700; font-size: 36px; color: var(--brand); margin: 0 0 10px; }
   .loading-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
 
   .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
@@ -184,6 +185,7 @@
   .rank-row.current { font-weight: 700; color: var(--brand); }
   .rank-row .pt { color: var(--muted); font-size: 12px; }
 
+  .schedule-month-select { margin-bottom: 14px; }
   .schedule-updated-note { font-size: 12px; color: var(--muted); text-align: right; margin: 0 0 14px; }
   .schedule-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .schedule-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
@@ -283,7 +285,6 @@
   ];
   const FRUIT_LIST = ["🍒", "🍓", "🍊", "🍎", "🍑", "🍍", "🍈", "🍉"];
 
-  // レア果実の等級(見た目上の等級と、獲得できるバッジの色を紐づける。サーバー側のRARE_FRUITSと同じ対応)
   const RARE_TIER = {
     "幻のシャインマスカット": "gold",
     "コネコネの実": "silver",
@@ -360,6 +361,7 @@
   let lastSeenRank = null;
   let pendingRankUp = null;
   let lastSelectedDay = null;
+  let selectedScheduleMonthIndex = 0; // 0=当月, 1=翌月(アプリ内だけで切り替え、再通信しない)
 
   function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function showToast(message) {
@@ -379,7 +381,6 @@
     return `<span style="font-size:${size}px;line-height:1;">${name}</span>`;
   }
 
-  // 収穫演出:通常果実はアイコン+個数、レア果実は「レア果実」ラベル+名前+獲得バッジを大きく表示
   function showHarvestCelebration(fruits, badgesAwarded) {
     const container = document.getElementById("celebration-container");
     const tally = {};
@@ -1177,26 +1178,25 @@
     el.innerHTML = html;
   }
 
-  // ---------- スケジュールタブ(1限〜6限の下に時間表示、日付列の幅固定、注意書き追加) ----------
+  // ---------- スケジュールタブ(当月・翌月をプルダウンで切り替え。再通信なし) ----------
   const SCHEDULE_PERIODS = ["1限", "2限", "3限", "4限", "5限", "6限"];
   const SCHEDULE_TIMES = ["13:00〜14:20", "14:30〜15:50", "16:00〜17:20", "17:30〜18:50", "19:00〜20:20", "20:30〜21:50"];
   const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
 
   function renderSchedule(el) {
-    const rows = currentData.schedule || [];
-    const updatedAt = currentData.scheduleUpdatedAt;
-    const year = currentData.scheduleYear;
-    const monthNum = currentData.scheduleMonthNum;
-
-    if (!year || !monthNum) {
+    const months = currentData.scheduleMonths || [];
+    if (months.length === 0) {
       el.innerHTML = `
         <div class="card">
-          <p class="section-title" style="margin-top:0;">今月のスケジュール</p>
-          <p class="empty">今月のスケジュールはまだ登録されていません</p>
+          <p class="section-title" style="margin-top:0;">スケジュール</p>
+          <p class="empty">スケジュールはまだ登録されていません</p>
         </div>
       `;
       return;
     }
+    if (selectedScheduleMonthIndex >= months.length) selectedScheduleMonthIndex = 0;
+    const monthData = months[selectedScheduleMonthIndex];
+    const { year, monthNum, rows, updatedAt } = monthData;
 
     const daysInMonth = new Date(year, monthNum, 0).getDate();
     const cellMap = {};
@@ -1208,7 +1208,12 @@
     })();
 
     let html = `<div class="card">`;
-    html += `<p class="section-title" style="margin-top:0;">${monthNum}月のスケジュール</p>`;
+    html += `<p class="section-title" style="margin-top:0;">スケジュール</p>`;
+    html += `<div class="field schedule-month-select">
+      <select id="schedule-month-select">
+        ${months.map((m, i) => `<option value="${i}" ${i === selectedScheduleMonthIndex ? "selected" : ""}>${m.monthNum}月</option>`).join("")}
+      </select>
+    </div>`;
     if (updatedAt) html += `<p class="schedule-updated-note">最終更新:${formatDate(updatedAt)}</p>`;
 
     html += `<div class="schedule-scroll"><table class="schedule-table"><colgroup><col class="schedule-col-date" />${SCHEDULE_PERIODS.map(() => `<col />`).join("")}</colgroup>`;
@@ -1217,9 +1222,11 @@
 
     for (let day = 1; day <= daysInMonth; day++) {
       const dateCompact = `${year}${String(monthNum).padStart(2, "0")}${String(day).padStart(2, "0")}`;
-      const dow = SCHEDULE_DOW[new Date(year, monthNum - 1, day).getDay()];
+      const dowIndex = new Date(year, monthNum - 1, day).getDay();
+      const dow = SCHEDULE_DOW[dowIndex];
       const isToday = dateCompact === todayCompact;
-      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell">${monthNum}/${day}<br>(${dow})</td>`;
+      const dowStyle = dowIndex === 0 ? ' style="color:#C0392B;"' : "";
+      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell"${dowStyle}>${monthNum}/${day}<br>(${dow})</td>`;
       SCHEDULE_PERIODS.forEach((period) => {
         const cell = cellMap[`${dateCompact}_${period}`];
         if (!cell) { html += `<td></td>`; return; }
@@ -1243,6 +1250,14 @@
     html += `</div>`;
 
     el.innerHTML = html;
+
+    const monthSelect = document.getElementById("schedule-month-select");
+    if (monthSelect) {
+      monthSelect.addEventListener("change", (e) => {
+        selectedScheduleMonthIndex = Number(e.target.value);
+        renderSchedule(document.getElementById("tab-content"));
+      });
+    }
   }
 
   init();
