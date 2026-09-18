@@ -235,6 +235,7 @@
   .celebration-badge-note { font-size: 12px; color: var(--growth); font-weight: 600; margin: 0 0 14px; }
   .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
   .advice-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--growth); background: var(--growth-soft); color: var(--growth); font-size: 12.5px; font-weight: 600; margin: -6px 0 14px; }
+  .advice-btn.advice-btn-standalone { margin: 0 0 16px; padding: 12px; font-size: 13.5px; }
 
   #advice-modal { position: fixed; inset: 0; z-index: 45; display: none; align-items: flex-end; justify-content: center; }
   #advice-modal.show { display: flex; }
@@ -830,7 +831,6 @@
             <input type="text" id="mission-content" placeholder="例:数学の宿題プリント2枚" />
           </div>
           <p class="field-note">※書き方の注意点:科目、テキスト名、単元名、ページ数などを入力しよう</p>
-          <button type="button" id="advice-open-btn" class="advice-btn">📖 自主学習のアドバイスを見る</button>
           <div class="preset-actions"><button type="button" id="preset-save-btn" class="preset-save-btn">＋ 区分と内容をよく使う項目に登録</button></div>
           <div id="mission-error" class="msg error"></div>
           <button class="submit" id="mission-submit-btn" type="submit">ミッションを追加</button>
@@ -846,6 +846,7 @@
           </div>` : ""}
         </form>` : `<p class="empty">この週は終了しています。新しいミッションは今週以降の週で追加してください</p>`}
       </div>
+      <button type="button" id="advice-open-btn" class="advice-btn advice-btn-standalone">📖 自主学習のアドバイスを見る</button>
       <p class="section-title">この週のミッション</p>
       <p class="list-note">✓ ミッションが完了したらチェックボックスにチェックを入れよう<br>(🔁は繰り返し設定されたミッションです)</p>
       <p class="list-note schedule-red-note">ミッションを3つクリアしたら果実が成るから畑を確認してみてね♪</p>
