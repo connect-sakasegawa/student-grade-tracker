@@ -181,14 +181,15 @@
   .rank-row .pt { color: var(--muted); font-size: 12px; }
 
   .schedule-updated-note { font-size: 12px; color: var(--muted); text-align: right; margin: 0 0 14px; }
-  .schedule-day-block { margin-bottom: 12px; }
-  .schedule-day-title { font-size: 13px; font-weight: 700; color: var(--brand); margin: 0 0 6px; }
-  .schedule-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-bottom: 1px solid var(--line); border-radius: 6px; }
-  .schedule-row:last-child { border-bottom: none; }
-  .schedule-row.changed { background: #FFF6C4; }
-  .schedule-period { font-size: 12px; font-weight: 700; color: var(--muted); width: 44px; flex-shrink: 0; }
-  .schedule-subject { font-size: 14px; font-weight: 600; }
-  .schedule-changed-flag { font-size: 10.5px; color: #8A6A1E; font-weight: 700; margin-left: auto; }
+  .schedule-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -18px; padding: 0 18px; }
+  .schedule-table { border-collapse: collapse; width: 100%; min-width: 480px; }
+  .schedule-table th, .schedule-table td { border: 1px solid var(--line); padding: 6px 4px; text-align: center; font-size: 11.5px; white-space: nowrap; }
+  .schedule-table th { background: var(--paper); color: var(--muted); font-weight: 700; font-size: 10.5px; }
+  .schedule-table td.schedule-daycell { background: var(--paper); font-weight: 700; color: var(--ink); text-align: left; padding-left: 8px; }
+  .schedule-table tr.schedule-today td { background: #FBE7D0; }
+  .schedule-table td.schedule-cell-changed { background: #FFF6C4; font-weight: 700; color: #8A6A1E; }
+  .schedule-legend { font-size: 11px; color: var(--muted); margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
+  .schedule-legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #FFF6C4; border: 1px solid var(--line); }
 
   .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
   .tab-btn { flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
@@ -1121,12 +1122,17 @@
     el.innerHTML = html;
   }
 
-  // ---------- スケジュールタブ ----------
+  // ---------- スケジュールタブ(当月1日〜末日までを表にし、1限〜6限を列にして表示。空きコマは空白) ----------
+  const SCHEDULE_PERIODS = ["1限", "2限", "3限", "4限", "5限", "6限"];
+  const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
+
   function renderSchedule(el) {
     const rows = currentData.schedule || [];
     const updatedAt = currentData.scheduleUpdatedAt;
+    const year = currentData.scheduleYear;
+    const monthNum = currentData.scheduleMonthNum;
 
-    if (rows.length === 0) {
+    if (!year || !monthNum) {
       el.innerHTML = `
         <div class="card">
           <p class="section-title" style="margin-top:0;">今月のスケジュール</p>
@@ -1136,37 +1142,37 @@
       return;
     }
 
-    const byDate = {};
-    rows.forEach((r) => {
-      if (!byDate[r.date]) byDate[r.date] = [];
-      byDate[r.date].push(r);
-    });
-    const dates = Object.keys(byDate).sort();
+    const daysInMonth = new Date(year, monthNum, 0).getDate();
+    const cellMap = {};
+    rows.forEach((r) => { cellMap[`${r.date}_${r.period}`] = r; });
+
+    const todayCompact = (() => {
+      const d = new Date();
+      return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    })();
 
     let html = `<div class="card">`;
-    html += `<p class="section-title" style="margin-top:0;">今月のスケジュール</p>`;
+    html += `<p class="section-title" style="margin-top:0;">${monthNum}月のスケジュール</p>`;
     if (updatedAt) html += `<p class="schedule-updated-note">最終更新:${formatDateTime(updatedAt)}</p>`;
-    dates.forEach((date) => {
-      const dayRows = byDate[date].slice().sort((a, b) => {
-        const pa = Number(String(a.period).match(/(\d+)/)?.[1] || 99);
-        const pb = Number(String(b.period).match(/(\d+)/)?.[1] || 99);
-        return pa - pb;
+
+    html += `<div class="schedule-scroll"><table class="schedule-table"><thead><tr><th>日付</th>${SCHEDULE_PERIODS.map((p) => `<th>${p}</th>`).join("")}</tr></thead><tbody>`;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateCompact = `${year}${String(monthNum).padStart(2, "0")}${String(day).padStart(2, "0")}`;
+      const dow = SCHEDULE_DOW[new Date(year, monthNum - 1, day).getDay()];
+      const isToday = dateCompact === todayCompact;
+      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell">${monthNum}/${day}(${dow})</td>`;
+      SCHEDULE_PERIODS.forEach((period) => {
+        const cell = cellMap[`${dateCompact}_${period}`];
+        if (!cell) { html += `<td></td>`; return; }
+        const isChanged = cell.changed === true || cell.changed === "TRUE" || cell.changed === "true";
+        html += `<td class="${isChanged ? "schedule-cell-changed" : ""}">${escapeHtml(cell.subject)}</td>`;
       });
-      const dow = dayRows[0].dow;
-      html += `<div class="schedule-day-block">`;
-      html += `<p class="schedule-day-title">${formatMD(date)}(${dow})</p>`;
-      dayRows.forEach((r) => {
-        const isChanged = r.changed === true || r.changed === "TRUE" || r.changed === "true";
-        html += `
-          <div class="schedule-row ${isChanged ? "changed" : ""}">
-            <span class="schedule-period">${escapeHtml(r.period)}</span>
-            <span class="schedule-subject">${escapeHtml(r.subject)}</span>
-            ${isChanged ? `<span class="schedule-changed-flag">更新あり</span>` : ""}
-          </div>
-        `;
-      });
-      html += `</div>`;
-    });
+      html += `</tr>`;
+    }
+
+    html += `</tbody></table></div>`;
+    html += `<p class="schedule-legend"><span class="schedule-legend-swatch"></span>前回から変わったコマ</p>`;
     html += `</div>`;
     el.innerHTML = html;
   }
