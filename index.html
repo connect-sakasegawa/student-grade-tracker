@@ -122,7 +122,16 @@
   .id-error { text-align: center; padding: 60px 16px; color: var(--muted); font-size: 14px; }
   .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; display: none; }
   .install-hint.show { display: block; }
-
+  
+  .test-date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+  .test-date-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .test-date-name { font-size: 13px; font-weight: 600; flex-shrink: 0; width: 132px; }
+  .test-date-input-wrap { flex: 1; display: flex; align-items: center; gap: 6px; }
+  .test-date-input-wrap input[type="date"] { flex: 1; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff; color: var(--ink); }
+  .test-date-input-wrap input[type="date"]:disabled { background: var(--paper); color: var(--muted); }
+  .test-date-countdown { font-size: 11.5px; color: var(--brand); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+  .test-date-countdown.today { color: #C0392B; }
+  .test-date-locked-flag { font-size: 10.5px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
   .badge-legend { display: flex; justify-content: space-around; margin-top: 10px; }
   .badge-legend-item { text-align: center; flex: 1; }
   .badge-legend-item .diff { font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -476,6 +485,26 @@
   function formatMD(ymd) { const d = new Date(ymd + "T00:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; }
   function todayYMD() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 
+    function renderTestDateRow(testName) {
+    const testDates = currentData.testDates || [];
+    const info = testDates.find((t) => t.testName === testName) || { testDate: "", locked: false, daysUntil: null };
+    let countdownHtml = "";
+    if (info.testDate) {
+      if (info.daysUntil > 0) countdownHtml = `<span class="test-date-countdown">あと${info.daysUntil}日</span>`;
+      else if (info.daysUntil === 0) countdownHtml = `<span class="test-date-countdown today">本日!</span>`;
+      else countdownHtml = `<span class="test-date-locked-flag">終了</span>`;
+    }
+    return `
+      <div class="test-date-row">
+        <span class="test-date-name">${testName}</span>
+        <div class="test-date-input-wrap">
+          <input type="date" data-test-name="${testName}" value="${info.testDate || ""}" ${info.locked ? "disabled" : ""} />
+          ${countdownHtml}
+        </div>
+      </div>
+    `;
+  }
+
   function calcTotal(subjects, list) {
     const relevant = subjects.filter((s) => list.indexOf(s.subject) !== -1 && s.score !== null);
     if (relevant.length === 0) return null;
@@ -619,6 +648,11 @@
           <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
         </form>
       </div>
+            <div class="card">
+        <p class="info-title">テスト日程</p>
+        <p class="field-note" style="margin-top:0;">テスト初日を入力しよう。当日になると目標点は入力できなくなります</p>
+        ${TEST_NAMES.map((name) => renderTestDateRow(name)).join("")}
+      </div>
       <div class="card info-card">
         <p class="info-title">バッジについて</p>
         <p>目標点・平均点を上回った差に応じて、自動でバッジがもらえます。バッジは階級のポイントにもなります。</p>
@@ -671,6 +705,9 @@
     });
     document.getElementById("entry-form").addEventListener("submit", handleAddScore);
     document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
+    document.querySelectorAll('.test-date-input-wrap input[type="date"]').forEach((input) => {
+      input.addEventListener("change", (e) => handleSetTestDate(e.target.dataset.testName, e.target.value));
+    });
   }
 
   function mergeTestScoresLocally(testName, submittedSubjects) {
@@ -738,6 +775,28 @@
     } catch (err) {
       showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
     } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
+  }
+      async function handleSetTestDate(testName, testDate) {
+    if (!testDate) return;
+    try {
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "setTestDate", studentId, testName, testDate }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      currentData.testDates = currentData.testDates || [];
+      const idx = currentData.testDates.findIndex((t) => t.testName === testName);
+      const today = todayYMD();
+      const locked = today >= testDate;
+      const d = new Date(testDate + "T00:00:00");
+      const t = new Date(today + "T00:00:00");
+      const daysUntil = Math.round((d - t) / 86400000);
+      const entry = { testName, testDate, locked, daysUntil };
+      if (idx === -1) currentData.testDates.push(entry); else currentData.testDates[idx] = entry;
+      renderGrades(document.getElementById("tab-content"));
+      showToast("テスト日程を保存しました");
+    } catch (err) {
+      showToast(err.message || "保存に失敗しました。もう一度お試しください。");
+      renderGrades(document.getElementById("tab-content"));
+    }
   }
 
   function showFieldError(el, msg) { el.textContent = msg; el.classList.add("show"); }
