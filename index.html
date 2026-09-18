@@ -134,6 +134,8 @@
   .test-date-countdown { font-size: 11.5px; color: var(--brand); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
   .test-date-countdown.today { color: #C0392B; }
   .test-date-locked-flag { font-size: 10.5px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+  .test-date-save-btn { padding: 7px 10px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .test-date-save-btn:disabled { opacity: 0.4; }
   .badge-legend { display: flex; justify-content: space-around; margin-top: 10px; }
   .badge-legend-item { text-align: center; flex: 1; }
   .badge-legend-item .diff { font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -500,7 +502,8 @@
       <div class="test-date-row">
         <span class="test-date-name">${testName}</span>
         <div class="test-date-input-wrap">
-          <input type="date" data-test-name="${testName}" value="${info.testDate || ""}" ${info.locked ? "disabled" : ""} />
+          <input type="date" id="test-date-input-${testName}" data-test-name="${testName}" value="${info.testDate || ""}" ${info.locked ? "disabled" : ""} />
+          ${info.locked ? "" : `<button type="button" class="test-date-save-btn" data-test-name="${testName}">設定</button>`}
           ${countdownHtml}
         </div>
       </div>
@@ -707,8 +710,12 @@
     });
     document.getElementById("entry-form").addEventListener("submit", handleAddScore);
     document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
-    document.querySelectorAll('.test-date-input-wrap input[type="date"]').forEach((input) => {
-      input.addEventListener("change", (e) => handleSetTestDate(e.target.dataset.testName, e.target.value));
+    document.querySelectorAll(".test-date-save-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const testName = btn.dataset.testName;
+        const input = document.getElementById(`test-date-input-${testName}`);
+        if (input) handleSetTestDate(testName, input.value);
+      });
     });
   }
 
