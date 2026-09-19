@@ -99,6 +99,12 @@
   .target-cell { border-right: 1px dashed var(--muted); padding-right: 6px; }
   .target-cell input { color: var(--target-blue); font-weight: 600; }
 
+  .hs-group-title { font-size: 12.5px; font-weight: 700; color: var(--brand); margin: 14px 0 4px; }
+  .hs-group-title:first-child { margin-top: 0; }
+  .hs-slot-label { display: flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; }
+  .hs-slot-label .hs-slot-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hs-slot-edit-btn { flex-shrink: 0; background: none; border: none; padding: 2px; font-size: 12px; color: var(--muted); }
+
   .test-card { margin-bottom: 12px; }
   .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .test-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; color: var(--ink); }
@@ -122,13 +128,15 @@
   .id-error { text-align: center; padding: 60px 16px; color: var(--muted); font-size: 14px; }
   .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; display: none; }
   .install-hint.show { display: block; }
-  
-  .test-date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+
+  .badge-legend { display: flex; justify-content: space-around; margin-top: 10px; }
+  .badge-legend-item { text-align: center; flex: 1; }
+  .badge-legend-item .diff { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .test-date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); flex-wrap: wrap; }
   .test-date-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .test-date-row { flex-wrap: wrap; }
   .test-date-name { font-size: 11.5px; font-weight: 600; flex-shrink: 0; width: 100%; white-space: nowrap; margin-bottom: 4px; }
-  .test-date-input-wrap { width: 100%; }
-  .test-date-input-wrap { flex: 1; display: flex; align-items: center; gap: 6px; }
+  .test-date-input-wrap { width: 100%; display: flex; align-items: center; gap: 6px; }
   .test-date-input-wrap input[type="date"] { flex: 1; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff; color: var(--ink); }
   .test-date-input-wrap input[type="date"]:disabled { background: var(--paper); color: var(--muted); }
   .test-date-countdown { font-size: 11.5px; color: var(--brand); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
@@ -139,9 +147,14 @@
   .test-date-select-group { display: flex; gap: 4px; flex: 1; min-width: 0; }
   .test-date-select-group select { flex: 1; min-width: 0; padding: 6px 2px; border: 1px solid var(--line); border-radius: 6px; font-size: 11.5px; font-family: inherit; background: #fff; color: var(--ink); }
   .test-date-fixed { font-size: 13px; font-weight: 600; color: var(--ink); }
-  .badge-legend { display: flex; justify-content: space-around; margin-top: 10px; }
-  .badge-legend-item { text-align: center; flex: 1; }
-  .badge-legend-item .diff { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .mock-exam-slot { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); gap: 8px; }
+  .mock-exam-slot:last-child { border-bottom: none; }
+  .mock-exam-name { font-size: 13.5px; font-weight: 600; flex-shrink: 0; }
+  .mock-exam-meta { flex: 1; text-align: right; }
+  .mock-exam-links { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
+  .mock-exam-links a { font-size: 11px; color: var(--brand); text-decoration: underline; }
+  .mock-exam-upload-btn { width: 100%; margin-top: 12px; padding: 12px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 13.5px; font-weight: 600; }
 
   .week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .week-nav button { background: var(--brand-soft); color: var(--brand); border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
@@ -250,7 +263,7 @@
   .celebration-rare-badge { font-size: 12px; color: var(--brand); font-weight: 700; margin-top: 4px; }
   .celebration-badge-note { font-size: 12px; color: var(--growth); font-weight: 600; margin: 0 0 14px; }
   .celebration-close { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; }
-  .advice-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--growth); background: var(--growth-soft); color: var(--growth); font-size: 12.5px; font-weight: 600; margin: -6px 0 14px; }
+  .advice-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1px dashed var(--growth); background: var(--growth-soft); color: var(--growth); font-size: 12.5px; font-weight: 600; }
   .advice-btn.advice-btn-standalone { margin: 0 0 16px; padding: 12px; font-size: 13.5px; }
 
   #advice-modal { position: fixed; inset: 0; z-index: 45; display: none; align-items: flex-end; justify-content: center; }
@@ -287,6 +300,13 @@
     "1学期中間テスト", "1学期期末テスト", "2学期中間テスト", "2学期期末テスト", "学年末テスト",
     "第1回実力テスト（6月）", "第2回実力テスト（9月）", "第3回実力テスト（11月）", "第4回実力テスト（1月）",
   ];
+  const HS_TEST_NAMES = TEST_NAMES.slice(0, 5);
+  const HS_SUBJECT_GROUPS = ["英語", "数学", "国語", "理科", "社会"];
+  const HS_SLOTS_PER_SUBJECT = 3;
+  const HS_SLOT_KEYS = [];
+  HS_SUBJECT_GROUPS.forEach((g) => { for (let i = 1; i <= HS_SLOTS_PER_SUBJECT; i++) HS_SLOT_KEYS.push(g + i); });
+  const MOCK_EXAM_SLOT_LABELS = ["模試①", "模試②", "模試③", "模試④", "模試⑤", "模試⑥"];
+
   const DAYS = ["月", "火", "水", "木", "金", "土", "日"];
   const CATEGORIES = ["宿題", "自主学習"];
   const RANKS = [
@@ -379,7 +399,7 @@
   let lastSeenRank = null;
   let pendingRankUp = null;
   let lastSelectedDay = null;
-  let selectedScheduleMonthIndex = 0; // 0=当月, 1=翌月(アプリ内だけで切り替え、再通信しない)
+  let selectedScheduleMonthIndex = 0;
 
   function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function showToast(message) {
@@ -492,70 +512,22 @@
   function formatMD(ymd) { const d = new Date(ymd + "T00:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; }
   function todayYMD() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 
-    function renderTestDateRow(testName) {
-    const testDates = currentData.testDates || [];
-    const info = testDates.find((t) => t.testName === testName) || { testDate: "", locked: false, daysUntil: null };
-    let countdownHtml = "";
-    if (info.testDate) {
-      if (info.daysUntil > 0) countdownHtml = `<span class="test-date-countdown">あと${info.daysUntil}日</span>`;
-      else if (info.daysUntil === 0) countdownHtml = `<span class="test-date-countdown today">本日!</span>`;
-      else countdownHtml = `<span class="test-date-locked-flag">終了</span>`;
-    }
-
-    if (info.locked) {
-      const parts = info.testDate.split("-");
-      return `
-        <div class="test-date-row">
-          <span class="test-date-name">${testName}</span>
-          <div class="test-date-input-wrap">
-            <span class="test-date-fixed">${Number(parts[1])}/${Number(parts[2])}</span>
-            ${countdownHtml}
-          </div>
-        </div>
-      `;
-    }
-
-    const currentYear = new Date().getFullYear();
-    const years = [currentYear, currentYear + 1];
-    let selY = "", selM = "", selD = "";
-    if (info.testDate) {
-      const parts = info.testDate.split("-");
-      selY = String(Number(parts[0])); selM = String(Number(parts[1])); selD = String(Number(parts[2]));
-    }
-    const yearOptions = `<option value="" disabled ${selY === "" ? "selected" : ""}>年</option>` + years.map((y) => `<option value="${y}" ${String(y) === selY ? "selected" : ""}>${y}年</option>`).join("");
-    const monthOptions = `<option value="" disabled ${selM === "" ? "selected" : ""}>月</option>` + Array.from({ length: 12 }, (_, i) => i + 1).map((mo) => `<option value="${mo}" ${String(mo) === selM ? "selected" : ""}>${mo}月</option>`).join("");
-    const dayOptions = `<option value="" disabled ${selD === "" ? "selected" : ""}>日</option>` + Array.from({ length: 31 }, (_, i) => i + 1).map((da) => `<option value="${da}" ${String(da) === selD ? "selected" : ""}>${da}日</option>`).join("");
-    const allFilled = selY !== "" && selM !== "" && selD !== "";
-
-    return `
-      <div class="test-date-row">
-        <span class="test-date-name">${testName}</span>
-        <div class="test-date-input-wrap">
-          <div class="test-date-select-group" data-test-name="${testName}">
-            <select class="test-date-select-y">${yearOptions}</select>
-            <select class="test-date-select-m">${monthOptions}</select>
-            <select class="test-date-select-d">${dayOptions}</select>
-          </div>
-          <button type="button" class="test-date-save-btn" data-test-name="${testName}" ${allFilled ? "" : "disabled"}>設定</button>
-          ${countdownHtml}
-        </div>
-      </div>
-    `;
-  }
-
   function calcTotal(subjects, list) {
     const relevant = subjects.filter((s) => list.indexOf(s.subject) !== -1 && s.score !== null);
     if (relevant.length === 0) return null;
     return relevant.reduce((sum, s) => sum + Number(s.score), 0);
   }
 
+  function currentTestNames() { return (currentData && currentData.isHighSchool) ? HS_TEST_NAMES : TEST_NAMES; }
+
   function getPreviousScore(subject, testName) {
-    const idx = TEST_NAMES.indexOf(testName);
+    const testNames = currentTestNames();
+    const idx = testNames.indexOf(testName);
     if (idx <= 0 || !currentData) return null;
     const testsByName = {};
     (currentData.tests || []).forEach((t) => { testsByName[t.testName] = t; });
     for (let i = idx - 1; i >= 0; i--) {
-      const t = testsByName[TEST_NAMES[i]];
+      const t = testsByName[testNames[i]];
       if (!t) continue;
       const s = t.subjects.find((s) => s.subject === subject);
       if (s && s.score !== null) return s.score;
@@ -569,9 +541,6 @@
       return;
     }
     await loadAndRender();
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => { navigator.serviceWorker.register("service-worker.js").catch(() => {}); });
-    }
   }
 
   async function fetchData() {
@@ -653,35 +622,58 @@
     else if (currentTab === "schedule") renderSchedule(contentEl);
   }
 
-  // ---------- 成績表タブ ----------
+  // ---------- 私の成績表タブ(中学生/高校生で出し分け) ----------
   function renderGrades(el) {
-    const tests = (currentData.tests || []).slice().sort((a, b) => TEST_NAMES.indexOf(a.testName) - TEST_NAMES.indexOf(b.testName));
+    const isHS = !!(currentData && currentData.isHighSchool);
+    const testNames = isHS ? HS_TEST_NAMES : TEST_NAMES;
+    const tests = (currentData.tests || []).slice().sort((a, b) => testNames.indexOf(a.testName) - testNames.indexOf(b.testName));
+    const subjectNames = currentData.subjectNames || {};
+
+    let subjectGridHtml = "";
+    if (isHS) {
+      HS_SUBJECT_GROUPS.forEach((group) => {
+        subjectGridHtml += `<p class="hs-group-title">${group}</p>`;
+        for (let i = 1; i <= HS_SLOTS_PER_SUBJECT; i++) {
+          const slotKey = group + i;
+          const displayName = subjectNames[slotKey] || `未設定${i}`;
+          subjectGridHtml += `
+            <div class="subject-row">
+              <div class="hs-slot-label">
+                <span class="hs-slot-name">${escapeHtml(displayName)}</span>
+                <button type="button" class="hs-slot-edit-btn" data-slot-key="${slotKey}" data-current-name="${escapeHtml(displayName.indexOf("未設定") === 0 ? "" : displayName)}">✏️</button>
+              </div>
+              <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="target" /></div>
+              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="score" />
+              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="average" />
+            </div>
+          `;
+        }
+      });
+    } else {
+      subjectGridHtml = SUBJECTS.map((s) => `
+        <div class="subject-row">
+          <label>${s}</label>
+          <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" /></div>
+          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
+          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
+        </div>`).join("");
+    }
+
     el.innerHTML = `
       <div class="card">
         <form id="entry-form">
           <div class="field">
             <label for="testName">テスト名</label>
-            <select id="testName"><option value="">選択してください</option>${TEST_NAMES.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
+            <select id="testName"><option value="">選択してください</option>${testNames.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
           </div>
           <div class="subject-grid">
             <div class="subject-grid-header"><span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span></div>
-            ${SUBJECTS.map((s) => `
-              <div class="subject-row">
-                <label>${s}</label>
-                <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" /></div>
-                <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
-                <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
-              </div>`).join("")}
+            ${subjectGridHtml}
           </div>
           <div id="form-error" class="msg error"></div>
           <div id="form-success" class="msg success">記録しました。</div>
           <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
         </form>
-      </div>
-            <div class="card">
-        <p class="info-title">テスト日程</p>
-        <p class="field-note" style="margin-top:0;">テスト初日を入力しよう。当日になると目標点は入力できなくなります</p>
-        ${TEST_NAMES.map((name) => renderTestDateRow(name)).join("")}
       </div>
       <div class="card info-card">
         <p class="info-title">バッジについて</p>
@@ -692,8 +684,14 @@
           <div class="badge-legend-item">${GOLD_BADGE_SVG}<p class="diff">+20点〜</p></div>
         </div>
       </div>
+      <div class="card">
+        <p class="info-title">テスト日程</p>
+        <p class="field-note" style="margin-top:0;">テスト初日を入力しよう。当日になると目標点は入力できなくなります</p>
+        ${testNames.map((name) => renderTestDateRow(name)).join("")}
+      </div>
       <p class="section-title">テストごとの記録</p>
       <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
+      ${isHS ? renderMockExamSection() : ""}
     `;
     const testsListEl = document.getElementById("tests-list");
     tests.forEach((t) => {
@@ -701,17 +699,25 @@
       card.className = "card test-card";
       const photoSubmitted = !!t.photo;
       const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null || s.target !== null);
-      const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
-      const total9 = calcTotal(t.subjects, SUBJECTS);
+      let totalsHtml = "";
+      if (!isHS) {
+        const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
+        const total9 = calcTotal(t.subjects, SUBJECTS);
+        totalsHtml = `
+          <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
+          <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
+        `;
+      }
       card.innerHTML = `
         <div class="test-header"><p class="test-name">${t.testName}</p></div>
         ${filledSubjects.map((s) => {
           let badges = "";
           if (s.score !== null && s.target !== null) { const b = badgeForDiff(s.score - s.target); if (b) badges += b; }
           if (s.score !== null && s.average !== null) { const b = badgeForDiff(s.score - s.average); if (b) badges += b; }
+          const label = isHS ? escapeHtml(subjectNames[s.subject] || s.subject) : s.subject;
           return `
           <div class="entry">
-            <div>${s.subject}</div>
+            <div>${label}</div>
             <div style="text-align:right">
               ${s.score !== null ? `${s.score}点` : "-"}${badges ? `<span class="score-badges">${badges}</span>` : ""}
               <span class="entry-meta">
@@ -721,8 +727,7 @@
             </div>
           </div>`;
         }).join("")}
-        <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
-        <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
+        ${totalsHtml}
         <div class="photo-row">
           <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span></span>
           <label class="photo-btn ${photoSubmitted ? "done" : ""}">
@@ -735,7 +740,10 @@
     });
     document.getElementById("entry-form").addEventListener("submit", handleAddScore);
     document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
-    document.querySelectorAll(".test-date-select-group").forEach((group) => {
+    document.querySelectorAll(".hs-slot-edit-btn").forEach((btn) => {
+      btn.addEventListener("click", () => editSubjectName(btn.dataset.slotKey, btn.dataset.currentName));
+    });
+    document.querySelectorAll('.test-date-select-group').forEach((group) => {
       const testName = group.dataset.testName;
       const selects = group.querySelectorAll("select");
       const btn = document.querySelector(`.test-date-save-btn[data-test-name="${testName}"]`);
@@ -759,77 +767,113 @@
         handleSetTestDate(testName, dateStr);
       });
     });
+    const mockUploadInput = document.getElementById("mock-exam-photo-input");
+    if (mockUploadInput) mockUploadInput.addEventListener("change", handleMockExamPhotosSelected);
   }
 
-  function mergeTestScoresLocally(testName, submittedSubjects) {
-    currentData.tests = currentData.tests || [];
-    let test = currentData.tests.find((t) => t.testName === testName);
-    if (!test) {
-      test = { testName, subjects: SUBJECTS.map((s) => ({ subject: s, score: null, average: null, target: null })) };
-      currentData.tests.push(test);
+  function renderTestDateRow(testName) {
+    const testDates = currentData.testDates || [];
+    const info = testDates.find((t) => t.testName === testName) || { testDate: "", locked: false, daysUntil: null };
+    let countdownHtml = "";
+    if (info.testDate) {
+      if (info.daysUntil > 0) countdownHtml = `<span class="test-date-countdown">あと${info.daysUntil}日</span>`;
+      else if (info.daysUntil === 0) countdownHtml = `<span class="test-date-countdown today">本日!</span>`;
+      else countdownHtml = `<span class="test-date-locked-flag">終了</span>`;
     }
-    submittedSubjects.forEach((sub) => {
-      const entry = test.subjects.find((s) => s.subject === sub.subject);
-      if (!entry) return;
-      if (sub.score !== null) entry.score = sub.score;
-      if (sub.average !== null) entry.average = sub.average;
-      if (sub.target !== null) entry.target = sub.target;
-    });
+
+    if (info.locked) {
+      const parts = info.testDate.split("-");
+      return `
+        <div class="test-date-row">
+          <span class="test-date-name">${testName}</span>
+          <div class="test-date-input-wrap">
+            <span class="test-date-fixed">${Number(parts[1])}/${Number(parts[2])}</span>
+            ${countdownHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    const currentYear = new Date().getFullYear();
+    const years = [currentYear, currentYear + 1];
+    let selY = "", selM = "", selD = "";
+    if (info.testDate) {
+      const parts = info.testDate.split("-");
+      selY = String(Number(parts[0])); selM = String(Number(parts[1])); selD = String(Number(parts[2]));
+    }
+    const yearOptions = `<option value="" disabled ${selY === "" ? "selected" : ""}>年</option>` + years.map((y) => `<option value="${y}" ${String(y) === selY ? "selected" : ""}>${y}年</option>`).join("");
+    const monthOptions = `<option value="" disabled ${selM === "" ? "selected" : ""}>月</option>` + Array.from({ length: 12 }, (_, i) => i + 1).map((mo) => `<option value="${mo}" ${String(mo) === selM ? "selected" : ""}>${mo}月</option>`).join("");
+    const dayOptions = `<option value="" disabled ${selD === "" ? "selected" : ""}>日</option>` + Array.from({ length: 31 }, (_, i) => i + 1).map((da) => `<option value="${da}" ${String(da) === selD ? "selected" : ""}>${da}日</option>`).join("");
+    const allFilled = selY !== "" && selM !== "" && selD !== "";
+
+    return `
+      <div class="test-date-row">
+        <span class="test-date-name">${testName}</span>
+        <div class="test-date-input-wrap">
+          <div class="test-date-select-group" data-test-name="${testName}">
+            <select class="test-date-select-y">${yearOptions}</select>
+            <select class="test-date-select-m">${monthOptions}</select>
+            <select class="test-date-select-d">${dayOptions}</select>
+          </div>
+          <button type="button" class="test-date-save-btn" data-test-name="${testName}" ${allFilled ? "" : "disabled"}>設定</button>
+          ${countdownHtml}
+        </div>
+      </div>
+    `;
   }
 
-  async function handleAddScore(e) {
-    e.preventDefault();
-    const testNameEl = document.getElementById("testName");
-    const errorEl = document.getElementById("form-error");
-    const successEl = document.getElementById("form-success");
-    const btn = document.getElementById("submit-btn");
-    errorEl.classList.remove("show"); successEl.classList.remove("show");
-    const testName = testNameEl.value;
-    if (!testName) return showFieldError(errorEl, "テスト名を選択してください");
+  function renderMockExamSection() {
+    const mockExams = currentData.mockExams || [];
+    return `
+      <p class="section-title">模試の成績表</p>
+      <div class="card">
+        ${mockExams.map((m) => {
+          const statusHtml = m.filled
+            ? `<span class="badge done">提出済み(${formatDate(m.submittedAt)})</span>`
+            : `<span class="badge pending">未提出</span>`;
+          const linksHtml = m.filled
+            ? `<div class="mock-exam-links">${m.photos.map((p) => `<a href="${p.url}" target="_blank" rel="noopener">写真${p.photoIndex}</a>`).join("")}</div>`
+            : "";
+          return `
+            <div class="mock-exam-slot">
+              <span class="mock-exam-name">${m.slotKey}</span>
+              <div class="mock-exam-meta">${statusHtml}${linksHtml}</div>
+            </div>
+          `;
+        }).join("")}
+        <label class="mock-exam-upload-btn">
+          📷 模試の成績表を撮影・アップロード(空いている枠に自動で入ります)
+          <input type="file" id="mock-exam-photo-input" accept="image/*" multiple style="display:none;" />
+        </label>
+        <p class="field-note" style="margin:8px 0 0;">6枠すべて埋まると、一番古いものから上書きされます</p>
+      </div>
+    `;
+  }
 
-    const subjects = []; let validationError = "";
-    SUBJECTS.forEach((subject) => {
-      if (validationError) return;
-      const scoreInput = document.querySelector(`input[data-subject="${subject}"][data-field="score"]`);
-      const avgInput = document.querySelector(`input[data-subject="${subject}"][data-field="average"]`);
-      const targetInput = document.querySelector(`input[data-subject="${subject}"][data-field="target"]`);
-      const scoreRaw = scoreInput.value, avgRaw = avgInput.value, targetRaw = targetInput.value;
-      if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return;
-      const parseOrError = (raw, label) => {
-        if (raw === "") return null;
-        const n = Number(raw);
-        if (Number.isNaN(n) || n < 0 || n > 100) { validationError = `${subject}の${label}は0〜100の数字で入力してください`; return null; }
-        return n;
-      };
-      const target = parseOrError(targetRaw, "目標点"); if (validationError) return;
-      const score = parseOrError(scoreRaw, "点数"); if (validationError) return;
-      const average = parseOrError(avgRaw, "平均点"); if (validationError) return;
-      if (target !== null) {
-        const prev = getPreviousScore(subject, testName);
-        if (prev !== null && target < prev) { validationError = `${subject}の目標点は、前回の点数(${prev}点)以上にしよう`; return; }
-      }
-      subjects.push({ subject, score, average, target });
-    });
-    if (validationError) return showFieldError(errorEl, validationError);
-    if (subjects.length === 0) return showFieldError(errorEl, "少なくとも1科目は入力してください");
+  function editSubjectName(slotKey, currentName) {
+    const newName = window.prompt("科目名を入力してください(例:コミュニケーション英語)", currentName || "");
+    if (newName === null) return;
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    handleSetSubjectNameRequest(slotKey, trimmed);
+  }
 
-    btn.disabled = true; btn.textContent = "保存中...";
+  async function handleSetSubjectNameRequest(slotKey, subjectName) {
     try {
-      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addTestScores", studentId, testName, subjects }) });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "setSubjectName", studentId, slotKey, subjectName }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-      mergeTestScoresLocally(testName, subjects);
-      successEl.classList.add("show");
+      currentData.subjectNames = currentData.subjectNames || {};
+      currentData.subjectNames[slotKey] = result.subjectName;
       renderGrades(document.getElementById("tab-content"));
-      showToast("記録しました");
-      syncRankOnly();
+      showToast("科目名を登録しました");
     } catch (err) {
-      showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
-    } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
+      showToast(err.message || "登録に失敗しました。もう一度お試しください。");
+    }
   }
-      async function handleSetTestDate(testName, testDate) {
+
+  async function handleSetTestDate(testName, testDate) {
     if (!testDate) return;
-    // 既に保存済みの日付と同じ場合(=カレンダーの誤発火など)は、何もしない
     const testDates = currentData.testDates || [];
     const existing = testDates.find((t) => t.testName === testName);
     if (existing && existing.testDate === testDate) return;
@@ -855,6 +899,78 @@
   }
 
   function showFieldError(el, msg) { el.textContent = msg; el.classList.add("show"); }
+
+  function mergeTestScoresLocally(testName, submittedSubjects) {
+    currentData.tests = currentData.tests || [];
+    const isHS = !!currentData.isHighSchool;
+    const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+    let test = currentData.tests.find((t) => t.testName === testName);
+    if (!test) {
+      test = { testName, subjects: subjectKeys.map((s) => ({ subject: s, score: null, average: null, target: null })) };
+      currentData.tests.push(test);
+    }
+    submittedSubjects.forEach((sub) => {
+      const entry = test.subjects.find((s) => s.subject === sub.subject);
+      if (!entry) return;
+      if (sub.score !== null) entry.score = sub.score;
+      if (sub.average !== null) entry.average = sub.average;
+      if (sub.target !== null) entry.target = sub.target;
+    });
+  }
+
+  async function handleAddScore(e) {
+    e.preventDefault();
+    const testNameEl = document.getElementById("testName");
+    const errorEl = document.getElementById("form-error");
+    const successEl = document.getElementById("form-success");
+    const btn = document.getElementById("submit-btn");
+    errorEl.classList.remove("show"); successEl.classList.remove("show");
+    const testName = testNameEl.value;
+    if (!testName) return showFieldError(errorEl, "テスト名を選択してください");
+
+    const isHS = !!(currentData && currentData.isHighSchool);
+    const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+
+    const subjects = []; let validationError = "";
+    subjectKeys.forEach((subjectKey) => {
+      if (validationError) return;
+      const scoreInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="score"]`);
+      const avgInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="average"]`);
+      const targetInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="target"]`);
+      const scoreRaw = scoreInput.value, avgRaw = avgInput.value, targetRaw = targetInput.value;
+      if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return;
+      const parseOrError = (raw, label) => {
+        if (raw === "") return null;
+        const n = Number(raw);
+        if (Number.isNaN(n) || n < 0 || n > 100) { validationError = `${label}は0〜100の数字で入力してください`; return null; }
+        return n;
+      };
+      const target = parseOrError(targetRaw, "目標点"); if (validationError) return;
+      const score = parseOrError(scoreRaw, "点数"); if (validationError) return;
+      const average = parseOrError(avgRaw, "平均点"); if (validationError) return;
+      if (target !== null) {
+        const prev = getPreviousScore(subjectKey, testName);
+        if (prev !== null && target < prev) { validationError = `目標点は、前回の点数(${prev}点)以上にしよう`; return; }
+      }
+      subjects.push({ subject: subjectKey, score, average, target });
+    });
+    if (validationError) return showFieldError(errorEl, validationError);
+    if (subjects.length === 0) return showFieldError(errorEl, "少なくとも1科目は入力してください");
+
+    btn.disabled = true; btn.textContent = "保存中...";
+    try {
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addTestScores", studentId, testName, subjects }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      mergeTestScoresLocally(testName, subjects);
+      successEl.classList.add("show");
+      renderGrades(document.getElementById("tab-content"));
+      showToast("記録しました");
+      syncRankOnly();
+    } catch (err) {
+      showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
+    } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
+  }
 
   function compressImage(file, maxWidth = 1600, quality = 0.7) {
     return new Promise((resolve, reject) => {
@@ -883,12 +999,41 @@
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadPhoto", studentId, testName, imageBase64: base64, mimeType: "image/jpeg" }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
+      const isHS = !!currentData.isHighSchool;
+      const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
       let test = (currentData.tests || []).find((t) => t.testName === testName);
-      if (!test) { test = { testName, subjects: SUBJECTS.map((s) => ({ subject: s, score: null, average: null, target: null })) }; currentData.tests.push(test); }
+      if (!test) { test = { testName, subjects: subjectKeys.map((s) => ({ subject: s, score: null, average: null, target: null })) }; currentData.tests.push(test); }
       test.photo = { submittedAt: result.submittedAt, driveFileUrl: result.url };
       renderGrades(document.getElementById("tab-content"));
       showToast("成績表をアップロードしました");
     } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
+  }
+
+  async function handleMockExamPhotosSelected(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const label = e.target.closest(".mock-exam-upload-btn");
+    const originalText = label.childNodes[0].textContent;
+    label.childNodes[0].textContent = "アップロード中...";
+    try {
+      const images = [];
+      for (const file of files) {
+        const base64 = await compressImage(file);
+        images.push({ imageBase64: base64, mimeType: "image/jpeg" });
+      }
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadMockExamPhotos", studentId, images }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      currentData.mockExams = currentData.mockExams || [];
+      const idx = currentData.mockExams.findIndex((m) => m.slotKey === result.slotKey);
+      const entry = { slotKey: result.slotKey, filled: true, submittedAt: result.submittedAt, photos: result.photos };
+      if (idx === -1) currentData.mockExams.push(entry); else currentData.mockExams[idx] = entry;
+      renderGrades(document.getElementById("tab-content"));
+      showToast(`${result.slotKey}にアップロードしました`);
+    } catch (err) {
+      showToast("アップロードに失敗しました。もう一度お試しください。");
+      label.childNodes[0].textContent = originalText;
+    }
   }
 
   // ---------- 学習手帳タブ ----------
@@ -1294,7 +1439,7 @@
     el.innerHTML = html;
   }
 
-  // ---------- スケジュールタブ(当月・翌月をプルダウンで切り替え。再通信なし) ----------
+  // ---------- スケジュールタブ ----------
   const SCHEDULE_PERIODS = ["1限", "2限", "3限", "4限", "5限", "6限"];
   const SCHEDULE_TIMES = ["13:00〜14:20", "14:30〜15:50", "16:00〜17:20", "17:30〜18:50", "19:00〜20:20", "20:30〜21:50"];
   const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
