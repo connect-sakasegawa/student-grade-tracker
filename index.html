@@ -746,7 +746,10 @@
         }).join("")}
         ${totalsHtml}
         <div class="photo-row">
-          <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span>${photoSubmitted ? ` <a href="${t.photo.driveFileUrl}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:underline;">写真を見る</a>` : ""}</span>
+          <div>
+            <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span></span>
+            ${photoSubmitted ? `<div style="margin-top:4px;"><a href="${t.photo.driveFileUrl}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:underline;">写真を見る</a></div>` : ""}
+          </div>
           <label class="photo-btn ${photoSubmitted ? "done" : ""}">
             ${photoSubmitted ? "写真を撮り直す" : "成績表を撮影"}
             <input type="file" accept="image/*" capture="environment" data-test-name="${t.testName}" class="photo-input" />
