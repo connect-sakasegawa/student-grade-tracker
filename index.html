@@ -140,6 +140,8 @@
 
   .test-date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); flex-wrap: wrap; }
   .test-date-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .test-date-inline { margin: -4px 0 14px; padding: 10px 12px; background: var(--paper); border: 1px dashed var(--line); border-radius: 8px; }
+  .test-date-inline .test-date-row { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
   .test-date-name { font-size: 11.5px; font-weight: 600; flex-shrink: 0; width: 100%; white-space: nowrap; margin-bottom: 4px; }
   .test-date-input-wrap { width: 100%; display: flex; align-items: center; gap: 6px; }
   .test-date-input-wrap input[type="date"] { flex: 1; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff; color: var(--ink); }
@@ -697,6 +699,7 @@
             <label for="testName">テスト名</label>
             <select id="testName"><option value="">選択してください</option>${testNames.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
           </div>
+          <div id="test-date-container"></div>
           <div class="subject-grid">
             <div class="subject-grid-header"><span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span></div>
             ${subjectGridHtml}
@@ -714,11 +717,6 @@
           <div class="badge-legend-item">${SILVER_BADGE_SVG}<p class="diff">+10〜19点</p></div>
           <div class="badge-legend-item">${GOLD_BADGE_SVG}<p class="diff">+20点〜</p></div>
         </div>
-      </div>
-      <div class="card">
-        <p class="info-title">テスト日程</p>
-        <p class="field-note" style="margin-top:0;">テスト初日を入力しよう。当日になると目標点は入力できなくなります</p>
-        ${testNames.map((name) => renderTestDateRow(name)).join("")}
       </div>
       <p class="section-title">テストごとの記録</p>
       <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
@@ -777,30 +775,8 @@
     document.querySelectorAll(".hs-slot-edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => editSubjectName(btn.dataset.slotKey, btn.dataset.currentName));
     });
-    document.querySelectorAll('.test-date-select-group').forEach((group) => {
-      const testName = group.dataset.testName;
-      const selects = group.querySelectorAll("select");
-      const btn = document.querySelector(`.test-date-save-btn[data-test-name="${testName}"]`);
-      selects.forEach((s) => s.addEventListener("change", () => {
-        const filled = Array.from(selects).every((sel) => sel.value !== "");
-        if (btn) btn.disabled = !filled;
-      }));
-    });
-    document.querySelectorAll(".test-date-save-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const testName = btn.dataset.testName;
-        const group = document.querySelector(`.test-date-select-group[data-test-name="${testName}"]`);
-        if (!group) return;
-        const y = group.querySelector(".test-date-select-y").value;
-        const m = group.querySelector(".test-date-select-m").value;
-        const d = group.querySelector(".test-date-select-d").value;
-        if (!y || !m || !d) return;
-        const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        btn.disabled = true;
-        btn.textContent = "設定中...";
-        handleSetTestDate(testName, dateStr);
-      });
-    });
+    document.getElementById("testName").addEventListener("change", renderTestDateContainer);
+    renderTestDateContainer();
     const mockUploadInput = document.getElementById("mock-exam-photo-input");
     if (mockUploadInput) mockUploadInput.addEventListener("change", handleMockExamPhotosSelected);
   }
@@ -841,6 +817,7 @@
     const allFilled = selY !== "" && selM !== "" && selD !== "";
 
     return `
+      return `
       <div class="test-date-row">
         <span class="test-date-name">${testName}</span>
         <div class="test-date-input-wrap">
@@ -854,6 +831,40 @@
         </div>
       </div>
     `;
+  }
+
+  // 選択中のテスト名に応じて、その回のテスト初日欄だけを表示する
+  function renderTestDateContainer() {
+    const container = document.getElementById("test-date-container");
+    const select = document.getElementById("testName");
+    if (!container || !select) return;
+    const testName = select.value;
+    if (!testName) { container.innerHTML = ""; return; }
+    container.innerHTML = `
+      <div class="test-date-inline">
+        <p class="field-note" style="margin:-4px 0 10px;">テスト初日を入力しよう。当日になると目標点は入力できなくなります</p>
+        ${renderTestDateRow(testName)}
+      </div>
+    `;
+    const group = container.querySelector(".test-date-select-group");
+    const btn = container.querySelector(".test-date-save-btn");
+    if (group && btn) {
+      const selects = group.querySelectorAll("select");
+      selects.forEach((s) => s.addEventListener("change", () => {
+        const filled = Array.from(selects).every((sel) => sel.value !== "");
+        btn.disabled = !filled;
+      }));
+      btn.addEventListener("click", () => {
+        const y = group.querySelector(".test-date-select-y").value;
+        const m = group.querySelector(".test-date-select-m").value;
+        const d = group.querySelector(".test-date-select-d").value;
+        if (!y || !m || !d) return;
+        const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        btn.disabled = true;
+        btn.textContent = "設定中...";
+        handleSetTestDate(testName, dateStr);
+      });
+    }
   }
 
   function renderMockExamSection() {
@@ -924,11 +935,11 @@
       const daysUntil = Math.round((d - t) / 86400000);
       const entry = { testName, testDate, locked, daysUntil };
       if (idx === -1) currentData.testDates.push(entry); else currentData.testDates[idx] = entry;
-      renderGrades(document.getElementById("tab-content"));
+      renderTestDateContainer();
       showToast("テスト日程を保存しました");
     } catch (err) {
       showToast(err.message || "保存に失敗しました。もう一度お試しください。");
-      renderGrades(document.getElementById("tab-content"));
+      renderTestDateContainer();
     }
   }
 
