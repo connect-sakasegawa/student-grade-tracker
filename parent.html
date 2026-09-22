@@ -109,11 +109,15 @@
   .test-card { margin-bottom: 12px; }
   .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .test-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; color: var(--ink); }
+  .test-edit-btn { background: none; border: 1px solid var(--brand); color: var(--brand); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .test-edit-btn.active { background: var(--brand); color: #fff; }
 
   .entry { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
   .entry:last-child { border-bottom: none; }
   .entry.total { font-weight: 700; }
   .entry-meta { color: var(--muted); font-size: 12px; display: block; }
+
+  .test-edit-form { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
 
   .photo-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; }
   .photo-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 13px; font-weight: 600; }
@@ -134,7 +138,6 @@
   .test-date-countdown.today { color: #C0392B; }
   .test-date-locked-flag { font-size: 10.5px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
   .test-date-fixed { font-size: 13px; font-weight: 600; color: var(--ink); }
-  .test-date-inline { margin: -4px 0 14px; padding: 10px 12px; background: var(--paper); border: 1px dashed var(--line); border-radius: 8px; }
 
   .mock-exam-slot { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); gap: 8px; }
   .mock-exam-slot:last-child { border-bottom: none; }
@@ -174,12 +177,12 @@
 </head>
 <body>
 
-<div id="app"><div class="loading-screen"><p class="loading-title">CONNEC＋</p><p class="loading-sub">保護者用アプリ</p></div></div>
+<div id="app"><div class="loading-screen"><p class="loading-title">CONNEC＋</p><p class="loading-sub">『自分ひとりで勉強できる力と姿勢を育む』</p></div></div>
 <div id="toast-container"></div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
-  const LOADING_TEXT = `<p class="loading-title">CONNEC＋</p><p class="loading-sub">保護者用アプリ</p>`;
+  const LOADING_TEXT = `<p class="loading-title">CONNEC＋</p><p class="loading-sub">『自分ひとりで勉強できる力と姿勢を育む』</p>`;
 
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
   const MAIN5_SUBJECTS = ["国語", "社会", "数学", "理科", "英語"];
@@ -203,6 +206,7 @@
   let currentData = null;
   let currentTab = "grades";
   let selectedScheduleMonthIndex = 0;
+  let editingTestName = null; // 現在「修正」を開いているテスト回(1つだけ開ける)
 
   function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function showToast(message) {
@@ -221,8 +225,6 @@
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
   function formatDate(iso) { if (!iso) return ""; const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}`; }
-  function formatMD(ymd) { const d = new Date(ymd + "T00:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; }
-  function todayYMD() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 
   function calcTotal(subjects, list) {
     const relevant = subjects.filter((s) => list.indexOf(s.subject) !== -1 && s.score !== null);
@@ -275,6 +277,7 @@
 
   function switchTab(tab) {
     currentTab = tab;
+    editingTestName = null;
     renderShell();
     if (tab === "schedule" && currentData.hasUnreadSchedule) markScheduleSeen();
   }
@@ -309,188 +312,149 @@
     else if (currentTab === "schedule") renderSchedule(contentEl);
   }
 
-  // ---------- 成績表タブ ----------
+  // ---------- 成績表タブ(閲覧+「修正」ボタンで全枠を開いて編集) ----------
   function renderGrades(el) {
     const isHS = !!(currentData && currentData.isHighSchool);
     const testNames = isHS ? HS_TEST_NAMES : TEST_NAMES;
     const tests = (currentData.tests || []).slice().sort((a, b) => testNames.indexOf(a.testName) - testNames.indexOf(b.testName));
     const subjectNames = currentData.subjectNames || {};
 
+    el.innerHTML = `
+      <div class="card grades-guide-card">
+        <p class="grades-guide-title">保護者用アプリについて</p>
+        <p class="grades-guide-item">お子様が入力した成績を確認いただけます。誤りがある場合は、各テストの「修正」ボタンから直接修正できます。</p>
+      </div>
+      <p class="section-title">テストごとの記録</p>
+      <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
+    `;
+
+    const testsListEl = document.getElementById("tests-list");
+    testNames.forEach((testName) => {
+      const t = tests.find((x) => x.testName === testName);
+      const card = document.createElement("div");
+      card.className = "card test-card";
+      const isEditing = editingTestName === testName;
+
+      if (!t && !isEditing) {
+        card.innerHTML = `
+          <div class="test-header">
+            <p class="test-name">${testName}</p>
+            <button type="button" class="test-edit-btn" data-test-name="${testName}">修正</button>
+          </div>
+          <p class="empty" style="padding:10px 0;">まだ記録がありません</p>
+        `;
+        testsListEl.appendChild(card);
+        return;
+      }
+
+      const photoSubmitted = !!(t && t.photo);
+      let bodyHtml = "";
+      if (t && !isEditing) {
+        const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null || s.target !== null);
+        let totalsHtml = "";
+        if (!isHS) {
+          const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
+          const total9 = calcTotal(t.subjects, SUBJECTS);
+          totalsHtml = `
+            <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
+            <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
+          `;
+        }
+        bodyHtml = `
+          ${filledSubjects.length === 0 ? '<p class="empty" style="padding:10px 0;">まだ記録がありません</p>' : filledSubjects.map((s) => {
+            const label = isHS ? escapeHtml(subjectNames[s.subject] || s.subject) : s.subject;
+            return `
+            <div class="entry">
+              <div>${label}</div>
+              <div style="text-align:right">
+                ${s.score !== null ? `${s.score}点` : "-"}
+                <span class="entry-meta">
+                  ${s.target !== null ? `目標${s.target}点` : ""}
+                  ${s.average !== null ? `${s.target !== null ? " / " : ""}平均${s.average}点` : ""}
+                </span>
+              </div>
+            </div>`;
+          }).join("")}
+          ${totalsHtml}
+          <div class="photo-row">
+            <div>
+              <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span></span>
+              ${photoSubmitted ? `<div style="margin-top:4px;"><a href="${t.photo.driveFileUrl}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:underline;">写真を見る</a></div>` : ""}
+            </div>
+            <label class="photo-btn ${photoSubmitted ? "done" : ""}">
+              ${photoSubmitted ? "写真を撮り直す" : "成績表を撮影"}
+              <input type="file" accept="image/*" capture="environment" data-test-name="${testName}" class="photo-input" />
+            </label>
+          </div>
+        `;
+      } else if (isEditing) {
+        bodyHtml = `<div class="test-edit-form">${renderEditForm(testName, t, isHS, subjectNames)}</div>`;
+      }
+
+      card.innerHTML = `
+        <div class="test-header">
+          <p class="test-name">${testName}</p>
+          <button type="button" class="test-edit-btn ${isEditing ? "active" : ""}" data-test-name="${testName}">${isEditing ? "閉じる" : "修正"}</button>
+        </div>
+        ${bodyHtml}
+      `;
+      testsListEl.appendChild(card);
+    });
+
+    document.querySelectorAll(".test-edit-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const testName = btn.dataset.testName;
+        editingTestName = editingTestName === testName ? null : testName;
+        renderGrades(document.getElementById("tab-content"));
+      });
+    });
+    document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
+    const editForm = document.getElementById("edit-form");
+    if (editForm) editForm.addEventListener("submit", handleAddScore);
+  }
+
+  function renderEditForm(testName, t, isHS, subjectNames) {
+    const subjectOf = (key) => (t ? t.subjects.find((s) => s.subject === key) : null);
     let subjectGridHtml = "";
     if (isHS) {
       HS_SUBJECT_GROUPS.forEach((group) => {
         subjectGridHtml += `<p class="hs-group-title">${group}</p>`;
         for (let i = 1; i <= HS_SLOTS_PER_SUBJECT; i++) {
           const slotKey = group + i;
+          const existing = subjectOf(slotKey);
           const displayName = subjectNames[slotKey] || `未設定${i}`;
           subjectGridHtml += `
             <div class="subject-row">
               <div class="hs-slot-label"><span class="hs-slot-name">${escapeHtml(displayName)}</span></div>
-              <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="target" /></div>
-              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="score" />
-              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="average" />
+              <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="target" value="${existing && existing.target !== null ? existing.target : ""}" /></div>
+              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="score" value="${existing && existing.score !== null ? existing.score : ""}" />
+              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="average" value="${existing && existing.average !== null ? existing.average : ""}" />
             </div>
           `;
         }
       });
     } else {
-      subjectGridHtml = SUBJECTS.map((s) => `
+      subjectGridHtml = SUBJECTS.map((s) => {
+        const existing = subjectOf(s);
+        return `
         <div class="subject-row">
           <label>${s}</label>
-          <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" /></div>
-          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
-          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
-        </div>`).join("");
+          <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" value="${existing && existing.target !== null ? existing.target : ""}" /></div>
+          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" value="${existing && existing.score !== null ? existing.score : ""}" />
+          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" value="${existing && existing.average !== null ? existing.average : ""}" />
+        </div>`;
+      }).join("");
     }
 
-    el.innerHTML = `
-      <div class="card grades-guide-card">
-        <p class="grades-guide-title">入力のしかた</p>
-        <p class="grades-guide-item"><strong>目標点</strong>テスト前日までに入力しましょう。前回の得点より低い点数は入力できません。</p>
-        <p class="grades-guide-item"><strong>得点</strong>テストが返却されたら、なるべく早く入力しましょう。</p>
-        <p class="grades-guide-item"><strong>平均点</strong>学校から成績表が返却されたら入力しましょう。小数点以下は切り捨てて入力してください。</p>
-        <p class="grades-guide-item"><strong>成績表</strong>下にある「テストごとの記録」から、成績表の写真をアップロードしましょう。</p>
-      </div>
-      <div class="card">
-        <form id="entry-form">
-          <div class="field">
-            <label for="testName">テスト名</label>
-            <select id="testName"><option value="">選択してください</option>${testNames.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
-          </div>
-          <div id="test-date-container"></div>
-          <div class="subject-grid">
-            <div class="subject-grid-header"><span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span></div>
-            ${subjectGridHtml}
-          </div>
-          <div id="form-error" class="msg error"></div>
-          <div id="form-success" class="msg success">記録しました。</div>
-          <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
-        </form>
-      </div>
-      <p class="section-title">テストごとの記録</p>
-      <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
-      ${isHS ? renderMockExamSection() : ""}
-    `;
-    const testsListEl = document.getElementById("tests-list");
-    tests.forEach((t) => {
-      const card = document.createElement("div");
-      card.className = "card test-card";
-      const photoSubmitted = !!t.photo;
-      const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null || s.target !== null);
-      let totalsHtml = "";
-      if (!isHS) {
-        const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
-        const total9 = calcTotal(t.subjects, SUBJECTS);
-        totalsHtml = `
-          <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
-          <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
-        `;
-      }
-      card.innerHTML = `
-        <div class="test-header"><p class="test-name">${t.testName}</p></div>
-        ${filledSubjects.map((s) => {
-          const label = isHS ? escapeHtml(subjectNames[s.subject] || s.subject) : s.subject;
-          return `
-          <div class="entry">
-            <div>${label}</div>
-            <div style="text-align:right">
-              ${s.score !== null ? `${s.score}点` : "-"}
-              <span class="entry-meta">
-                ${s.target !== null ? `目標${s.target}点` : ""}
-                ${s.average !== null ? `${s.target !== null ? " / " : ""}平均${s.average}点` : ""}
-              </span>
-            </div>
-          </div>`;
-        }).join("")}
-        ${totalsHtml}
-        <div class="photo-row">
-          <div>
-            <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span></span>
-            ${photoSubmitted ? `<div style="margin-top:4px;"><a href="${t.photo.driveFileUrl}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:underline;">写真を見る</a></div>` : ""}
-          </div>
-          <label class="photo-btn ${photoSubmitted ? "done" : ""}">
-            ${photoSubmitted ? "写真を撮り直す" : "成績表を撮影"}
-            <input type="file" accept="image/*" capture="environment" data-test-name="${t.testName}" class="photo-input" />
-          </label>
-        </div>
-      `;
-      testsListEl.appendChild(card);
-    });
-    document.getElementById("entry-form").addEventListener("submit", handleAddScore);
-    document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
-    document.getElementById("testName").addEventListener("change", renderTestDateContainer);
-    renderTestDateContainer();
-    const mockUploadInput = document.getElementById("mock-exam-photo-input");
-    if (mockUploadInput) mockUploadInput.addEventListener("change", handleMockExamPhotosSelected);
-  }
-
-  // テスト初日は閲覧のみ(保護者からは入力・修正不可)
-  function renderTestDateRow(testName) {
-    const testDates = currentData.testDates || [];
-    const info = testDates.find((t) => t.testName === testName) || { testDate: "", locked: false, daysUntil: null };
-    if (!info.testDate) {
-      return `
-        <div class="test-date-row">
-          <span class="test-date-name">${testName}</span>
-          <div class="test-date-input-wrap"><span class="entry-meta">まだ設定されていません</span></div>
-        </div>
-      `;
-    }
-    let countdownHtml = "";
-    if (info.daysUntil > 0) countdownHtml = `<span class="test-date-countdown">あと${info.daysUntil}日</span>`;
-    else if (info.daysUntil === 0) countdownHtml = `<span class="test-date-countdown today">本日!</span>`;
-    else countdownHtml = `<span class="test-date-locked-flag">終了</span>`;
-    const parts = info.testDate.split("-");
     return `
-      <div class="test-date-row">
-        <span class="test-date-name">${testName}</span>
-        <div class="test-date-input-wrap">
-          <span class="test-date-fixed">${Number(parts[1])}/${Number(parts[2])}</span>
-          ${countdownHtml}
+      <form id="edit-form" data-test-name="${testName}">
+        <div class="subject-grid">
+          <div class="subject-grid-header"><span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span></div>
+          ${subjectGridHtml}
         </div>
-      </div>
-    `;
-  }
-
-  function renderTestDateContainer() {
-    const container = document.getElementById("test-date-container");
-    const select = document.getElementById("testName");
-    if (!container || !select) return;
-    const testName = select.value;
-    if (!testName) { container.innerHTML = ""; return; }
-    container.innerHTML = `
-      <div class="test-date-inline">
-        <p class="field-note" style="margin:-4px 0 10px;">テスト初日(生徒本人が入力します)</p>
-        ${renderTestDateRow(testName)}
-      </div>
-    `;
-  }
-
-  function renderMockExamSection() {
-    const mockExams = currentData.mockExams || [];
-    return `
-      <p class="section-title">模試の成績表</p>
-      <div class="card">
-        ${mockExams.map((m) => {
-          const statusHtml = m.filled
-            ? `<span class="badge done">提出済み(${formatDate(m.submittedAt)})</span>`
-            : `<span class="badge pending">未提出</span>`;
-          const linksHtml = m.filled
-            ? `<div class="mock-exam-links">${m.photos.map((p) => `<a href="${p.url}" target="_blank" rel="noopener">写真${p.photoIndex}</a>`).join("")}</div>`
-            : "";
-          return `
-            <div class="mock-exam-slot">
-              <span class="mock-exam-name">${m.slotKey}</span>
-              <div class="mock-exam-meta">${statusHtml}${linksHtml}</div>
-            </div>
-          `;
-        }).join("")}
-        <label class="mock-exam-upload-btn">
-          📷 模試の成績表を撮影・アップロード(空いている枠に自動で入ります)
-          <input type="file" id="mock-exam-photo-input" accept="image/*" multiple style="display:none;" />
-        </label>
-        <p class="field-note" style="margin:8px 0 0;">6枠すべて埋まると、一番古いものから上書きされます</p>
-      </div>
+        <div id="form-error" class="msg error"></div>
+        <button class="submit" id="submit-btn" type="submit">この内容で保存する</button>
+      </form>
     `;
   }
 
@@ -516,13 +480,11 @@
 
   async function handleAddScore(e) {
     e.preventDefault();
-    const testNameEl = document.getElementById("testName");
+    const form = e.target;
+    const testName = form.dataset.testName;
     const errorEl = document.getElementById("form-error");
-    const successEl = document.getElementById("form-success");
     const btn = document.getElementById("submit-btn");
-    errorEl.classList.remove("show"); successEl.classList.remove("show");
-    const testName = testNameEl.value;
-    if (!testName) return showFieldError(errorEl, "テスト名を選択してください");
+    errorEl.classList.remove("show");
 
     const isHS = !!(currentData && currentData.isHighSchool);
     const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
@@ -530,9 +492,9 @@
     const subjects = []; let validationError = "";
     subjectKeys.forEach((subjectKey) => {
       if (validationError) return;
-      const scoreInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="score"]`);
-      const avgInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="average"]`);
-      const targetInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="target"]`);
+      const scoreInput = form.querySelector(`input[data-subject="${subjectKey}"][data-field="score"]`);
+      const avgInput = form.querySelector(`input[data-subject="${subjectKey}"][data-field="average"]`);
+      const targetInput = form.querySelector(`input[data-subject="${subjectKey}"][data-field="target"]`);
       const scoreRaw = scoreInput.value, avgRaw = avgInput.value, targetRaw = targetInput.value;
       if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return;
       const parseOrError = (raw, label) => {
@@ -559,12 +521,13 @@
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       mergeTestScoresLocally(testName, subjects);
-      successEl.classList.add("show");
+      editingTestName = null;
       renderGrades(document.getElementById("tab-content"));
       showToast("記録しました");
     } catch (err) {
       showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
-    } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
+      btn.disabled = false; btn.textContent = "この内容で保存する";
+    }
   }
 
   function compressImage(file, maxWidth = 1600, quality = 0.7) {
@@ -602,33 +565,6 @@
       renderGrades(document.getElementById("tab-content"));
       showToast("成績表をアップロードしました");
     } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
-  }
-
-  async function handleMockExamPhotosSelected(e) {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    const label = e.target.closest(".mock-exam-upload-btn");
-    const originalText = label.childNodes[0].textContent;
-    label.childNodes[0].textContent = "アップロード中...";
-    try {
-      const images = [];
-      for (const file of files) {
-        const base64 = await compressImage(file);
-        images.push({ imageBase64: base64, mimeType: "image/jpeg" });
-      }
-      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadMockExamPhotos", parentId, images }) });
-      const result = await res.json();
-      if (!result.ok) throw new Error(result.error || "failed");
-      currentData.mockExams = currentData.mockExams || [];
-      const idx = currentData.mockExams.findIndex((m) => m.slotKey === result.slotKey);
-      const entry = { slotKey: result.slotKey, filled: true, submittedAt: result.submittedAt, photos: result.photos };
-      if (idx === -1) currentData.mockExams.push(entry); else currentData.mockExams[idx] = entry;
-      renderGrades(document.getElementById("tab-content"));
-      showToast(`${result.slotKey}にアップロードしました`);
-    } catch (err) {
-      showToast("アップロードに失敗しました。もう一度お試しください。");
-      label.childNodes[0].textContent = originalText;
-    }
   }
 
   // ---------- スケジュールタブ(生徒用と同じ内容) ----------
