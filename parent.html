@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>CONNEC＋ 保護者用 | 個別指導塾コネクト</title>
+
+<meta name="theme-color" content="#D9720B" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="CONNEC＋保護者用" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<script>
+  (function () {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var STORAGE_KEY_PID = "connect-parent-id";
+      var urlPid = params.get("pid");
+      var pid = urlPid || localStorage.getItem(STORAGE_KEY_PID);
+      if (!pid) return;
+      var base = window.location.origin + window.location.pathname;
+      var manifest = {
+        name: "CONNEC＋保護者用 | 個別指導塾コネクト", short_name: "CONNEC＋保護者用",
+        start_url: base + "?pid=" + pid, scope: base, display: "standalone",
+        orientation: "portrait", background_color: "#FFF6EC", theme_color: "#D9720B", lang: "ja",
+        icons: [
+          { src: window.location.origin + window.location.pathname.replace("parent.html", "") + "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: window.location.origin + window.location.pathname.replace("parent.html", "") + "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+        ],
+      };
+      var dataUri = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
+      var link = document.createElement("link");
+      link.rel = "manifest"; link.href = dataUri;
+      document.head.appendChild(link);
+    } catch (err) {}
+  })();
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+  :root {
+    --ink: #1F2A44; --paper: #FFF6EC; --card: #FFFFFF; --line: #E8D9C6;
+    --brand: #D9720B; --brand-soft: #FBE7D0;
+    --growth: #3E7C59; --growth-soft: #E3EEE7;
+    --amber: #B24D2F; --amber-soft: #F3DCD3;
+    --muted: #7A6F63; --gold: #C99A2E; --gold-soft: #FBF0D0;
+    --target-blue: #2A5FB4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { padding: max(20px, env(safe-area-inset-top)) 16px calc(84px + env(safe-area-inset-bottom)); min-height: 100vh; }
+
+  .loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: var(--paper); }
+  .loading-title { font-family: 'Zilla Slab', serif; font-weight: 700; font-size: 36px; color: var(--brand); margin: 0 0 10px; }
+  .loading-sub { font-size: 16px; color: var(--muted); line-height: 1.6; }
+
+  .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
+  h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 22px; margin: 0 0 4px; line-height: 1.25; color: var(--brand); }
+  .student-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .info-card { background: var(--paper); border: 1px dashed var(--line); }
+  .info-card p { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
+  .info-card p:last-child { margin-bottom: 0; }
+  .info-title { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0 0 8px; }
+
+  .grades-guide-card { background: #FFF6C4; border: 1px solid var(--gold); }
+  .grades-guide-title { font-size: 13px; font-weight: 700; color: #8A6A1E; margin: 0 0 8px; text-decoration: underline; }
+  .grades-guide-item { font-size: 12.5px; color: var(--ink); line-height: 1.6; margin: 0 0 8px; }
+  .grades-guide-item:last-child { margin-bottom: 0; }
+  .grades-guide-item strong { display: block; color: #8A6A1E; margin-bottom: 2px; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .field select, .field input[type="text"] { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
+  .field select:focus, .field input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .field-note { font-size: 11.5px; color: var(--muted); margin: -8px 0 14px; line-height: 1.4; }
+
+  .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; display: none; }
+  .msg.error { color: #B3441E; background: #FCEBE3; }
+  .msg.success { color: var(--growth); background: var(--growth-soft); }
+  .msg.show { display: block; }
+
+  button.submit { width: 100%; padding: 13px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; background: var(--brand); color: #fff; }
+  button.submit:disabled { opacity: 0.6; }
+
+  .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 22px 0 10px; }
+
+  .subject-grid { margin-bottom: 4px; }
+  .subject-grid-header, .subject-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 6px; align-items: center; }
+  .subject-grid-header { font-size: 10.5px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+  .subject-grid-header span:nth-child(2), .subject-grid-header span:nth-child(3), .subject-grid-header span:nth-child(4) { text-align: center; }
+  .subject-grid-header span.target-label { color: var(--target-blue); }
+  .subject-row { padding: 6px 0; }
+  .subject-row label { font-size: 13.5px; font-weight: 600; }
+  .subject-row input { width: 100%; padding: 8px 4px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; text-align: center; background: #fff; color: var(--ink); }
+  .target-cell { border-right: 1px dashed var(--muted); padding-right: 6px; }
+  .target-cell input { color: var(--target-blue); font-weight: 600; }
+
+  .hs-group-title { font-size: 12.5px; font-weight: 700; color: var(--brand); margin: 14px 0 4px; }
+  .hs-group-title:first-child { margin-top: 0; }
+  .hs-slot-label { display: flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; }
+  .hs-slot-label .hs-slot-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .test-card { margin-bottom: 12px; }
+  .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .test-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; color: var(--ink); }
+
+  .entry { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .entry:last-child { border-bottom: none; }
+  .entry.total { font-weight: 700; }
+  .entry-meta { color: var(--muted); font-size: 12px; display: block; }
+
+  .photo-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; }
+  .photo-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 13px; font-weight: 600; }
+  .photo-btn.done { border-color: var(--growth); background: var(--growth-soft); color: var(--growth); }
+  input[type="file"] { display: none; }
+
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.done { background: var(--growth-soft); color: var(--growth); }
+  .badge.pending { background: var(--amber-soft); color: var(--amber); }
+
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 10px; }
+  .id-error { text-align: center; padding: 60px 16px; color: var(--muted); font-size: 14px; }
+
+  .test-date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .test-date-name { font-size: 11.5px; font-weight: 600; flex-shrink: 0; width: 100%; white-space: nowrap; margin-bottom: 4px; }
+  .test-date-input-wrap { width: 100%; display: flex; align-items: center; gap: 6px; }
+  .test-date-countdown { font-size: 11.5px; color: var(--brand); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+  .test-date-countdown.today { color: #C0392B; }
+  .test-date-locked-flag { font-size: 10.5px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+  .test-date-fixed { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .test-date-inline { margin: -4px 0 14px; padding: 10px 12px; background: var(--paper); border: 1px dashed var(--line); border-radius: 8px; }
+
+  .mock-exam-slot { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); gap: 8px; }
+  .mock-exam-slot:last-child { border-bottom: none; }
+  .mock-exam-name { font-size: 13.5px; font-weight: 600; flex-shrink: 0; }
+  .mock-exam-meta { flex: 1; text-align: right; }
+  .mock-exam-links { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
+  .mock-exam-links a { font-size: 11px; color: var(--brand); text-decoration: underline; }
+  .mock-exam-upload-btn { width: 100%; margin-top: 12px; padding: 12px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 13.5px; font-weight: 600; }
+
+  .schedule-month-select { margin-bottom: 14px; }
+  .schedule-updated-note { font-size: 12px; color: var(--muted); text-align: right; margin: 0 0 14px; }
+  .schedule-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .schedule-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  .schedule-col-date { width: 66px; }
+  .schedule-table th, .schedule-table td { border: 1px solid var(--line); padding: 4px 2px; text-align: center; font-size: 10px; overflow: hidden; }
+  .schedule-table th { background: var(--paper); color: var(--muted); font-weight: 700; }
+  .schedule-table th.schedule-time-row { font-weight: 500; font-size: 8.5px; color: var(--muted); }
+  .schedule-table td.schedule-daycell { background: var(--paper); font-weight: 700; color: var(--ink); text-align: left; padding-left: 4px; font-size: 10px; white-space: normal; line-height: 1.3; }
+  .schedule-table tr.schedule-today td { background: #FBE7D0; }
+  .schedule-table td.schedule-cell-changed { background: #FFF6C4; font-weight: 700; color: #8A6A1E; }
+  .schedule-legend { font-size: 11px; color: var(--muted); margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
+  .schedule-legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #FFF6C4; border: 1px solid var(--line); }
+  .schedule-notes-list { margin: 0; padding-left: 18px; }
+  .schedule-notes-list li { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 4px; }
+  .schedule-notes-list li:last-child { margin-bottom: 0; }
+
+  .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
+  .tab-btn { position: relative; flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
+  .tab-btn .tab-icon { font-size: 19px; line-height: 1; }
+  .tab-btn.active { color: var(--brand); font-weight: 700; }
+  .tab-unread-dot { position: absolute; top: 2px; left: 50%; margin-left: 7px; width: 10px; height: 10px; border-radius: 50%; background: #E63946; border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px #E63946; }
+
+  #toast-container { position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom) + 10px); z-index: 30; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast { background: var(--ink); color: #fff; padding: 11px 14px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.18); opacity: 0; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="app"><div class="loading-screen"><p class="loading-title">CONNEC＋</p><p class="loading-sub">保護者用アプリ</p></div></div>
+<div id="toast-container"></div>
+
+<script>
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
+  const LOADING_TEXT = `<p class="loading-title">CONNEC＋</p><p class="loading-sub">保護者用アプリ</p>`;
+
+  const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
+  const MAIN5_SUBJECTS = ["国語", "社会", "数学", "理科", "英語"];
+  const TEST_NAMES = [
+    "1学期中間テスト", "1学期期末テスト", "2学期中間テスト", "2学期期末テスト", "学年末テスト",
+    "第1回実力テスト（6月）", "第2回実力テスト（9月）", "第3回実力テスト（11月）", "第4回実力テスト（1月）",
+  ];
+  const HS_TEST_NAMES = TEST_NAMES.slice(0, 5);
+  const HS_SUBJECT_GROUPS = ["英語", "数学", "国語", "理科", "社会"];
+  const HS_SLOTS_PER_SUBJECT = 3;
+  const HS_SLOT_KEYS = [];
+  HS_SUBJECT_GROUPS.forEach((g) => { for (let i = 1; i <= HS_SLOTS_PER_SUBJECT; i++) HS_SLOT_KEYS.push(g + i); });
+  const MOCK_EXAM_SLOT_LABELS = ["模試①", "模試②", "模試③", "模試④", "模試⑤", "模試⑥"];
+
+  const params = new URLSearchParams(window.location.search);
+  const STORAGE_KEY_PID = "connect-parent-id";
+  const urlPid = params.get("pid");
+  const parentId = urlPid || localStorage.getItem(STORAGE_KEY_PID);
+  const appEl = document.getElementById("app");
+
+  let currentData = null;
+  let currentTab = "grades";
+  let selectedScheduleMonthIndex = 0;
+
+  function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function showToast(message) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+    const el = document.createElement("div");
+    el.className = "toast"; el.textContent = message;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 300); }, 2500);
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+  function formatDate(iso) { if (!iso) return ""; const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}`; }
+  function formatMD(ymd) { const d = new Date(ymd + "T00:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; }
+  function todayYMD() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+
+  function calcTotal(subjects, list) {
+    const relevant = subjects.filter((s) => list.indexOf(s.subject) !== -1 && s.score !== null);
+    if (relevant.length === 0) return null;
+    return relevant.reduce((sum, s) => sum + Number(s.score), 0);
+  }
+
+  function currentTestNames() { return (currentData && currentData.isHighSchool) ? HS_TEST_NAMES : TEST_NAMES; }
+
+  function getPreviousScore(subject, testName) {
+    const testNames = currentTestNames();
+    const idx = testNames.indexOf(testName);
+    if (idx <= 0 || !currentData) return null;
+    const testsByName = {};
+    (currentData.tests || []).forEach((t) => { testsByName[t.testName] = t; });
+    for (let i = idx - 1; i >= 0; i--) {
+      const t = testsByName[testNames[i]];
+      if (!t) continue;
+      const s = t.subjects.find((s) => s.subject === subject);
+      if (s && s.score !== null) return s.score;
+    }
+    return null;
+  }
+
+  async function init() {
+    if (!parentId) {
+      appEl.innerHTML = `<div class="id-error">専用リンクが正しくありません。<br />講師から送られたリンクからアクセスしてください。</div>`;
+      return;
+    }
+    await loadAndRender();
+  }
+
+  async function fetchData() {
+    const url = `${GAS_URL}?parentId=${encodeURIComponent(parentId)}`;
+    const res = await fetch(url);
+    return res.json();
+  }
+
+  async function loadAndRender() {
+    if (!currentData) appEl.innerHTML = `<div class="loading-screen">${LOADING_TEXT}</div>`;
+    let data;
+    try { data = await fetchData(); }
+    catch (err) { appEl.innerHTML = `<div class="id-error">通信に失敗しました。電波の良い場所でもう一度お試しください。</div>`; return; }
+    if (!data.ok) { appEl.innerHTML = `<div class="id-error">リンクが無効です。講師に確認してください。</div>`; return; }
+    if (urlPid) localStorage.setItem(STORAGE_KEY_PID, urlPid);
+
+    currentData = data;
+    renderShell();
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    renderShell();
+    if (tab === "schedule" && currentData.hasUnreadSchedule) markScheduleSeen();
+  }
+
+  async function markScheduleSeen() {
+    const months = currentData.scheduleMonths || [];
+    let latest = null;
+    months.forEach((m) => { if (m.updatedAt && (!latest || m.updatedAt > latest)) latest = m.updatedAt; });
+    if (!latest) return;
+    currentData.hasUnreadSchedule = false;
+    renderShell();
+    try {
+      await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "markScheduleSeen", parentId, seenUpdatedAt: latest }) });
+    } catch (err) {}
+  }
+
+  function renderShell() {
+    const data = currentData;
+    appEl.innerHTML = `
+      <p class="eyebrow">個別指導塾コネクト 保護者用</p>
+      <h1>CONNEC＋</h1>
+      <p class="student-name">${data.studentName} さん の保護者様</p>
+      <div id="tab-content"></div>
+      <nav class="tabbar">
+        <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>成績表</button>
+        <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール${data.hasUnreadSchedule ? '<span class="tab-unread-dot"></span>' : ""}</button>
+      </nav>
+    `;
+    document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+    const contentEl = document.getElementById("tab-content");
+    if (currentTab === "grades") renderGrades(contentEl);
+    else if (currentTab === "schedule") renderSchedule(contentEl);
+  }
+
+  // ---------- 成績表タブ ----------
+  function renderGrades(el) {
+    const isHS = !!(currentData && currentData.isHighSchool);
+    const testNames = isHS ? HS_TEST_NAMES : TEST_NAMES;
+    const tests = (currentData.tests || []).slice().sort((a, b) => testNames.indexOf(a.testName) - testNames.indexOf(b.testName));
+    const subjectNames = currentData.subjectNames || {};
+
+    let subjectGridHtml = "";
+    if (isHS) {
+      HS_SUBJECT_GROUPS.forEach((group) => {
+        subjectGridHtml += `<p class="hs-group-title">${group}</p>`;
+        for (let i = 1; i <= HS_SLOTS_PER_SUBJECT; i++) {
+          const slotKey = group + i;
+          const displayName = subjectNames[slotKey] || `未設定${i}`;
+          subjectGridHtml += `
+            <div class="subject-row">
+              <div class="hs-slot-label"><span class="hs-slot-name">${escapeHtml(displayName)}</span></div>
+              <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="target" /></div>
+              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="score" />
+              <input type="number" inputmode="numeric" min="0" max="100" data-subject="${slotKey}" data-field="average" />
+            </div>
+          `;
+        }
+      });
+    } else {
+      subjectGridHtml = SUBJECTS.map((s) => `
+        <div class="subject-row">
+          <label>${s}</label>
+          <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" /></div>
+          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="score" />
+          <input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="average" />
+        </div>`).join("");
+    }
+
+    el.innerHTML = `
+      <div class="card grades-guide-card">
+        <p class="grades-guide-title">入力のしかた</p>
+        <p class="grades-guide-item"><strong>目標点</strong>テスト前日までに入力しましょう。前回の得点より低い点数は入力できません。</p>
+        <p class="grades-guide-item"><strong>得点</strong>テストが返却されたら、なるべく早く入力しましょう。</p>
+        <p class="grades-guide-item"><strong>平均点</strong>学校から成績表が返却されたら入力しましょう。小数点以下は切り捨てて入力してください。</p>
+        <p class="grades-guide-item"><strong>成績表</strong>下にある「テストごとの記録」から、成績表の写真をアップロードしましょう。</p>
+      </div>
+      <div class="card">
+        <form id="entry-form">
+          <div class="field">
+            <label for="testName">テスト名</label>
+            <select id="testName"><option value="">選択してください</option>${testNames.map((t) => `<option value="${t}">${t}</option>`).join("")}</select>
+          </div>
+          <div id="test-date-container"></div>
+          <div class="subject-grid">
+            <div class="subject-grid-header"><span></span><span class="target-label">目標点</span><span>得点</span><span>平均点</span></div>
+            ${subjectGridHtml}
+          </div>
+          <div id="form-error" class="msg error"></div>
+          <div id="form-success" class="msg success">記録しました。</div>
+          <button class="submit" id="submit-btn" type="submit">この結果を記録する</button>
+        </form>
+      </div>
+      <p class="section-title">テストごとの記録</p>
+      <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
+      ${isHS ? renderMockExamSection() : ""}
+    `;
+    const testsListEl = document.getElementById("tests-list");
+    tests.forEach((t) => {
+      const card = document.createElement("div");
+      card.className = "card test-card";
+      const photoSubmitted = !!t.photo;
+      const filledSubjects = t.subjects.filter((s) => s.score !== null || s.average !== null || s.target !== null);
+      let totalsHtml = "";
+      if (!isHS) {
+        const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
+        const total9 = calcTotal(t.subjects, SUBJECTS);
+        totalsHtml = `
+          <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
+          <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
+        `;
+      }
+      card.innerHTML = `
+        <div class="test-header"><p class="test-name">${t.testName}</p></div>
+        ${filledSubjects.map((s) => {
+          const label = isHS ? escapeHtml(subjectNames[s.subject] || s.subject) : s.subject;
+          return `
+          <div class="entry">
+            <div>${label}</div>
+            <div style="text-align:right">
+              ${s.score !== null ? `${s.score}点` : "-"}
+              <span class="entry-meta">
+                ${s.target !== null ? `目標${s.target}点` : ""}
+                ${s.average !== null ? `${s.target !== null ? " / " : ""}平均${s.average}点` : ""}
+              </span>
+            </div>
+          </div>`;
+        }).join("")}
+        ${totalsHtml}
+        <div class="photo-row">
+          <div>
+            <span>成績表: <span class="badge ${photoSubmitted ? "done" : "pending"}">${photoSubmitted ? `提出済み(${formatDateTime(t.photo.submittedAt)})` : "未提出"}</span></span>
+            ${photoSubmitted ? `<div style="margin-top:4px;"><a href="${t.photo.driveFileUrl}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:underline;">写真を見る</a></div>` : ""}
+          </div>
+          <label class="photo-btn ${photoSubmitted ? "done" : ""}">
+            ${photoSubmitted ? "写真を撮り直す" : "成績表を撮影"}
+            <input type="file" accept="image/*" capture="environment" data-test-name="${t.testName}" class="photo-input" />
+          </label>
+        </div>
+      `;
+      testsListEl.appendChild(card);
+    });
+    document.getElementById("entry-form").addEventListener("submit", handleAddScore);
+    document.querySelectorAll(".photo-input").forEach((input) => input.addEventListener("change", (e) => handlePhotoSelected(e, input.dataset.testName)));
+    document.getElementById("testName").addEventListener("change", renderTestDateContainer);
+    renderTestDateContainer();
+    const mockUploadInput = document.getElementById("mock-exam-photo-input");
+    if (mockUploadInput) mockUploadInput.addEventListener("change", handleMockExamPhotosSelected);
+  }
+
+  // テスト初日は閲覧のみ(保護者からは入力・修正不可)
+  function renderTestDateRow(testName) {
+    const testDates = currentData.testDates || [];
+    const info = testDates.find((t) => t.testName === testName) || { testDate: "", locked: false, daysUntil: null };
+    if (!info.testDate) {
+      return `
+        <div class="test-date-row">
+          <span class="test-date-name">${testName}</span>
+          <div class="test-date-input-wrap"><span class="entry-meta">まだ設定されていません</span></div>
+        </div>
+      `;
+    }
+    let countdownHtml = "";
+    if (info.daysUntil > 0) countdownHtml = `<span class="test-date-countdown">あと${info.daysUntil}日</span>`;
+    else if (info.daysUntil === 0) countdownHtml = `<span class="test-date-countdown today">本日!</span>`;
+    else countdownHtml = `<span class="test-date-locked-flag">終了</span>`;
+    const parts = info.testDate.split("-");
+    return `
+      <div class="test-date-row">
+        <span class="test-date-name">${testName}</span>
+        <div class="test-date-input-wrap">
+          <span class="test-date-fixed">${Number(parts[1])}/${Number(parts[2])}</span>
+          ${countdownHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTestDateContainer() {
+    const container = document.getElementById("test-date-container");
+    const select = document.getElementById("testName");
+    if (!container || !select) return;
+    const testName = select.value;
+    if (!testName) { container.innerHTML = ""; return; }
+    container.innerHTML = `
+      <div class="test-date-inline">
+        <p class="field-note" style="margin:-4px 0 10px;">テスト初日(生徒本人が入力します)</p>
+        ${renderTestDateRow(testName)}
+      </div>
+    `;
+  }
+
+  function renderMockExamSection() {
+    const mockExams = currentData.mockExams || [];
+    return `
+      <p class="section-title">模試の成績表</p>
+      <div class="card">
+        ${mockExams.map((m) => {
+          const statusHtml = m.filled
+            ? `<span class="badge done">提出済み(${formatDate(m.submittedAt)})</span>`
+            : `<span class="badge pending">未提出</span>`;
+          const linksHtml = m.filled
+            ? `<div class="mock-exam-links">${m.photos.map((p) => `<a href="${p.url}" target="_blank" rel="noopener">写真${p.photoIndex}</a>`).join("")}</div>`
+            : "";
+          return `
+            <div class="mock-exam-slot">
+              <span class="mock-exam-name">${m.slotKey}</span>
+              <div class="mock-exam-meta">${statusHtml}${linksHtml}</div>
+            </div>
+          `;
+        }).join("")}
+        <label class="mock-exam-upload-btn">
+          📷 模試の成績表を撮影・アップロード(空いている枠に自動で入ります)
+          <input type="file" id="mock-exam-photo-input" accept="image/*" multiple style="display:none;" />
+        </label>
+        <p class="field-note" style="margin:8px 0 0;">6枠すべて埋まると、一番古いものから上書きされます</p>
+      </div>
+    `;
+  }
+
+  function showFieldError(el, msg) { el.textContent = msg; el.classList.add("show"); }
+
+  function mergeTestScoresLocally(testName, submittedSubjects) {
+    currentData.tests = currentData.tests || [];
+    const isHS = !!currentData.isHighSchool;
+    const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+    let test = currentData.tests.find((t) => t.testName === testName);
+    if (!test) {
+      test = { testName, subjects: subjectKeys.map((s) => ({ subject: s, score: null, average: null, target: null })) };
+      currentData.tests.push(test);
+    }
+    submittedSubjects.forEach((sub) => {
+      const entry = test.subjects.find((s) => s.subject === sub.subject);
+      if (!entry) return;
+      if (sub.score !== null) entry.score = sub.score;
+      if (sub.average !== null) entry.average = sub.average;
+      if (sub.target !== null) entry.target = sub.target;
+    });
+  }
+
+  async function handleAddScore(e) {
+    e.preventDefault();
+    const testNameEl = document.getElementById("testName");
+    const errorEl = document.getElementById("form-error");
+    const successEl = document.getElementById("form-success");
+    const btn = document.getElementById("submit-btn");
+    errorEl.classList.remove("show"); successEl.classList.remove("show");
+    const testName = testNameEl.value;
+    if (!testName) return showFieldError(errorEl, "テスト名を選択してください");
+
+    const isHS = !!(currentData && currentData.isHighSchool);
+    const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+
+    const subjects = []; let validationError = "";
+    subjectKeys.forEach((subjectKey) => {
+      if (validationError) return;
+      const scoreInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="score"]`);
+      const avgInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="average"]`);
+      const targetInput = document.querySelector(`input[data-subject="${subjectKey}"][data-field="target"]`);
+      const scoreRaw = scoreInput.value, avgRaw = avgInput.value, targetRaw = targetInput.value;
+      if (scoreRaw === "" && avgRaw === "" && targetRaw === "") return;
+      const parseOrError = (raw, label) => {
+        if (raw === "") return null;
+        const n = Number(raw);
+        if (Number.isNaN(n) || n < 0 || n > 100) { validationError = `${label}は0〜100の数字で入力してください`; return null; }
+        return n;
+      };
+      const target = parseOrError(targetRaw, "目標点"); if (validationError) return;
+      const score = parseOrError(scoreRaw, "点数"); if (validationError) return;
+      const average = parseOrError(avgRaw, "平均点"); if (validationError) return;
+      if (target !== null) {
+        const prev = getPreviousScore(subjectKey, testName);
+        if (prev !== null && target < prev) { validationError = `目標点は、前回の点数(${prev}点)以上にしよう`; return; }
+      }
+      subjects.push({ subject: subjectKey, score, average, target });
+    });
+    if (validationError) return showFieldError(errorEl, validationError);
+    if (subjects.length === 0) return showFieldError(errorEl, "少なくとも1科目は入力してください");
+
+    btn.disabled = true; btn.textContent = "保存中...";
+    try {
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addTestScores", parentId, testName, subjects }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      mergeTestScoresLocally(testName, subjects);
+      successEl.classList.add("show");
+      renderGrades(document.getElementById("tab-content"));
+      showToast("記録しました");
+    } catch (err) {
+      showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
+    } finally { btn.disabled = false; btn.textContent = "この結果を記録する"; }
+  }
+
+  function compressImage(file, maxWidth = 1600, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxWidth / img.width);
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width * scale; canvas.height = img.height * scale;
+          const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", quality).split(",")[1]);
+        };
+        img.onerror = reject; img.src = reader.result;
+      };
+      reader.onerror = reject; reader.readAsDataURL(file);
+    });
+  }
+  async function handlePhotoSelected(e, testName) {
+    const file = e.target.files[0]; if (!file) return;
+    const label = e.target.closest(".photo-btn");
+    const originalText = label.childNodes[0].textContent;
+    label.childNodes[0].textContent = "アップロード中...";
+    try {
+      const base64 = await compressImage(file);
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadPhoto", parentId, testName, imageBase64: base64, mimeType: "image/jpeg" }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      const isHS = !!currentData.isHighSchool;
+      const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+      let test = (currentData.tests || []).find((t) => t.testName === testName);
+      if (!test) { test = { testName, subjects: subjectKeys.map((s) => ({ subject: s, score: null, average: null, target: null })) }; currentData.tests.push(test); }
+      test.photo = { submittedAt: result.submittedAt, driveFileUrl: result.url };
+      renderGrades(document.getElementById("tab-content"));
+      showToast("成績表をアップロードしました");
+    } catch (err) { showToast("成績表のアップロードに失敗しました。もう一度お試しください。"); label.childNodes[0].textContent = originalText; }
+  }
+
+  async function handleMockExamPhotosSelected(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const label = e.target.closest(".mock-exam-upload-btn");
+    const originalText = label.childNodes[0].textContent;
+    label.childNodes[0].textContent = "アップロード中...";
+    try {
+      const images = [];
+      for (const file of files) {
+        const base64 = await compressImage(file);
+        images.push({ imageBase64: base64, mimeType: "image/jpeg" });
+      }
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadMockExamPhotos", parentId, images }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      currentData.mockExams = currentData.mockExams || [];
+      const idx = currentData.mockExams.findIndex((m) => m.slotKey === result.slotKey);
+      const entry = { slotKey: result.slotKey, filled: true, submittedAt: result.submittedAt, photos: result.photos };
+      if (idx === -1) currentData.mockExams.push(entry); else currentData.mockExams[idx] = entry;
+      renderGrades(document.getElementById("tab-content"));
+      showToast(`${result.slotKey}にアップロードしました`);
+    } catch (err) {
+      showToast("アップロードに失敗しました。もう一度お試しください。");
+      label.childNodes[0].textContent = originalText;
+    }
+  }
+
+  // ---------- スケジュールタブ(生徒用と同じ内容) ----------
+  const SCHEDULE_PERIODS = ["1限", "2限", "3限", "4限", "5限", "6限"];
+  const SCHEDULE_TIMES = ["13:00〜14:20", "14:30〜15:50", "16:00〜17:20", "17:30〜18:50", "19:00〜20:20", "20:30〜21:50"];
+  const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
+
+  function renderSchedule(el) {
+    const months = currentData.scheduleMonths || [];
+    if (months.length === 0) {
+      el.innerHTML = `
+        <div class="card">
+          <p class="section-title" style="margin-top:0;">スケジュール</p>
+          <p class="empty">スケジュールはまだ登録されていません</p>
+        </div>
+      `;
+      return;
+    }
+    if (selectedScheduleMonthIndex >= months.length) selectedScheduleMonthIndex = 0;
+    const monthData = months[selectedScheduleMonthIndex];
+    const { year, monthNum, rows, updatedAt } = monthData;
+
+    const daysInMonth = new Date(year, monthNum, 0).getDate();
+    const cellMap = {};
+    rows.forEach((r) => { cellMap[`${r.date}_${r.period}`] = r; });
+
+    const todayCompact = (() => {
+      const d = new Date();
+      return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    })();
+
+    let html = `
+      <div class="card grades-guide-card">
+        <p class="grades-guide-title">スケジュールの見かた</p>
+        <p class="grades-guide-item">スケジュールは「当月」と「翌月」をご確認いただけます。プルダウンで確認したい月を選択してください。また、授業日時が変更になった箇所は黄色く表示されます。</p>
+      </div>
+    `;
+    html += `<div class="card">`;
+    html += `<p class="section-title" style="margin-top:0;">スケジュール</p>`;
+    html += `<div class="field schedule-month-select">
+      <select id="schedule-month-select">
+        ${months.map((m, i) => `<option value="${i}" ${i === selectedScheduleMonthIndex ? "selected" : ""}>${m.monthNum}月</option>`).join("")}
+      </select>
+    </div>`;
+    if (updatedAt) html += `<p class="schedule-updated-note">最終更新:${formatDate(updatedAt)}</p>`;
+
+    html += `<div class="schedule-scroll"><table class="schedule-table"><colgroup><col class="schedule-col-date" />${SCHEDULE_PERIODS.map(() => `<col />`).join("")}</colgroup>`;
+    html += `<thead><tr><th rowspan="2">日付</th>${SCHEDULE_PERIODS.map((p) => `<th>${p}</th>`).join("")}</tr>`;
+    html += `<tr>${SCHEDULE_TIMES.map((t) => `<th class="schedule-time-row">${t}</th>`).join("")}</tr></thead><tbody>`;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateCompact = `${year}${String(monthNum).padStart(2, "0")}${String(day).padStart(2, "0")}`;
+      const dowIndex = new Date(year, monthNum - 1, day).getDay();
+      const dow = SCHEDULE_DOW[dowIndex];
+      const isToday = dateCompact === todayCompact;
+      const dowStyle = dowIndex === 0 ? ' style="color:#C0392B;"' : "";
+      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell"${dowStyle}>${monthNum}/${day}<br>(${dow})</td>`;
+      SCHEDULE_PERIODS.forEach((period) => {
+        const cell = cellMap[`${dateCompact}_${period}`];
+        if (!cell) { html += `<td></td>`; return; }
+        const isChanged = cell.changed === true || cell.changed === "TRUE" || cell.changed === "true";
+        html += `<td class="${isChanged ? "schedule-cell-changed" : ""}">${escapeHtml(cell.subject)}</td>`;
+      });
+      html += `</tr>`;
+    }
+
+    html += `</tbody></table></div>`;
+    html += `<p class="schedule-legend"><span class="schedule-legend-swatch"></span>前回から日時が変更になったコマ</p>`;
+    html += `</div>`;
+
+    html += `<div class="card info-card">`;
+    html += `<p class="info-title">注意</p>`;
+    html += `<ol class="schedule-notes-list">`;
+    html += `<li>授業をお休みされる場合は授業開始の2時間前までにご連絡ください。</li>`;
+    html += `<li>事前のご連絡のないお休み、また振替授業をお休みされた場合は振替の対象外となりますのでご注意ください。</li>`;
+    html += `<li>講師の都合で授業日時を変更させていただく場合がございます。予めご了承ください。</li>`;
+    html += `</ol>`;
+    html += `</div>`;
+
+    el.innerHTML = html;
+
+    const monthSelect = document.getElementById("schedule-month-select");
+    if (monthSelect) {
+      monthSelect.addEventListener("change", (e) => {
+        selectedScheduleMonthIndex = Number(e.target.value);
+        renderSchedule(document.getElementById("tab-content"));
+      });
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
