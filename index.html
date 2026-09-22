@@ -233,7 +233,8 @@
   .schedule-notes-list li:last-child { margin-bottom: 0; }
 
   .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
-  .tab-btn { flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
+  .tab-btn { position: relative; flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
+  .tab-unread-dot { position: absolute; top: 4px; left: 50%; margin-left: 6px; width: 8px; height: 8px; border-radius: 50%; background: #C0392B; }
   .tab-btn .tab-icon { font-size: 19px; line-height: 1; }
   .tab-btn.active { color: var(--brand); font-weight: 700; }
 
@@ -595,7 +596,23 @@
     } catch (err) {}
   }
 
-  function switchTab(tab) { currentTab = tab; renderShell(); }
+  function switchTab(tab) {
+    currentTab = tab;
+    renderShell();
+    if (tab === "schedule" && currentData.hasUnreadSchedule) markScheduleSeen();
+  }
+
+  async function markScheduleSeen() {
+    const months = currentData.scheduleMonths || [];
+    let latest = null;
+    months.forEach((m) => { if (m.updatedAt && (!latest || m.updatedAt > latest)) latest = m.updatedAt; });
+    if (!latest) return;
+    currentData.hasUnreadSchedule = false;
+    renderShell();
+    try {
+      await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "markScheduleSeen", studentId, seenUpdatedAt: latest }) });
+    } catch (err) {}
+  }
 
   function renderShell() {
     const data = currentData;
@@ -610,7 +627,7 @@
         <button class="tab-btn ${currentTab === "notebook" ? "active" : ""}" data-tab="notebook"><span class="tab-icon">📔</span>学習手帳</button>
         <button class="tab-btn ${currentTab === "garden" ? "active" : ""}" data-tab="garden"><span class="tab-icon">🌾</span>畑</button>
         <button class="tab-btn ${currentTab === "ranks" ? "active" : ""}" data-tab="ranks"><span class="tab-icon">🎖️</span>階級</button>
-        <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール</button>
+        <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール${data.hasUnreadSchedule ? '<span class="tab-unread-dot"></span>' : ""}</button>
       </nav>
     `;
     document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
