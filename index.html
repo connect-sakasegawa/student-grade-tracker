@@ -161,7 +161,7 @@
   .mock-exam-meta { flex: 1; text-align: right; }
   .mock-exam-links { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2px; }
   .mock-exam-links a { font-size: 11px; color: var(--brand); text-decoration: underline; }
-  .mock-exam-upload-btn { width: 100%; margin-top: 12px; padding: 12px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 13.5px; font-weight: 600; }
+  .mock-exam-upload-btn { display: block; width: 100%; margin-top: 12px; padding: 12px; border-radius: 8px; border: 1px dashed var(--brand); background: var(--brand-soft); color: var(--brand); font-size: 13.5px; font-weight: 600; text-align: center; line-height: 1.5; box-sizing: border-box; }
 
   .week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .week-nav button { background: var(--brand-soft); color: var(--brand); border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
@@ -886,10 +886,10 @@
           `;
         }).join("")}
         <label class="mock-exam-upload-btn">
-          📷 模試の成績表を撮影・アップロード(空いている枠に自動で入ります)
+          📷 模試の成績表を撮影・アップロード
           <input type="file" id="mock-exam-photo-input" accept="image/*" multiple style="display:none;" />
         </label>
-        <p class="field-note" style="margin:8px 0 0;">6枠すべて埋まると、一番古いものから上書きされます</p>
+        <p class="field-note" style="margin:8px 0 0 0;">空いている枠に自動で入ります。6枠すべて埋まると、一番古いものから上書きされます</p>
       </div>
     `;
   }
