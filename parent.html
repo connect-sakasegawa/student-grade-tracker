@@ -401,6 +401,25 @@
       testsListEl.appendChild(card);
     });
 
+    if (isHS) {
+      const mockExams = currentData.mockExams || [];
+      const mockHtml = `
+        <p class="section-title">模試の成績表</p>
+        <div class="card">
+          ${mockExams.map((m) => {
+            const statusHtml = m.filled
+              ? `<span class="badge done">提出済み(${formatDate(m.submittedAt)})</span>`
+              : `<span class="badge pending">未提出</span>`;
+            const linksHtml = m.filled
+              ? `<div class="mock-exam-links">${m.photos.map((p) => `<a href="${p.url}" target="_blank" rel="noopener">写真${p.photoIndex}</a>`).join("")}</div>`
+              : "";
+            return `<div class="mock-exam-slot"><span class="mock-exam-name">${m.slotKey}</span><div class="mock-exam-meta">${statusHtml}${linksHtml}</div></div>`;
+          }).join("")}
+          <p class="field-note" style="margin:8px 0 0;">模試の提出はお子様のアプリから行います</p>
+        </div>
+      `;
+      testsListEl.parentElement.insertAdjacentHTML("beforeend", mockHtml);
+    }
     document.querySelectorAll(".test-edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const testName = btn.dataset.testName;
