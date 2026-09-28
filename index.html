@@ -1150,7 +1150,7 @@
           </div>` : ""}
         </form>` : `<p class="empty">この週は終了しています。新しいミッションは今週以降の週で追加してください</p>`}
       </div>
-      <button type="button" id="advice-open-btn" class="advice-btn advice-btn-standalone">📖 自主学習のアドバイスを見る</button>
+      ${(currentData.studyAdvice || []).length > 0 ? `<button type="button" id="advice-open-btn" class="advice-btn advice-btn-standalone">📖 自主学習のアドバイスを見る</button>` : ""}
       <p class="section-title">この週のミッション</p>
       <p class="list-note">✓ ミッションが完了したらチェックボックスにチェックを入れよう<br>(🔁は繰り返し設定されたミッションです)</p>
       <p class="list-note schedule-red-note">ミッションを3つクリアしたら果実が成るから畑を確認してみてね♪</p>
