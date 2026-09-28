@@ -636,7 +636,8 @@
         <p class="grades-guide-item"><strong>得点</strong>テストが返却されたら、なるべく早く入力しましょう。</p>
         <p class="grades-guide-item"><strong>平均点</strong>学校から成績表が返却されたら入力しましょう。小数点以下は切り捨てて入力してください。</p>
         <p class="grades-guide-item"><strong>成績表</strong>下にある「テストごとの記録」から、成績表の写真をアップロードしましょう。</p>
-      </div>` : ""}
+        ${isHS ? `<p class="grades-guide-item"><strong>模試の成績表</strong>模試帳票の「点数」と「志望校判定」がわかるページをアップロードしてください。</p>` : ""}
+      </div>
       <div id="tab-content"></div>
       <nav class="tabbar">
         <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>私の成績表</button>
