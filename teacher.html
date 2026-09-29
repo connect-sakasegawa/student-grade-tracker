@@ -89,6 +89,8 @@
   .schedule-table td.schedule-daycell { background: var(--paper); font-weight: 700; color: var(--ink); text-align: left; padding-left: 4px; font-size: 10px; white-space: normal; line-height: 1.3; }
   .schedule-table tr.schedule-today td { background: #E2EBF9; }
   .schedule-table td.schedule-cell-changed { background: #FFF6C4; font-weight: 700; color: #8A6A1E; }
+  .schedule-cell-entry { }
+  .schedule-cell-entry + .schedule-cell-entry { margin-top: 3px; padding-top: 3px; border-top: 1px dashed var(--line); }
   .schedule-cell-subject { display: block; font-weight: 700; }
   .schedule-cell-student { display: block; font-size: 8.5px; color: var(--muted); }
   .schedule-legend { font-size: 11px; color: var(--muted); margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
@@ -311,7 +313,11 @@
 
     const daysInMonth = new Date(year, monthNum, 0).getDate();
     const cellMap = {};
-    (rows || []).forEach((r) => { cellMap[`${r.date}_${r.period}`] = r; });
+    (rows || []).forEach((r) => {
+      const key = `${r.date}_${r.period}`;
+      if (!cellMap[key]) cellMap[key] = [];
+      cellMap[key].push(r);
+    });
 
     const todayCompact = (() => {
       const d = new Date();
@@ -346,13 +352,16 @@
       const dowStyle = dowIndex === 0 ? ' style="color:#C0392B;"' : "";
       html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell"${dowStyle}>${monthNum}/${day}<br>(${dow})</td>`;
       SCHEDULE_PERIODS.forEach((period) => {
-        const cell = cellMap[`${dateCompact}_${period}`];
-        if (!cell) { html += `<td></td>`; return; }
-        const isChanged = cell.changed === true || cell.changed === "TRUE" || cell.changed === "true";
-        html += `<td class="${isChanged ? "schedule-cell-changed" : ""}">
-          <span class="schedule-cell-subject">${escapeHtml(cell.subject)}</span>
-          ${cell.student ? `<span class="schedule-cell-student">${escapeHtml(cell.student)}</span>` : ""}
-        </td>`;
+        const entries = cellMap[`${dateCompact}_${period}`];
+        if (!entries || entries.length === 0) { html += `<td></td>`; return; }
+        const anyChanged = entries.some((e) => e.changed === true || e.changed === "TRUE" || e.changed === "true");
+        const entriesHtml = entries.map((e) => `
+          <div class="schedule-cell-entry">
+            <span class="schedule-cell-subject">${escapeHtml(e.subject)}</span>
+            <span class="schedule-cell-student">${e.grade ? escapeHtml(e.grade) + " " : ""}${escapeHtml(e.student || "")}</span>
+          </div>
+        `).join("");
+        html += `<td class="${anyChanged ? "schedule-cell-changed" : ""}">${entriesHtml}</td>`;
       });
       html += `</tr>`;
     }
