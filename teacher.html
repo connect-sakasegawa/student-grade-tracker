@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>CONNEC＋ 講師用 | 個別指導塾コネクト</title>
+
+<meta name="theme-color" content="#2A5FB4" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="CONNEC＋ 講師用" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<script>
+  // teacherId を id と同じ考え方でホーム画面追加(PWA)に対応させる
+  (function () {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var STORAGE_KEY_ID = "connect-teacher-id";
+      var urlId = params.get("teacherId");
+      var id = urlId || localStorage.getItem(STORAGE_KEY_ID);
+      if (!id) return;
+      var base = window.location.origin + window.location.pathname;
+      var manifest = {
+        name: "CONNEC＋ 講師用 | 個別指導塾コネクト", short_name: "CONNEC＋講師用",
+        start_url: base + "?teacherId=" + id, scope: base, display: "standalone",
+        orientation: "portrait", background_color: "#F2F6FC", theme_color: "#2A5FB4", lang: "ja",
+        icons: [
+          { src: base + "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: base + "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+        ],
+      };
+      var dataUri = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
+      var link = document.createElement("link");
+      link.rel = "manifest"; link.href = dataUri;
+      document.head.appendChild(link);
+    } catch (err) {}
+  })();
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+  :root {
+    --ink: #1F2A44; --paper: #F2F6FC; --card: #FFFFFF; --line: #DDE5F2;
+    --brand: #2A5FB4; --brand-soft: #E2EBF9;
+    --growth: #3E7C59; --growth-soft: #E3EEE7;
+    --amber: #B24D2F; --amber-soft: #F3DCD3;
+    --muted: #6B7488; --gold: #C99A2E; --gold-soft: #FBF0D0;
+    --diff-up: #2E7D46; --diff-down: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { padding: max(20px, env(safe-area-inset-top)) 16px calc(84px + env(safe-area-inset-bottom)); min-height: 100vh; }
+
+  .loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: var(--paper); }
+  .loading-title { font-family: 'Zilla Slab', serif; font-weight: 700; font-size: 32px; color: var(--brand); margin: 0 0 10px; }
+  .loading-sub { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+  .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
+  h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 20px; margin: 0 0 4px; line-height: 1.25; color: var(--brand); }
+  .teacher-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .info-card { background: var(--paper); border: 1px dashed var(--line); }
+  .info-card p { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
+  .info-card p:last-child { margin-bottom: 0; }
+  .info-title { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0 0 8px; }
+  .guide-card { background: #EAF1FC; border: 1px solid var(--brand); }
+  .guide-title { font-size: 13px; font-weight: 700; color: var(--brand); margin: 0 0 8px; }
+  .guide-item { font-size: 12.5px; color: var(--ink); line-height: 1.6; margin: 0; }
+
+  .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 22px 0 10px; }
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 10px; }
+  .id-error { text-align: center; padding: 60px 16px; color: var(--muted); font-size: 14px; }
+
+  /* スケジュール */
+  .schedule-month-select { margin-bottom: 14px; }
+  .schedule-month-select select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 15px; font-family: inherit; background: #fff; color: var(--ink); }
+  .schedule-updated-note { font-size: 12px; color: var(--muted); text-align: right; margin: 0 0 14px; }
+  .schedule-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .schedule-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  .schedule-col-date { width: 60px; }
+  .schedule-table th, .schedule-table td { border: 1px solid var(--line); padding: 4px 2px; text-align: center; font-size: 10px; overflow: hidden; }
+  .schedule-table th { background: var(--paper); color: var(--muted); font-weight: 700; }
+  .schedule-table th.schedule-time-row { font-weight: 500; font-size: 8.5px; color: var(--muted); }
+  .schedule-table td.schedule-daycell { background: var(--paper); font-weight: 700; color: var(--ink); text-align: left; padding-left: 4px; font-size: 10px; white-space: normal; line-height: 1.3; }
+  .schedule-table tr.schedule-today td { background: #E2EBF9; }
+  .schedule-table td.schedule-cell-changed { background: #FFF6C4; font-weight: 700; color: #8A6A1E; }
+  .schedule-cell-subject { display: block; font-weight: 700; }
+  .schedule-cell-student { display: block; font-size: 8.5px; color: var(--muted); }
+  .schedule-legend { font-size: 11px; color: var(--muted); margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
+  .schedule-legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #FFF6C4; border: 1px solid var(--line); }
+
+  /* 担当生徒の成績 */
+  .student-card { margin-bottom: 12px; }
+  .student-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .student-card-name { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 16px; margin: 0; color: var(--ink); }
+  .student-card-grade { font-size: 12px; color: var(--muted); margin-left: 6px; }
+  .student-rank-chip { font-size: 11px; color: var(--brand); font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+  .score-entry { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .score-entry:last-child { border-bottom: none; }
+  .score-entry-meta { color: var(--muted); font-size: 11.5px; display: block; }
+  .score-entry-value { text-align: right; }
+  .score-diff { font-weight: 700; margin-left: 6px; }
+  .score-diff.up { color: var(--diff-up); }
+  .score-diff.down { color: var(--diff-down); }
+  .submit-flag { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; margin-left: 6px; }
+  .submit-flag.done { background: var(--growth-soft); color: var(--growth); }
+  .submit-flag.pending { background: var(--amber-soft); color: var(--amber); }
+  .student-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .student-filter button { padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 12.5px; font-family: inherit; font-weight: 600; }
+  .student-filter button.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+  /* ランキング */
+  .rank-list-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .rank-list-item:last-child { border-bottom: none; }
+  .rank-list-pos { flex-shrink: 0; width: 26px; text-align: center; font-weight: 700; color: var(--muted); font-size: 13px; }
+  .rank-list-item.top1 .rank-list-pos { color: #C9A227; }
+  .rank-list-item.top2 .rank-list-pos { color: #9A9AA6; }
+  .rank-list-item.top3 .rank-list-pos { color: #B5651D; }
+  .rank-list-body { flex: 1; min-width: 0; }
+  .rank-list-title { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+  .rank-list-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .rank-list-diff { flex-shrink: 0; font-size: 16px; font-weight: 700; color: var(--diff-up); }
+  .rank-medal-mini { display: inline-flex; align-items: center; gap: 2px; font-size: 10.5px; color: var(--muted); }
+  .rank-medal-mini svg { display: block; }
+  .rank-class-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .rank-class-legend-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 9.5px; color: var(--muted); width: 52px; text-align: center; }
+
+  /* コネクトのルール */
+  .rule-section { margin-bottom: 16px; }
+  .rule-section:last-child { margin-bottom: 0; }
+  .rule-section-title { font-size: 14px; font-weight: 700; color: var(--brand); margin: 0 0 6px; }
+  .rule-section-body { font-size: 13.5px; line-height: 1.7; color: var(--ink); white-space: pre-wrap; }
+
+  .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
+  .tab-btn { position: relative; flex: 1; background: none; border: none; padding: 10px 2px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10.5px; font-family: inherit; }
+  .tab-btn .tab-icon { font-size: 19px; line-height: 1; }
+  .tab-btn.active { color: var(--brand); font-weight: 700; }
+
+  #toast-container { position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom) + 10px); z-index: 30; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast { background: var(--ink); color: #fff; padding: 11px 14px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.18); opacity: 0; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="app"><div class="loading-screen"><p class="loading-title">CONNEC＋ 講師用</p><p class="loading-sub">個別指導塾コネクト</p></div></div>
+<div id="toast-container"></div>
+
+<script>
+  /*
+   * ===== このアプリが期待するバックエンド(GAS)のレスポンス仕様 =====
+   * GET {GAS_URL}?teacherId=xxxxxxxx
+   * {
+   *   ok: true,
+   *   teacherName: "美木",
+   *   schedule: {
+   *     months: [
+   *       { year, monthNum, updatedAt,
+   *         rows: [ { date:"20261003", period:"1限", subject:"数学", student:"石田 葉奈", grade:"中１", changed:false } ] }
+   *     ]
+   *   },
+   *   students: [
+   *     { studentId, studentName, grade, rank: { rankName, className },
+   *       tests: [
+   *         { testName, subject, score, target, average, prevScore, diff, photoSubmitted }
+   *       ]
+   *     }
+   *   ], // 「担当講師」欄に自分の名前が入っている科目だけが入る想定
+   *   ranking: [
+   *     { studentName, grade, subject, testName, diff, teacherName,
+   *       rank: { rankName, className } }
+   *   ], // 全講師共通のランキング(前回との差が大きい順)
+   *   rules: "コネクトのルール本文(未作成の場合は空文字)"
+   * }
+   * 現時点ではこのエンドポイントは未実装です。Code.gs 側に doGet の分岐と
+   * 上記形式を返す関数を追加してください。
+   */
+
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
+  const LOADING_TEXT = `<p class="loading-title">CONNEC＋ 講師用</p><p class="loading-sub">個別指導塾コネクト</p>`;
+
+  const SCHEDULE_PERIODS = ["1限", "2限", "3限", "4限", "5限", "6限"];
+  const SCHEDULE_TIMES = ["13:00〜14:20", "14:30〜15:50", "16:00〜17:20", "17:30〜18:50", "19:00〜20:20", "20:30〜21:50"];
+
+  const MEDALS = {
+    "見習いクラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -12 L-8 -26 L0 -21 L8 -26 L5 -12" fill="#D8D3C8"/><circle r="13" fill="#D8D3C8" stroke="#B5AC9A" stroke-width="1.4"/>` },
+    "新兵クラス": { vb: "-40 -50 80 90", svg: `<path d="M-5 -21 L-8 -35 L0 -30 L8 -35 L5 -21" fill="#D9B98A"/><circle r="14" fill="#D9B98A" stroke="#A8825A" stroke-width="1.4"/>` },
+    "隊長クラス": { vb: "-40 -50 80 90", svg: `<circle r="15" fill="#CD8B4E" stroke="#8A5A2E" stroke-width="1.4"/><circle r="6" fill="#F5D9A8"/>` },
+    "指揮官クラス": { vb: "-40 -50 80 90", svg: `<circle r="16" fill="#C9C9D2" stroke="#8A8A96" stroke-width="1.4"/><circle r="7" fill="#F0F0F5"/>` },
+    "幹部クラス": { vb: "-50 -55 100 100", svg: `<circle r="18" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.5"/><circle r="8" fill="#FFF6D9"/><circle r="3" fill="#C0392B"/>` },
+    "将官クラス": { vb: "-50 -55 100 100", svg: `<circle r="9" fill="#C0392B" stroke="#E8C24A" stroke-width="1.5"/><circle r="6" fill="#FFFFFF"/><circle r="6" fill="none" stroke="#C0392B" stroke-width="1"/>` },
+    "最高位": { vb: "-55 -60 110 110", svg: `<circle r="24" fill="#F2D27A" stroke="#C9A227" stroke-width="1.5"/><circle r="10" fill="#C0392B" stroke="#E8C24A" stroke-width="1.8"/><circle r="6.5" fill="#FFFFFF"/>` },
+    "トップ": { vb: "-55 -65 110 105", svg: `<circle r="30" fill="#F2D27A" stroke="#C9A227" stroke-width="1.5"/><circle r="12" fill="#E8C24A" stroke="#8A6A1E" stroke-width="1.6"/><circle r="8.5" fill="#FFFFFF"/>` },
+  };
+  const RANK_CLASS_ORDER = ["見習いクラス", "新兵クラス", "隊長クラス", "指揮官クラス", "幹部クラス", "将官クラス", "最高位", "トップ"];
+  function medalIcon(cls, size) {
+    const m = MEDALS[cls] || MEDALS["見習いクラス"];
+    return `<svg viewBox="${m.vb}" width="${size}" height="${size}">${m.svg}</svg>`;
+  }
+
+  function escapeHtml(str) { return String(str == null ? "" : str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function showToast(message) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+    const el = document.createElement("div");
+    el.className = "toast"; el.textContent = message;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 300); }, 2500);
+  }
+  function formatDate(iso) { if (!iso) return ""; const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}`; }
+
+  const params = new URLSearchParams(window.location.search);
+  const STORAGE_KEY_ID = "connect-teacher-id";
+  const urlId = params.get("teacherId");
+  const teacherId = urlId || localStorage.getItem(STORAGE_KEY_ID);
+  const appEl = document.getElementById("app");
+
+  let currentData = null;
+  let currentTab = "schedule";
+  let selectedScheduleMonthIndex = 0;
+  let studentFilterId = "all";
+
+  async function init() {
+    if (!teacherId) {
+      appEl.innerHTML = `<div class="id-error">専用リンクが正しくありません。<br />管理者から送られたリンクからアクセスしてください。</div>`;
+      return;
+    }
+    await loadAndRender();
+  }
+
+  async function fetchData() {
+    const url = `${GAS_URL}?teacherId=${encodeURIComponent(teacherId)}`;
+    const res = await fetch(url);
+    return res.json();
+  }
+
+  async function loadAndRender() {
+    if (!currentData) appEl.innerHTML = `<div class="loading-screen">${LOADING_TEXT}</div>`;
+    let data;
+    try { data = await fetchData(); }
+    catch (err) { appEl.innerHTML = `<div class="id-error">通信に失敗しました。電波の良い場所でもう一度お試しください。</div>`; return; }
+    if (!data.ok) { appEl.innerHTML = `<div class="id-error">リンクが無効です。管理者に確認してください。</div>`; return; }
+    if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
+    currentData = data;
+    renderShell();
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    renderShell();
+  }
+
+  function renderShell() {
+    const data = currentData;
+    appEl.innerHTML = `
+      <p class="eyebrow">個別指導塾コネクト 講師用</p>
+      <h1>CONNEC＋</h1>
+      <p class="teacher-name">${escapeHtml(data.teacherName)} 先生</p>
+      <div id="tab-content"></div>
+      <nav class="tabbar">
+        <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール</button>
+        <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>成績表</button>
+        <button class="tab-btn ${currentTab === "ranking" ? "active" : ""}" data-tab="ranking"><span class="tab-icon">🏆</span>ランキング</button>
+        <button class="tab-btn ${currentTab === "rules" ? "active" : ""}" data-tab="rules"><span class="tab-icon">📖</span>コネクトのルール</button>
+      </nav>
+    `;
+    document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+    const tabEl = document.getElementById("tab-content");
+    if (currentTab === "schedule") renderSchedule(tabEl);
+    else if (currentTab === "grades") renderGrades(tabEl);
+    else if (currentTab === "ranking") renderRanking(tabEl);
+    else if (currentTab === "rules") renderRules(tabEl);
+  }
+
+  // ===== スケジュール =====
+  function renderSchedule(el) {
+    const months = (currentData.schedule && currentData.schedule.months) || [];
+    if (months.length === 0) {
+      el.innerHTML = `
+        <div class="card">
+          <p class="section-title" style="margin-top:0;">スケジュール</p>
+          <p class="empty">スケジュールはまだ登録されていません</p>
+        </div>
+      `;
+      return;
+    }
+    if (selectedScheduleMonthIndex >= months.length) selectedScheduleMonthIndex = 0;
+    const monthData = months[selectedScheduleMonthIndex];
+    const { year, monthNum, rows, updatedAt } = monthData;
+
+    const daysInMonth = new Date(year, monthNum, 0).getDate();
+    const cellMap = {};
+    (rows || []).forEach((r) => { cellMap[`${r.date}_${r.period}`] = r; });
+
+    const todayCompact = (() => {
+      const d = new Date();
+      return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    })();
+    const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
+
+    let html = `
+      <div class="card guide-card">
+        <p class="guide-title">自分が担当するコマの時間割です</p>
+        <p class="guide-item">「当月」と「翌月」をご確認いただけます。プルダウンで確認したい月を選択してください。前回から日時が変更になったコマは黄色く表示されます。</p>
+      </div>
+    `;
+    html += `<div class="card">`;
+    html += `<p class="section-title" style="margin-top:0;">スケジュール</p>`;
+    html += `<div class="field schedule-month-select">
+      <select id="schedule-month-select">
+        ${months.map((m, i) => `<option value="${i}" ${i === selectedScheduleMonthIndex ? "selected" : ""}>${m.monthNum}月</option>`).join("")}
+      </select>
+    </div>`;
+    if (updatedAt) html += `<p class="schedule-updated-note">最終更新:${formatDate(updatedAt)}</p>`;
+
+    html += `<div class="schedule-scroll"><table class="schedule-table"><colgroup><col class="schedule-col-date" />${SCHEDULE_PERIODS.map(() => `<col />`).join("")}</colgroup>`;
+    html += `<thead><tr><th rowspan="2">日付</th>${SCHEDULE_PERIODS.map((p) => `<th>${p}</th>`).join("")}</tr>`;
+    html += `<tr>${SCHEDULE_TIMES.map((t) => `<th class="schedule-time-row">${t}</th>`).join("")}</tr></thead><tbody>`;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateCompact = `${year}${String(monthNum).padStart(2, "0")}${String(day).padStart(2, "0")}`;
+      const dowIndex = new Date(year, monthNum - 1, day).getDay();
+      const dow = SCHEDULE_DOW[dowIndex];
+      const isToday = dateCompact === todayCompact;
+      const dowStyle = dowIndex === 0 ? ' style="color:#C0392B;"' : "";
+      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell"${dowStyle}>${monthNum}/${day}<br>(${dow})</td>`;
+      SCHEDULE_PERIODS.forEach((period) => {
+        const cell = cellMap[`${dateCompact}_${period}`];
+        if (!cell) { html += `<td></td>`; return; }
+        const isChanged = cell.changed === true || cell.changed === "TRUE" || cell.changed === "true";
+        html += `<td class="${isChanged ? "schedule-cell-changed" : ""}">
+          <span class="schedule-cell-subject">${escapeHtml(cell.subject)}</span>
+          ${cell.student ? `<span class="schedule-cell-student">${escapeHtml(cell.student)}</span>` : ""}
+        </td>`;
+      });
+      html += `</tr>`;
+    }
+
+    html += `</tbody></table></div>`;
+    html += `<p class="schedule-legend"><span class="schedule-legend-swatch"></span>前回から日時が変更になったコマ</p>`;
+    html += `</div>`;
+    el.innerHTML = html;
+
+    const monthSelect = document.getElementById("schedule-month-select");
+    if (monthSelect) {
+      monthSelect.addEventListener("change", (e) => {
+        selectedScheduleMonthIndex = Number(e.target.value);
+        renderSchedule(document.getElementById("tab-content"));
+      });
+    }
+  }
+
+  // ===== 担当生徒の成績表 =====
+  function renderGrades(el) {
+    const students = currentData.students || [];
+    if (students.length === 0) {
+      el.innerHTML = `
+        <div class="card">
+          <p class="section-title" style="margin-top:0;">担当生徒の成績</p>
+          <p class="empty">担当している生徒データがまだ登録されていません</p>
+        </div>
+      `;
+      return;
+    }
+    let html = `
+      <div class="card guide-card">
+        <p class="guide-title">担当生徒の成績表です</p>
+        <p class="guide-item">生徒が入力した得点・目標点・平均点と、前回テストとの差を確認できます。写真提出の有無もあわせて表示します。</p>
+      </div>
+    `;
+    html += `<div class="student-filter">
+      <button data-sid="all" class="${studentFilterId === "all" ? "active" : ""}">全員</button>
+      ${students.map((s) => `<button data-sid="${s.studentId}" class="${studentFilterId === s.studentId ? "active" : ""}">${escapeHtml(s.studentName)}</button>`).join("")}
+    </div>`;
+
+    const visible = studentFilterId === "all" ? students : students.filter((s) => s.studentId === studentFilterId);
+    visible.forEach((s) => {
+      html += `<div class="card student-card">`;
+      html += `<div class="student-card-header">
+        <p class="student-card-name">${escapeHtml(s.studentName)}<span class="student-card-grade">${escapeHtml(s.grade || "")}</span></p>
+        ${s.rank ? `<span class="student-rank-chip">${medalIcon(s.rank.className, 16)}${escapeHtml(s.rank.rankName)}</span>` : ""}
+      </div>`;
+      const tests = s.tests || [];
+      if (tests.length === 0) {
+        html += `<p class="empty" style="padding:10px 0;">担当科目の成績データがまだありません</p>`;
+      } else {
+        tests.forEach((t) => {
+          const diff = t.diff;
+          const diffHtml = (diff === null || diff === undefined) ? "" :
+            `<span class="score-diff ${diff >= 0 ? "up" : "down"}">${diff >= 0 ? "+" : ""}${diff}</span>`;
+          html += `<div class="score-entry">
+            <span>${escapeHtml(t.testName)} / ${escapeHtml(t.subject)}
+              <span class="score-entry-meta">目標${t.target ?? "-"} ・ 平均${t.average ?? "-"}
+                ${t.photoSubmitted === true ? '<span class="submit-flag done">写真提出済</span>' : t.photoSubmitted === false ? '<span class="submit-flag pending">写真未提出</span>' : ""}
+              </span>
+            </span>
+            <span class="score-entry-value">${t.score ?? "-"}点${diffHtml}</span>
+          </div>`;
+        });
+      }
+      html += `</div>`;
+    });
+    el.innerHTML = html;
+
+    document.querySelectorAll(".student-filter button").forEach((btn) => {
+      btn.addEventListener("click", () => { studentFilterId = btn.dataset.sid; renderGrades(document.getElementById("tab-content")); });
+    });
+  }
+
+  // ===== ランキング =====
+  function renderRanking(el) {
+    const ranking = currentData.ranking || [];
+    let html = `
+      <div class="card guide-card">
+        <p class="guide-title">成績アップランキング</p>
+        <p class="guide-item">前回のテストからの得点の伸びが大きい順に表示しています。担当講師名も表示されるため、講師の成績アップ率ランキングとしても参照できます。</p>
+      </div>
+    `;
+    html += `<div class="card">`;
+    if (ranking.length === 0) {
+      html += `<p class="empty">まだランキングデータがありません</p>`;
+    } else {
+      ranking.forEach((r, i) => {
+        const pos = i + 1;
+        const posCls = pos === 1 ? "top1" : pos === 2 ? "top2" : pos === 3 ? "top3" : "";
+        html += `<div class="rank-list-item ${posCls}">
+          <span class="rank-list-pos">${pos}</span>
+          <span class="rank-list-body">
+            <span class="rank-list-title">${escapeHtml(r.studentName)}
+              ${r.rank ? `<span class="rank-medal-mini">${medalIcon(r.rank.className, 14)}${escapeHtml(r.rank.rankName)}</span>` : ""}
+            </span>
+            <span class="rank-list-sub">${escapeHtml(r.subject)} ・ ${escapeHtml(r.testName)} ・ 担当:${escapeHtml(r.teacherName || "未設定")}</span>
+          </span>
+          <span class="rank-list-diff">+${r.diff}</span>
+        </div>`;
+      });
+    }
+    html += `</div>`;
+
+    html += `<div class="card info-card">
+      <p class="info-title">階級一覧(参考)</p>
+      <div class="rank-class-legend">
+        ${RANK_CLASS_ORDER.map((cls) => `<div class="rank-class-legend-item">${medalIcon(cls, 30)}<span>${cls}</span></div>`).join("")}
+      </div>
+    </div>`;
+    el.innerHTML = html;
+  }
+
+  // ===== コネクトのルール =====
+  function renderRules(el) {
+    const rules = currentData.rules;
+    let html = `<div class="card">`;
+    html += `<p class="section-title" style="margin-top:0;">コネクトのルール</p>`;
+    if (!rules) {
+      html += `<p class="empty">ルールの内容は準備中です</p>`;
+    } else {
+      html += `<div class="rule-section-body">${escapeHtml(rules)}</div>`;
+    }
+    html += `</div>`;
+    el.innerHTML = html;
+  }
+
+  init();
+</script>
+</body>
+</html>
