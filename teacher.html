@@ -466,13 +466,6 @@
       });
     }
     html += `</div>`;
-
-    html += `<div class="card info-card">
-      <p class="info-title">階級一覧(参考)</p>
-      <div class="rank-class-legend">
-        ${RANK_CLASS_ORDER.map((cls) => `<div class="rank-class-legend-item">${medalIcon(cls, 30)}<span>${cls}</span></div>`).join("")}
-      </div>
-    </div>`;
     el.innerHTML = html;
   }
 
