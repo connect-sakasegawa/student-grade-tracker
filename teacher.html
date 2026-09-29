@@ -62,8 +62,10 @@
   .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 2px; }
   h1 { font-family: 'Zilla Slab', serif; font-weight: 600; font-size: 20px; margin: 0 0 4px; line-height: 1.25; color: var(--brand); }
   .teacher-name { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
-  .force-refresh-btn { position: fixed; top: 10px; right: 10px; z-index: 50; background: #FFFFFF; border: 1px solid var(--line); border-radius: 20px; padding: 6px 12px; font-size: 12px; color: var(--muted); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .force-refresh-btn { background: #FFFFFF; border: 1px solid var(--line); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--muted); box-shadow: 0 1px 4px rgba(0,0,0,0.08); white-space: nowrap; flex-shrink: 0; }
   .force-refresh-btn:active { background: #F0F0F0; }
+  .schedule-card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .schedule-card-header .section-title { margin: 0; }
 
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
   .info-card { background: var(--paper); border: 1px dashed var(--line); }
@@ -296,7 +298,6 @@
   function renderShell() {
     const data = currentData;
     appEl.innerHTML = `
-      <button id="force-refresh-btn" class="force-refresh-btn" title="最新の状態に更新">⟳ 更新</button>
       <p class="eyebrow">個別指導塾コネクト 講師用</p>
       <h1>CONNEC＋</h1>
       <p class="teacher-name">${escapeHtml(data.teacherName)} 先生</p>
@@ -309,8 +310,6 @@
       </nav>
     `;
     document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
-    const refreshBtn = document.getElementById("force-refresh-btn");
-    if (refreshBtn) refreshBtn.addEventListener("click", forceRefreshApp);
     const tabEl = document.getElementById("tab-content");
     if (currentTab === "schedule") renderSchedule(tabEl);
     else if (currentTab === "grades") renderGrades(tabEl);
@@ -324,10 +323,15 @@
     if (months.length === 0) {
       el.innerHTML = `
         <div class="card">
-          <p class="section-title" style="margin-top:0;">スケジュール</p>
+          <div class="schedule-card-header">
+            <p class="section-title" style="margin-top:0;">スケジュール</p>
+            <button id="force-refresh-btn" class="force-refresh-btn" title="最新の状態に更新">⟳ 更新</button>
+          </div>
           <p class="empty">スケジュールはまだ登録されていません</p>
         </div>
       `;
+      const refreshBtnEmpty = document.getElementById("force-refresh-btn");
+      if (refreshBtnEmpty) refreshBtnEmpty.addEventListener("click", forceRefreshApp);
       return;
     }
     if (selectedScheduleMonthIndex >= months.length) selectedScheduleMonthIndex = 0;
@@ -355,7 +359,10 @@
       </div>
     `;
     html += `<div class="card">`;
-    html += `<p class="section-title" style="margin-top:0;">スケジュール</p>`;
+    html += `<div class="schedule-card-header">
+      <p class="section-title" style="margin-top:0;">スケジュール</p>
+      <button id="force-refresh-btn" class="force-refresh-btn" title="最新の状態に更新">⟳ 更新</button>
+    </div>`;
     html += `<div class="field schedule-month-select">
       <select id="schedule-month-select">
         ${months.map((m, i) => `<option value="${i}" ${i === selectedScheduleMonthIndex ? "selected" : ""}>${m.monthNum}月</option>`).join("")}
@@ -401,6 +408,8 @@
         renderSchedule(document.getElementById("tab-content"));
       });
     }
+    const refreshBtn = document.getElementById("force-refresh-btn");
+    if (refreshBtn) refreshBtn.addEventListener("click", forceRefreshApp);
   }
 
   // ===== 担当生徒の成績表 =====
