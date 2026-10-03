@@ -416,6 +416,21 @@
   // ===== 担当生徒の成績表 =====
   let selectedTestName = "all";
 
+  function scoreEntryHtml(t, showTestName) {
+    const diff = t.diff;
+    const diffHtml = (diff === null || diff === undefined) ? "" :
+      `<span class="score-diff ${diff >= 0 ? "up" : "down"}">${diff >= 0 ? "+" : ""}${diff}</span>`;
+    const label = showTestName ? `${escapeHtml(t.testName)} / ${escapeHtml(t.subject)}` : escapeHtml(t.subject);
+    return `<div class="score-entry">
+      <span>${label}
+        <span class="score-entry-meta">目標${t.target ?? "-"} ・ 平均${t.average ?? "-"}
+          ${t.photoSubmitted === true ? '<span class="submit-flag done">写真提出済</span>' : t.photoSubmitted === false ? '<span class="submit-flag pending">写真未提出</span>' : ""}
+        </span>
+      </span>
+      <span class="score-entry-value">${t.score ?? "-"}点${diffHtml}</span>
+    </div>`;
+  }
+
   function renderGrades(el) {
     const students = currentData.students || [];
     if (students.length === 0) {
@@ -437,7 +452,7 @@
     let html = `
       <div class="card guide-card">
         <p class="guide-title">担当生徒の成績表です</p>
-        <p class="guide-item">生徒が入力した得点・目標点・平均点と、前回テストとの差を確認できます。写真提出の有無もあわせて表示します。テスト区分を選ぶと、そのテストの全科目を確認できます。</p>
+        <p class="guide-item">生徒が入力した「目標点・得点・平均点」と「前回テストとの差」が閲覧できます。もし未入力の場合は担当生徒に対して入力するように指示してください。</p>
       </div>
     `;
     html += `<div class="field schedule-month-select">
@@ -452,6 +467,8 @@
     </div>`;
 
     const visible = studentFilterId === "all" ? students : students.filter((s) => s.studentId === studentFilterId);
+    const allTestOrder = REGULAR_TEST_NAMES.concat(JITSURYOKU_TEST_NAMES);
+
     visible.forEach((s) => {
       const tests = (s.tests || []).filter((t) => selectedTestName === "all" || t.testName === selectedTestName);
       html += `<div class="card student-card">`;
@@ -461,20 +478,17 @@
       </div>`;
       if (tests.length === 0) {
         html += `<p class="empty" style="padding:10px 0;">該当する成績データがまだありません</p>`;
-      } else {
-        tests.forEach((t) => {
-          const diff = t.diff;
-          const diffHtml = (diff === null || diff === undefined) ? "" :
-            `<span class="score-diff ${diff >= 0 ? "up" : "down"}">${diff >= 0 ? "+" : ""}${diff}</span>`;
-          html += `<div class="score-entry">
-            <span>${escapeHtml(t.testName)} / ${escapeHtml(t.subject)}
-              <span class="score-entry-meta">目標${t.target ?? "-"} ・ 平均${t.average ?? "-"}
-                ${t.photoSubmitted === true ? '<span class="submit-flag done">写真提出済</span>' : t.photoSubmitted === false ? '<span class="submit-flag pending">写真未提出</span>' : ""}
-              </span>
-            </span>
-            <span class="score-entry-value">${t.score ?? "-"}点${diffHtml}</span>
-          </div>`;
+      } else if (selectedTestName === "all") {
+        // 「すべてのテスト」表示の時は、テスト区分ごとに見出しを付けてグループ表示する
+        const grouped = {};
+        tests.forEach((t) => { if (!grouped[t.testName]) grouped[t.testName] = []; grouped[t.testName].push(t); });
+        const orderedNames = allTestOrder.filter((n) => grouped[n]).concat(Object.keys(grouped).filter((n) => !allTestOrder.includes(n)));
+        orderedNames.forEach((testName) => {
+          html += `<p style="font-size:12.5px;font-weight:700;color:var(--muted);margin:14px 0 4px;">${escapeHtml(testName)}</p>`;
+          grouped[testName].forEach((t) => { html += scoreEntryHtml(t, false); });
         });
+      } else {
+        tests.forEach((t) => { html += scoreEntryHtml(t, false); });
       }
       html += `</div>`;
     });
@@ -502,7 +516,7 @@
     let html = `
       <div class="card guide-card">
         <p class="guide-title">成績アップランキング</p>
-        <p class="guide-item">選んだテストでの、前回の同じ区分のテストからの得点の伸びが大きい順に表示しています。担当講師名も表示されるため、講師の成績アップ率ランキングとしても参照できます。</p>
+        <p class="guide-item">テスト区分を選択してください。ランキングは「定期テスト」と「実力テスト」で区別しています。担当生徒に対して、他の生徒の成績やランキングについて口外しないように注意してください。</p>
       </div>
     `;
     html += `<div class="field schedule-month-select">
