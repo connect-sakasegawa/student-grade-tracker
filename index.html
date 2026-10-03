@@ -408,6 +408,7 @@
 
   let currentData = null;
   let currentTab = "grades";
+  // 小学生は成績表タブがないため、データ取得後に学習手帳タブへ切り替える
   let selectedWeekStart = null;
   let weekNavBusy = false;
   let lastSeenRank = null;
@@ -585,6 +586,7 @@
     checkRankChange(data.rank);
     currentData = data;
     if (!selectedWeekStart) selectedWeekStart = data.weekStart;
+    if (data.isElementary && currentTab === "grades") currentTab = "notebook";
     renderShell();
   }
 
@@ -645,7 +647,7 @@
       </div>` : ""}
       <div id="tab-content"></div>
       <nav class="tabbar">
-        <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>私の成績表</button>
+        ${data.isElementary ? "" : `<button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>私の成績表</button>`}
         <button class="tab-btn ${currentTab === "notebook" ? "active" : ""}" data-tab="notebook"><span class="tab-icon">📔</span>学習手帳</button>
         <button class="tab-btn ${currentTab === "garden" ? "active" : ""}" data-tab="garden"><span class="tab-icon">🌾</span>畑</button>
         <button class="tab-btn ${currentTab === "ranks" ? "active" : ""}" data-tab="ranks"><span class="tab-icon">🎖️</span>階級</button>
