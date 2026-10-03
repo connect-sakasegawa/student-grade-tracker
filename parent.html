@@ -199,6 +199,7 @@
   const HS_SLOTS_PER_SUBJECT = 3;
   const HS_SLOT_KEYS = [];
   HS_SUBJECT_GROUPS.forEach((g) => { for (let i = 1; i <= HS_SLOTS_PER_SUBJECT; i++) HS_SLOT_KEYS.push(g + i); });
+  const ES_SUBJECTS = ["国語", "社会", "算数", "理科", "英語"];
   const MOCK_EXAM_SLOT_LABELS = ["模試①", "模試②", "模試③", "模試④", "模試⑤", "模試⑥"];
 
   const params = new URLSearchParams(window.location.search);
@@ -355,6 +356,7 @@
   // ---------- 成績表タブ(閲覧+「修正」ボタンで全枠を開いて編集) ----------
   function renderGrades(el) {
     const isHS = !!(currentData && currentData.isHighSchool);
+    const isES = !!(currentData && currentData.isElementary);
     const testNames = isHS ? HS_TEST_NAMES : TEST_NAMES;
     const tests = (currentData.tests || []).slice().sort((a, b) => testNames.indexOf(a.testName) - testNames.indexOf(b.testName));
     const subjectNames = currentData.subjectNames || {};
@@ -394,11 +396,11 @@
         let totalsHtml = "";
         if (!isHS) {
           const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
-          const total9 = calcTotal(t.subjects, SUBJECTS);
-          totalsHtml = `
-            <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
-            <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
-          `;
+          totalsHtml = `<div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>`;
+          if (!isES) {
+            const total9 = calcTotal(t.subjects, SUBJECTS);
+            totalsHtml += `<div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>`;
+          }
         }
         bodyHtml = `
           ${filledSubjects.length === 0 ? '<p class="empty" style="padding:10px 0;">まだ記録がありません</p>' : filledSubjects.map((s) => {
@@ -473,6 +475,8 @@
   }
 
   function renderEditForm(testName, t, isHS, subjectNames) {
+    const isES = !!(currentData && currentData.isElementary);
+    const gradeSubjects = isES ? ES_SUBJECTS : SUBJECTS;
     const subjectOf = (key) => (t ? t.subjects.find((s) => s.subject === key) : null);
     let subjectGridHtml = "";
     if (isHS) {
@@ -493,7 +497,7 @@
         }
       });
     } else {
-      subjectGridHtml = SUBJECTS.map((s) => {
+      subjectGridHtml = gradeSubjects.map((s) => {
         const existing = subjectOf(s);
         return `
         <div class="subject-row">
@@ -546,7 +550,8 @@
     errorEl.classList.remove("show");
 
     const isHS = !!(currentData && currentData.isHighSchool);
-    const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+    const isES = !!(currentData && currentData.isElementary);
+    const subjectKeys = isHS ? HS_SLOT_KEYS : (isES ? ES_SUBJECTS : SUBJECTS);
 
     const subjects = []; let validationError = "";
     subjectKeys.forEach((subjectKey) => {
