@@ -280,6 +280,7 @@
 
     currentData = data;
     currentSid = data.id || currentSid;
+    if (data.isElementary && currentTab === "grades") currentTab = "schedule";
     renderShell();
   }
 
@@ -336,7 +337,7 @@
       <p class="student-name">${data.studentName} さん の保護者様</p>
       <div id="tab-content"></div>
       <nav class="tabbar">
-        <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>成績表</button>
+        ${data.isElementary ? "" : `<button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>成績表</button>`}
         <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール${data.hasUnreadSchedule ? '<span class="tab-unread-dot"></span>' : ""}</button>
       </nav>
     `;
