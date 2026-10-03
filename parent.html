@@ -210,6 +210,7 @@
   let currentData = null;
   let currentTab = "grades";
   let selectedScheduleMonthIndex = 0;
+  let currentSid = null; // 兄弟姉妹がいる場合に、プルダウンで選んでいる生徒ID
   let editingTestName = null; // 現在「修正」を開いているテスト回(1つだけ開ける)
 
   function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
@@ -262,7 +263,8 @@
   }
 
   async function fetchData() {
-    const url = `${GAS_URL}?parentId=${encodeURIComponent(parentId)}`;
+    let url = `${GAS_URL}?parentId=${encodeURIComponent(parentId)}`;
+    if (currentSid) url += `&sid=${encodeURIComponent(currentSid)}`;
     const res = await fetch(url);
     return res.json();
   }
@@ -276,6 +278,7 @@
     if (urlPid) localStorage.setItem(STORAGE_KEY_PID, urlPid);
 
     currentData = data;
+    currentSid = data.id || currentSid;
     renderShell();
   }
 
@@ -294,7 +297,7 @@
     currentData.hasUnreadSchedule = false;
     renderShell();
     try {
-      await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "markScheduleSeen", parentId, seenUpdatedAt: latest }) });
+      await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "markScheduleSeen", parentId, sid: currentSid, seenUpdatedAt: latest }) });
     } catch (err) {}
   }
 
@@ -318,9 +321,17 @@
 
   function renderShell() {
     const data = currentData;
+    const siblings = data.siblings || [];
     appEl.innerHTML = `
       <p class="eyebrow">個別指導塾コネクト 保護者用</p>
       <h1>CONNEC＋</h1>
+      ${siblings.length > 1 ? `
+      <div class="field" style="margin-bottom:12px;">
+        <label for="sibling-select">お子様を選択</label>
+        <select id="sibling-select">
+          ${siblings.map((s) => `<option value="${s.id}" ${String(s.id) === String(data.id) ? "selected" : ""}>${escapeHtml(s.name)}</option>`).join("")}
+        </select>
+      </div>` : ""}
       <p class="student-name">${data.studentName} さん の保護者様</p>
       <div id="tab-content"></div>
       <nav class="tabbar">
@@ -329,6 +340,13 @@
       </nav>
     `;
     document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+    const siblingSelect = document.getElementById("sibling-select");
+    if (siblingSelect) {
+      siblingSelect.addEventListener("change", (e) => {
+        currentSid = e.target.value;
+        loadAndRender();
+      });
+    }
     const contentEl = document.getElementById("tab-content");
     if (currentTab === "grades") renderGrades(contentEl);
     else if (currentTab === "schedule") renderSchedule(contentEl);
@@ -558,7 +576,7 @@
 
     btn.disabled = true; btn.textContent = "保存中...";
     try {
-      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addTestScores", parentId, testName, subjects }) });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addTestScores", parentId, sid: currentSid, testName, subjects }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       mergeTestScoresLocally(testName, subjects);
@@ -595,7 +613,7 @@
     label.childNodes[0].textContent = "アップロード中...";
     try {
       const base64 = await compressImage(file);
-      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadPhoto", parentId, testName, imageBase64: base64, mimeType: "image/jpeg" }) });
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadPhoto", parentId, sid: currentSid, testName, imageBase64: base64, mimeType: "image/jpeg" }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       const isHS = !!currentData.isHighSchool;
