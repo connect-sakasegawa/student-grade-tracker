@@ -346,6 +346,9 @@
     if (siblingSelect) {
       siblingSelect.addEventListener("change", (e) => {
         currentSid = e.target.value;
+        const contentEl = document.getElementById("tab-content");
+        if (contentEl) contentEl.innerHTML = `<p class="empty">切り替え中...</p>`;
+        siblingSelect.disabled = true;
         loadAndRender();
       });
     }
