@@ -282,6 +282,7 @@
     currentSid = data.id || currentSid;
     if (data.isElementary && currentTab === "grades") currentTab = "schedule";
     renderShell();
+    if (currentTab === "schedule" && currentData.hasUnreadSchedule) markScheduleSeen();
   }
 
   function switchTab(tab) {
