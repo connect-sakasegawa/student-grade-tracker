@@ -257,6 +257,7 @@
     if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
     currentData = data;
     renderShell();
+    if (currentTab === "schedule" && currentData.hasUnreadSchedule) markTeacherScheduleSeen();
   }
 
   function switchTab(tab) {
@@ -413,6 +414,8 @@
   }
 
   // ===== 担当生徒の成績表 =====
+  let selectedTestName = "all";
+
   function renderGrades(el) {
     const students = currentData.students || [];
     if (students.length === 0) {
@@ -424,12 +427,25 @@
       `;
       return;
     }
+
+    // データに含まれるテスト名を重複なく集めてプルダウンの選択肢にする
+    const testNameSet = new Set();
+    students.forEach((s) => (s.tests || []).forEach((t) => testNameSet.add(t.testName)));
+    const testNames = Array.from(testNameSet);
+    if (selectedTestName !== "all" && !testNames.includes(selectedTestName)) selectedTestName = "all";
+
     let html = `
       <div class="card guide-card">
         <p class="guide-title">担当生徒の成績表です</p>
-        <p class="guide-item">生徒が入力した得点・目標点・平均点と、前回テストとの差を確認できます。写真提出の有無もあわせて表示します。</p>
+        <p class="guide-item">生徒が入力した得点・目標点・平均点と、前回テストとの差を確認できます。写真提出の有無もあわせて表示します。テスト区分を選ぶと、そのテストの全科目を確認できます。</p>
       </div>
     `;
+    html += `<div class="field schedule-month-select">
+      <select id="test-name-select">
+        <option value="all" ${selectedTestName === "all" ? "selected" : ""}>すべてのテスト</option>
+        ${testNames.map((n) => `<option value="${escapeHtml(n)}" ${selectedTestName === n ? "selected" : ""}>${escapeHtml(n)}</option>`).join("")}
+      </select>
+    </div>`;
     html += `<div class="student-filter">
       <button data-sid="all" class="${studentFilterId === "all" ? "active" : ""}">全員</button>
       ${students.map((s) => `<button data-sid="${s.studentId}" class="${studentFilterId === s.studentId ? "active" : ""}">${escapeHtml(s.studentName)}</button>`).join("")}
@@ -437,14 +453,14 @@
 
     const visible = studentFilterId === "all" ? students : students.filter((s) => s.studentId === studentFilterId);
     visible.forEach((s) => {
+      const tests = (s.tests || []).filter((t) => selectedTestName === "all" || t.testName === selectedTestName);
       html += `<div class="card student-card">`;
       html += `<div class="student-card-header">
         <p class="student-card-name">${escapeHtml(s.studentName)}<span class="student-card-grade">${escapeHtml(s.grade || "")}</span></p>
         ${s.rank ? `<span class="student-rank-chip">${medalIcon(s.rank.className, 16)}${escapeHtml(s.rank.rankName)}</span>` : ""}
       </div>`;
-      const tests = s.tests || [];
       if (tests.length === 0) {
-        html += `<p class="empty" style="padding:10px 0;">担当科目の成績データがまだありません</p>`;
+        html += `<p class="empty" style="padding:10px 0;">該当する成績データがまだありません</p>`;
       } else {
         tests.forEach((t) => {
           const diff = t.diff;
@@ -467,6 +483,13 @@
     document.querySelectorAll(".student-filter button").forEach((btn) => {
       btn.addEventListener("click", () => { studentFilterId = btn.dataset.sid; renderGrades(document.getElementById("tab-content")); });
     });
+    const testSelect = document.getElementById("test-name-select");
+    if (testSelect) {
+      testSelect.addEventListener("change", (e) => {
+        selectedTestName = e.target.value;
+        renderGrades(document.getElementById("tab-content"));
+      });
+    }
   }
 
   // ===== ランキング =====
