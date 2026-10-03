@@ -493,15 +493,32 @@
   }
 
   // ===== ランキング =====
+  const REGULAR_TEST_NAMES = ["1学期中間テスト", "1学期期末テスト", "2学期中間テスト", "2学期期末テスト", "学年末テスト"];
+  const JITSURYOKU_TEST_NAMES = ["第1回実力テスト（6月）", "第2回実力テスト（9月）", "第3回実力テスト（11月）", "第4回実力テスト（1月）"];
+  let selectedRankingTestName = "all";
+
   function renderRanking(el) {
-    const ranking = currentData.ranking || [];
+    const allRanking = currentData.ranking || [];
     let html = `
       <div class="card guide-card">
         <p class="guide-title">成績アップランキング</p>
-        <p class="guide-item">前回のテストからの得点の伸びが大きい順に表示しています。担当講師名も表示されるため、講師の成績アップ率ランキングとしても参照できます。</p>
+        <p class="guide-item">選んだテストでの、前回の同じ区分のテストからの得点の伸びが大きい順に表示しています。担当講師名も表示されるため、講師の成績アップ率ランキングとしても参照できます。</p>
       </div>
     `;
+    html += `<div class="field schedule-month-select">
+      <select id="ranking-test-select">
+        <option value="all" ${selectedRankingTestName === "all" ? "selected" : ""}>すべてのテスト</option>
+        <optgroup label="定期テスト">
+          ${REGULAR_TEST_NAMES.map((n) => `<option value="${escapeHtml(n)}" ${selectedRankingTestName === n ? "selected" : ""}>${escapeHtml(n)}</option>`).join("")}
+        </optgroup>
+        <optgroup label="実力テスト">
+          ${JITSURYOKU_TEST_NAMES.map((n) => `<option value="${escapeHtml(n)}" ${selectedRankingTestName === n ? "selected" : ""}>${escapeHtml(n)}</option>`).join("")}
+        </optgroup>
+      </select>
+    </div>`;
     html += `<div class="card">`;
+    const filtered = selectedRankingTestName === "all" ? allRanking : allRanking.filter((r) => r.testName === selectedRankingTestName);
+    const ranking = filtered.slice(0, 30);
     if (ranking.length === 0) {
       html += `<p class="empty">まだランキングデータがありません</p>`;
     } else {
@@ -522,6 +539,14 @@
     }
     html += `</div>`;
     el.innerHTML = html;
+
+    const rankingSelect = document.getElementById("ranking-test-select");
+    if (rankingSelect) {
+      rankingSelect.addEventListener("change", (e) => {
+        selectedRankingTestName = e.target.value;
+        renderRanking(document.getElementById("tab-content"));
+      });
+    }
   }
 
   // ===== コネクトのルール =====
