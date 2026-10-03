@@ -318,6 +318,7 @@
   const HS_SLOTS_PER_SUBJECT = 3;
   const HS_SLOT_KEYS = [];
   HS_SUBJECT_GROUPS.forEach((g) => { for (let i = 1; i <= HS_SLOTS_PER_SUBJECT; i++) HS_SLOT_KEYS.push(g + i); });
+  const ES_SUBJECTS = ["国語", "社会", "算数", "理科", "英語"];
   const MOCK_EXAM_SLOT_LABELS = ["模試①", "模試②", "模試③", "模試④", "模試⑤", "模試⑥"];
 
   const DAYS = ["月", "火", "水", "木", "金", "土", "日"];
@@ -681,6 +682,8 @@
   // ---------- 私の成績表タブ(中学生/高校生で出し分け) ----------
   function renderGrades(el) {
     const isHS = !!(currentData && currentData.isHighSchool);
+    const isES = !!(currentData && currentData.isElementary);
+    const gradeSubjects = isES ? ES_SUBJECTS : SUBJECTS;
     const testNames = isHS ? HS_TEST_NAMES : TEST_NAMES;
     const tests = (currentData.tests || []).slice().sort((a, b) => testNames.indexOf(a.testName) - testNames.indexOf(b.testName));
     const subjectNames = currentData.subjectNames || {};
@@ -706,7 +709,7 @@
         }
       });
     } else {
-      subjectGridHtml = SUBJECTS.map((s) => `
+      subjectGridHtml = gradeSubjects.map((s) => `
         <div class="subject-row">
           <label>${s}</label>
           <div class="target-cell"><input type="number" inputmode="numeric" min="0" max="100" data-subject="${s}" data-field="target" /></div>
@@ -754,11 +757,11 @@
       let totalsHtml = "";
       if (!isHS) {
         const total5 = calcTotal(t.subjects, MAIN5_SUBJECTS);
-        const total9 = calcTotal(t.subjects, SUBJECTS);
-        totalsHtml = `
-          <div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>
-          <div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>
-        `;
+        totalsHtml = `<div class="entry total"><div>5教科合計</div><div>${total5 !== null ? total5 + "点" : "-"}</div></div>`;
+        if (!isES) {
+          const total9 = calcTotal(t.subjects, SUBJECTS);
+          totalsHtml += `<div class="entry total"><div>9教科合計</div><div>${total9 !== null ? total9 + "点" : "-"}</div></div>`;
+        }
       }
       card.innerHTML = `
         <div class="test-header"><p class="test-name">${t.testName}</p></div>
@@ -970,7 +973,8 @@
   function mergeTestScoresLocally(testName, submittedSubjects) {
     currentData.tests = currentData.tests || [];
     const isHS = !!currentData.isHighSchool;
-    const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+    const isES = !!currentData.isElementary;
+    const subjectKeys = isHS ? HS_SLOT_KEYS : (isES ? ES_SUBJECTS : SUBJECTS);
     let test = currentData.tests.find((t) => t.testName === testName);
     if (!test) {
       test = { testName, subjects: subjectKeys.map((s) => ({ subject: s, score: null, average: null, target: null })) };
@@ -996,7 +1000,8 @@
     if (!testName) return showFieldError(errorEl, "テスト名を選択してください");
 
     const isHS = !!(currentData && currentData.isHighSchool);
-    const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+    const isES = !!(currentData && currentData.isElementary);
+    const subjectKeys = isHS ? HS_SLOT_KEYS : (isES ? ES_SUBJECTS : SUBJECTS);
 
     const subjects = []; let validationError = "";
     subjectKeys.forEach((subjectKey) => {
@@ -1067,7 +1072,8 @@
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
       const isHS = !!currentData.isHighSchool;
-      const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
+      const isES = !!currentData.isElementary;
+      const subjectKeys = isHS ? HS_SLOT_KEYS : (isES ? ES_SUBJECTS : SUBJECTS);
       let test = (currentData.tests || []).find((t) => t.testName === testName);
       if (!test) { test = { testName, subjects: subjectKeys.map((s) => ({ subject: s, score: null, average: null, target: null })) }; currentData.tests.push(test); }
       test.photo = { submittedAt: result.submittedAt, driveFileUrl: result.url };
