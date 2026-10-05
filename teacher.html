@@ -257,13 +257,13 @@
     if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
     currentData = data;
     renderShell();
-    if (currentTab === "schedule" && currentData.hasUnreadSchedule) markTeacherScheduleSeen();
+    if (currentTab === "schedule" && needsScheduleAck()) markTeacherScheduleSeen();
   }
 
   function switchTab(tab) {
     currentTab = tab;
     renderShell();
-    if (tab === "schedule" && currentData.hasUnreadSchedule) markTeacherScheduleSeen();
+    if (tab === "schedule" && needsScheduleAck()) markTeacherScheduleSeen();
   }
 
   // ホーム画面に追加した状態(ブラウザの更新ボタンがない状態)でも、
@@ -284,12 +284,24 @@
     location.reload();
   }
 
+  function isTrueFlag(v) { return v === true || v === "TRUE" || v === "true"; }
+
+  // 赤丸が出ている、または「黄色なのに未既読」の行がある場合は、既読処理が必要
+  function needsScheduleAck() {
+    if (!currentData) return false;
+    if (currentData.hasUnreadSchedule) return true;
+    const months = (currentData.schedule && currentData.schedule.months) || [];
+    return months.some((m) => (m.rows || []).some((r) => isTrueFlag(r.changed) && !isTrueFlag(r.ack)));
+  }
+
   async function markTeacherScheduleSeen() {
     const months = (currentData.schedule && currentData.schedule.months) || [];
     let latest = null;
     months.forEach((m) => { if (m.updatedAt && (!latest || m.updatedAt > latest)) latest = m.updatedAt; });
     if (!latest) return;
     currentData.hasUnreadSchedule = false;
+    // 画面上の黄色はそのまま表示しつつ、手元のデータだけ既読扱いにして重複送信を防ぐ
+    months.forEach((m) => (m.rows || []).forEach((r) => { if (isTrueFlag(r.changed)) r.ack = true; }));
     renderShell();
     try {
       await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "markTeacherScheduleSeen", teacherId, seenUpdatedAt: latest }) });
