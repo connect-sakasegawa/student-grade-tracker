@@ -428,6 +428,39 @@
   // 小学生は成績表タブがないため、データ取得後に学習手帳タブへ切り替える
   let selectedWeekStart = null;
   let weekNavBusy = false;
+  // 週ごとのミッションを一時的に覚えておく(前週・次週をすぐ切り替えるため)
+  const weekCache = {};
+  let weekSeq = 0;
+  let prefetchTimer = null;
+  function invalidateWeekCache() { weekSeq++; Object.keys(weekCache).forEach((k) => delete weekCache[k]); }
+  function schedulePrefetch() { clearTimeout(prefetchTimer); prefetchTimer = setTimeout(prefetchAdjacentWeeks, 700); }
+  async function prefetchAdjacentWeeks() {
+    if (weekNavBusy || currentTab !== "notebook" || !currentData) return;
+    const base = selectedWeekStart || currentData.weekStart;
+    const seq = weekSeq;
+    for (const d of [7, -7]) {
+      const ws = addDaysToYMD(base, d);
+      if (weekCache[ws]) continue;
+      try {
+        const data = await fetchMissionsOnly(ws);
+        if (data.ok && seq === weekSeq) weekCache[ws] = data.missions;
+      } catch (err) {}
+      if (weekNavBusy || seq !== weekSeq) return;
+    }
+  }
+  async function refreshWeekQuietly(ws) {
+    const seq = weekSeq;
+    try {
+      const data = await fetchMissionsOnly(ws);
+      if (!data.ok || seq !== weekSeq) return;
+      weekCache[ws] = data.missions;
+      const viewing = selectedWeekStart || currentData.weekStart;
+      if (viewing === ws && !weekNavBusy && JSON.stringify(data.missions) !== JSON.stringify(currentData.missions)) {
+        currentData.missions = data.missions;
+        renderNotebook(document.getElementById("tab-content"));
+      }
+    } catch (err) {}
+  }
   let lastSeenRank = null;
   let pendingRankUp = null;
   let lastSelectedDay = null;
@@ -1225,7 +1258,7 @@
     el.innerHTML = `
       <div class="week-nav">
         <button id="week-prev" ${weekNavBusy ? "disabled" : ""}>← 前週</button>
-        <span class="week-label">${formatMD(weekStart)}(月)〜${formatMD(weekEnd)}(日)</span>
+        <span class="week-label">${weekNavBusy ? "⏳ 切り替え中…" : `${formatMD(weekStart)}(月)〜${formatMD(weekEnd)}(日)`}</span>
         <button id="week-next" ${weekNavBusy ? "disabled" : ""}>次週 →</button>
       </div>
       <div class="card">
@@ -1278,7 +1311,7 @@
       <p class="section-title">この週のミッション</p>
       <p class="list-note">✓ ミッションが完了したらチェックボックスにチェックを入れよう<br>(🔁は繰り返し設定されたミッションです)</p>
       <p class="list-note schedule-red-note">ミッションを3つクリアしたら果実が成るから畑を確認してみてね♪</p>
-      <div class="card" id="mission-list"></div>
+      <div class="card" id="mission-list" style="${weekNavBusy ? "opacity:0.45;" : ""}"></div>
     `;
 
     const listEl = document.getElementById("mission-list");
@@ -1329,16 +1362,28 @@
     }
     const adviceBtn = document.getElementById("advice-open-btn");
     if (adviceBtn) adviceBtn.addEventListener("click", openAdviceModal);
+    schedulePrefetch();
   }
 
   async function changeWeek(days) {
     if (weekNavBusy) return;
+    const newWeekStart = addDaysToYMD(selectedWeekStart || currentData.weekStart, days);
+    weekCache[selectedWeekStart || currentData.weekStart] = currentData.missions;
+    const cached = weekCache[newWeekStart];
+    if (cached) {
+      // すでに読み込み済みの週は、待たずにすぐ表示し、裏で最新の状態に更新する
+      selectedWeekStart = newWeekStart; currentData.weekStart = newWeekStart; currentData.missions = cached;
+      renderNotebook(document.getElementById("tab-content"));
+      refreshWeekQuietly(newWeekStart);
+      return;
+    }
     weekNavBusy = true;
     renderNotebook(document.getElementById("tab-content"));
-    const newWeekStart = addDaysToYMD(selectedWeekStart || currentData.weekStart, days);
+    const seq = weekSeq;
     try {
       const data = await fetchMissionsOnly(newWeekStart);
       if (!data.ok) throw new Error(data.error || "failed");
+      if (seq === weekSeq) weekCache[newWeekStart] = data.missions;
       selectedWeekStart = data.weekStart; currentData.weekStart = data.weekStart; currentData.missions = data.missions;
     } catch (err) { showToast("週の切り替えに失敗しました。もう一度お試しください。"); }
     finally { weekNavBusy = false; renderNotebook(document.getElementById("tab-content")); }
@@ -1361,8 +1406,14 @@
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "addMission", studentId, day, category, content, weekStart: selectedWeekStart, repeat }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-      currentData.missions = currentData.missions || [];
-      currentData.missions.push({ id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""), day, category, content, completed: false, completedAt: "", recurringId: result.recurringId || "" });
+      invalidateWeekCache();
+      if (Array.isArray(result.missions)) {
+        // 繰り返し設定のときは、同じ週の残りの日の分もまとめて返ってくる
+        currentData.missions = result.missions;
+      } else {
+        currentData.missions = currentData.missions || [];
+        currentData.missions.push({ id: result.id, studentId, weekStart: (selectedWeekStart || currentData.weekStart).replace(/-/g, ""), day, category, content, completed: false, completedAt: "", recurringId: result.recurringId || "" });
+      }
       contentInput.value = "";
       document.getElementById("mission-repeat").value = "";
       renderNotebook(document.getElementById("tab-content"));
@@ -1422,15 +1473,22 @@
   }
 
   async function handleEditMissionRequest(id, content) {
+    const m = (currentData.missions || []).find((x) => x.id === id);
+    if (!m) return;
+    // 先に画面を書き換えて(待ち時間をなくす)、裏で保存する。失敗したら元に戻す
+    const prevContent = m.content;
+    invalidateWeekCache();
+    m.content = content;
+    renderNotebook(document.getElementById("tab-content"));
     try {
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "editMission", studentId, id, content }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-      const m = (currentData.missions || []).find((x) => x.id === id);
-      if (m) m.content = result.content;
-      renderNotebook(document.getElementById("tab-content"));
+      if (result.content) m.content = result.content;
       showToast("内容を修正しました");
     } catch (err) {
+      m.content = prevContent;
+      renderNotebook(document.getElementById("tab-content"));
       showToast(err.message || "修正に失敗しました。もう一度お試しください。");
     }
   }
@@ -1440,6 +1498,7 @@
     if (!m) return;
     const prevCompleted = m.completed === true || m.completed === "TRUE" || m.completed === "true";
     const prevGarden = currentData.garden ? { ...currentData.garden } : null;
+    invalidateWeekCache();
     m.completed = !prevCompleted;
     renderNotebook(document.getElementById("tab-content"));
     try {
