@@ -1540,12 +1540,15 @@
     if (newContent === null) return;
     const trimmed = newContent.trim();
     if (!trimmed) return;
+    // 変更がなければ何もしない(通信もメッセージも出さない)
+    if (trimmed === String(currentContent || "").trim()) return;
     handleEditMissionRequest(id, trimmed);
   }
 
   async function handleEditMissionRequest(id, content) {
     const m = (currentData.missions || []).find((x) => x.id === id);
     if (!m) return;
+    if (String(m.content || "").trim() === String(content || "").trim()) return;
     // 先に画面を書き換えて(待ち時間をなくす)、裏で保存する。失敗したら元に戻す
     const prevContent = m.content;
     invalidateWeekCache();
