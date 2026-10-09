@@ -78,6 +78,16 @@
   .info-card p { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
   .info-card p:last-child { margin-bottom: 0; }
   .info-title { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0 0 8px; }
+  .naishin-note { font-size: 12px; color: var(--muted); margin: 4px 0 0; line-height: 1.5; }
+  .naishin-tabs { display: flex; gap: 8px; margin: 12px 0; }
+  .naishin-tab { flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.35; font-family: inherit; }
+  .naishin-tab span { font-size: 11px; font-weight: 500; }
+  .naishin-tab.active { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); }
+  .naishin-group { font-size: 12.5px; font-weight: 700; color: var(--brand); margin: 12px 0 2px; }
+  .naishin-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .naishin-row select { width: 96px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
+  .naishin-total { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 0; padding: 12px 14px; border-radius: 10px; background: var(--brand-soft); font-size: 13px; font-weight: 600; }
+  .naishin-total strong { font-size: 26px; color: var(--brand); }
 
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
@@ -314,6 +324,13 @@
     "第1回実力テスト（6月）", "第2回実力テスト（9月）", "第3回実力テスト（11月）", "第4回実力テスト（1月）",
   ];
   const HS_TEST_NAMES = TEST_NAMES.slice(0, 5);
+  // 定期テスト(0〜4)と実力テスト(5以降)は別系統
+  const EXAM_CATEGORY_BREAK_INDEX = 5;
+  // 内申点(中学生のみ):主要5教科×4+副教科×7.5=250点満点
+  const NAISHIN_TERMS = ["1学期", "2学期", "学年末"];
+  const NAISHIN_MAIN = ["国語", "社会", "数学", "理科", "英語"];
+  const NAISHIN_SUB = ["音楽", "美術", "保体", "技家"];
+  let naishinTerm = "1学期";
   const HS_SUBJECT_GROUPS = ["英語", "数学", "国語", "理科", "社会"];
   const HS_SLOTS_PER_SUBJECT = 3;
   const HS_SLOT_KEYS = [];
@@ -539,9 +556,11 @@
     const testNames = currentTestNames();
     const idx = testNames.indexOf(testName);
     if (idx <= 0 || !currentData) return null;
+    const catStart = idx >= EXAM_CATEGORY_BREAK_INDEX ? EXAM_CATEGORY_BREAK_INDEX : 0;
+    if (idx === catStart) return null;
     const testsByName = {};
     (currentData.tests || []).forEach((t) => { testsByName[t.testName] = t; });
-    for (let i = idx - 1; i >= 0; i--) {
+    for (let i = idx - 1; i >= catStart; i--) {
       const t = testsByName[testNames[i]];
       if (!t) continue;
       const s = t.subjects.find((s) => s.subject === subject);
@@ -746,6 +765,7 @@
           <div class="badge-legend-item">${GOLD_BADGE_SVG}<p class="diff">+20点〜</p></div>
         </div>
       </div>
+      ${(!isHS && !isES) ? '<div id="naishin-section"></div>' : ""}
       <p class="section-title">テストごとの記録</p>
       <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
       ${isHS ? renderMockExamSection() : ""}
@@ -805,8 +825,82 @@
     });
     document.getElementById("testName").addEventListener("change", renderTestDateContainer);
     renderTestDateContainer();
+    drawNaishin();
     const mockUploadInput = document.getElementById("mock-exam-photo-input");
     if (mockUploadInput) mockUploadInput.addEventListener("change", handleMockExamPhotosSelected);
+  }
+
+  function naishinFmt(n) { return Number.isInteger(n) ? String(n) : n.toFixed(1); }
+  function naishinCalc(ratings) {
+    let total = 0, count = 0;
+    NAISHIN_MAIN.forEach((s) => { const r = Number(ratings[s]); if (r >= 1 && r <= 5) { total += r * 4; count++; } });
+    NAISHIN_SUB.forEach((s) => { const r = Number(ratings[s]); if (r >= 1 && r <= 5) { total += r * 7.5; count++; } });
+    return { total, complete: count === NAISHIN_MAIN.length + NAISHIN_SUB.length };
+  }
+  function drawNaishin() {
+    const el = document.getElementById("naishin-section");
+    if (!el) return;
+    const nd = (currentData && currentData.naishin) || { terms: [] };
+    const saved = nd.terms.find((t) => t.term === naishinTerm) || { ratings: {} };
+    const tabs = NAISHIN_TERMS.map((term) => {
+      const t = nd.terms.find((x) => x.term === term);
+      const sub = t && t.total !== null && t.total !== undefined ? `${naishinFmt(t.total)}点` : "未入力";
+      return `<button type="button" class="naishin-tab ${term === naishinTerm ? "active" : ""}" data-term="${term}">${term}<br><span>${sub}</span></button>`;
+    }).join("");
+    const row = (s) => `
+      <div class="naishin-row"><label for="ns-${s}">${s}</label>
+        <select id="ns-${s}" data-ns="${s}"><option value="">—</option>${[5, 4, 3, 2, 1].map((n) => `<option value="${n}" ${saved.ratings && saved.ratings[s] === n ? "selected" : ""}>${n}</option>`).join("")}</select>
+      </div>`;
+    el.innerHTML = `
+      <div class="card">
+        <p class="info-title">内申点(通知表)</p>
+        <p class="naishin-note">通知表の5段階評価を入れると、内申点が自動で計算されます。主要5教科は×4、副教科は×7.5で、オール5なら250点満点です。</p>
+        <div class="naishin-tabs">${tabs}</div>
+        <p class="naishin-group">主要5教科(×4)</p>
+        ${NAISHIN_MAIN.map(row).join("")}
+        <p class="naishin-group">副教科(×7.5)</p>
+        ${NAISHIN_SUB.map(row).join("")}
+        <div class="naishin-total"><span>${naishinTerm}の内申点<br><span id="naishin-incomplete" style="font-size:11px;font-weight:500;color:var(--muted)"></span></span><span><strong id="naishin-total-value">-</strong> / 250</span></div>
+        <div id="naishin-error" class="msg error"></div>
+        <button class="submit" id="naishin-save-btn" type="button">${naishinTerm}の内申点を保存する</button>
+      </div>`;
+    const readRatings = () => {
+      const r = {};
+      el.querySelectorAll("select[data-ns]").forEach((sel) => { r[sel.dataset.ns] = sel.value === "" ? null : Number(sel.value); });
+      return r;
+    };
+    const updateTotal = () => {
+      const c = naishinCalc(readRatings());
+      const any = Object.values(readRatings()).some((v) => v !== null);
+      document.getElementById("naishin-total-value").textContent = any ? naishinFmt(c.total) : "-";
+      document.getElementById("naishin-incomplete").textContent = any && !c.complete ? "未入力の教科があります" : "";
+    };
+    el.querySelectorAll("select[data-ns]").forEach((sel) => sel.addEventListener("change", updateTotal));
+    el.querySelectorAll(".naishin-tab").forEach((btn) => btn.addEventListener("click", () => { naishinTerm = btn.dataset.term; drawNaishin(); }));
+    document.getElementById("naishin-save-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("naishin-save-btn");
+      const errorEl = document.getElementById("naishin-error");
+      errorEl.classList.remove("show");
+      const ratings = readRatings();
+      if (!Object.values(ratings).some((v) => v !== null)) return showFieldError(errorEl, "評価を1つ以上入力してください");
+      btn.disabled = true; btn.textContent = "保存中...";
+      try {
+        const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "saveNaishin", studentId, term: naishinTerm, ratings }) });
+        const result = await res.json();
+        if (!result.ok) throw new Error(result.error || "failed");
+        if (!currentData.naishin) currentData.naishin = { terms: NAISHIN_TERMS.map((t) => ({ term: t, ratings: {}, total: null, complete: false })), max: 250 };
+        const c = naishinCalc(ratings);
+        const idx = currentData.naishin.terms.findIndex((t) => t.term === naishinTerm);
+        const entry = { term: naishinTerm, ratings, total: c.total, complete: c.complete };
+        if (idx === -1) currentData.naishin.terms.push(entry); else currentData.naishin.terms[idx] = entry;
+        drawNaishin();
+        showToast("内申点を保存しました");
+      } catch (err) {
+        showFieldError(errorEl, err.message || "保存に失敗しました。もう一度お試しください。");
+        btn.disabled = false; btn.textContent = `${naishinTerm}の内申点を保存する`;
+      }
+    });
+    updateTotal();
   }
 
   function renderTestDateRow(testName) {
