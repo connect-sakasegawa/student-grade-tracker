@@ -215,6 +215,12 @@
   .mission-cat.homework { background: var(--brand-soft); color: var(--brand); }
   .mission-cat.self { background: var(--growth-soft); color: var(--growth); }
   .mission-repeat-flag { font-size: 11px; margin-left: 4px; }
+  .mission-delete-btn { background: none; border: none; padding: 2px 4px; font-size: 12px; color: var(--muted); flex-shrink: 0; margin-top: 1px; }
+  .delete-opt-btn { width: 100%; padding: 13px; border-radius: 8px; border: 1px solid #C0392B; background: #fff; color: #C0392B; font-size: 14px; font-weight: 700; margin-top: 10px; font-family: inherit; }
+  .delete-opt-btn.solid { background: #C0392B; color: #fff; }
+  .delete-cancel-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--paper); color: var(--muted); font-size: 14px; font-weight: 600; margin-top: 10px; font-family: inherit; }
+  .delete-target { font-size: 13.5px; font-weight: 600; background: var(--paper); border-radius: 8px; padding: 10px 12px; margin: 0 0 4px; word-break: break-all; }
+  .delete-hint { font-size: 11.5px; color: var(--muted); margin: 4px 0 0; line-height: 1.5; }
   .mission-edit-btn { background: none; border: none; padding: 2px 4px; font-size: 12px; color: var(--muted); flex-shrink: 0; margin-top: 1px; }
   .day-empty { font-size: 12.5px; color: var(--muted); padding: 4px 0; }
 
@@ -1332,6 +1338,7 @@
             <div class="mission-checkbox ${done ? "checked" : ""}" data-id="${m.id}">${done ? "✓" : ""}</div>
             <div class="mission-text ${done ? "done" : ""}">${escapeHtml(m.content)}<span class="mission-cat ${m.category === "宿題" ? "homework" : "self"}">${m.category}</span>${isRecurring ? `<span class="mission-repeat-flag">🔁</span>` : ""}</div>
             <button type="button" class="mission-edit-btn" data-id="${m.id}" data-content="${escapeHtml(m.content)}">✏️</button>
+            <button type="button" class="mission-delete-btn" data-id="${m.id}" aria-label="消す">🗑</button>
           `;
           block.appendChild(item);
         });
@@ -1340,6 +1347,7 @@
     });
 
     document.querySelectorAll(".mission-checkbox").forEach((cb) => cb.addEventListener("click", () => toggleMission(cb.dataset.id)));
+    document.querySelectorAll(".mission-delete-btn").forEach((btn) => btn.addEventListener("click", () => openDeleteMissionModal(btn.dataset.id)));
     document.querySelectorAll(".mission-edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => editMissionContent(btn.dataset.id, btn.dataset.content));
     });
@@ -1464,6 +1472,69 @@
       else if (newGarden.nutrientCount === 2) showToast("🌿 つぼみになったよ");
     }
   }
+  // ---------- ミッションを消す(この日だけ / これ以降すべて) ----------
+  function isMissionDone(m) { return m.completed === true || m.completed === "TRUE" || m.completed === "true"; }
+  function missionDateYMD(m) {
+    const w = String(m.weekStart);
+    return addDaysToYMD(`${w.slice(0, 4)}-${w.slice(4, 6)}-${w.slice(6, 8)}`, Math.max(DAYS.indexOf(m.day), 0));
+  }
+  function openDeleteMissionModal(id) {
+    const m = (currentData.missions || []).find((x) => x.id === id);
+    if (!m) return;
+    const modal = document.getElementById("advice-modal");
+    const isRecurring = !!m.recurringId;
+    modal.innerHTML = `
+      <div class="advice-backdrop" id="delete-backdrop"></div>
+      <div class="advice-sheet">
+        <p class="advice-sheet-title" style="color:#C0392B;">ミッションを消しますか?</p>
+        <p class="delete-target">${m.day}曜日(${formatMD(missionDateYMD(m))}) ${escapeHtml(m.content)}</p>
+        ${isRecurring ? `
+          <button type="button" class="delete-opt-btn" id="delete-one-btn">この日だけ消す</button>
+          <p class="delete-hint">この日の分だけ消します。ほかの日の繰り返しは、そのまま続きます。</p>
+          <button type="button" class="delete-opt-btn solid" id="delete-future-btn">これ以降すべて消す</button>
+          <p class="delete-hint">この日から先の繰り返しを、すべて止めて消します。完了したものと、これより前の分は残ります。</p>
+        ` : `
+          <button type="button" class="delete-opt-btn solid" id="delete-one-btn">消す</button>
+        `}
+        <button type="button" class="delete-cancel-btn" id="delete-cancel-btn">やめる</button>
+      </div>
+    `;
+    modal.classList.add("show");
+    document.getElementById("delete-backdrop").addEventListener("click", closeAdviceModal);
+    document.getElementById("delete-cancel-btn").addEventListener("click", closeAdviceModal);
+    document.getElementById("delete-one-btn").addEventListener("click", () => deleteMission(id, "one"));
+    const futureBtn = document.getElementById("delete-future-btn");
+    if (futureBtn) futureBtn.addEventListener("click", () => deleteMission(id, "future"));
+  }
+  async function deleteMission(id, scope) {
+    closeAdviceModal();
+    const list = currentData.missions || [];
+    const m = list.find((x) => x.id === id);
+    if (!m) return;
+    // 先に画面から消して(待ち時間をなくす)、裏で保存する。失敗したら元に戻す
+    const snapshot = list.slice();
+    const removeIds = new Set([id]);
+    if (scope === "future" && m.recurringId) {
+      const targetDate = missionDateYMD(m);
+      list.forEach((x) => {
+        if (x.recurringId === m.recurringId && x.id !== id && !isMissionDone(x) && missionDateYMD(x) >= targetDate) removeIds.add(x.id);
+      });
+    }
+    currentData.missions = list.filter((x) => !removeIds.has(x.id));
+    invalidateWeekCache();
+    renderNotebook(document.getElementById("tab-content"));
+    try {
+      const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteMission", studentId, id, scope }) });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error || "failed");
+      showToast(scope === "future" ? "これ以降のミッションを消しました" : "ミッションを消しました");
+    } catch (err) {
+      currentData.missions = snapshot;
+      renderNotebook(document.getElementById("tab-content"));
+      showToast(err.message || "消せませんでした。もう一度お試しください。");
+    }
+  }
+
   function editMissionContent(id, currentContent) {
     const newContent = window.prompt("内容を修正してください(この1件だけが変わります)", currentContent || "");
     if (newContent === null) return;
