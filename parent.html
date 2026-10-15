@@ -552,7 +552,6 @@
           <button type="button" class="test-edit-btn ${editingNaishin ? "active" : ""}" id="naishin-edit-btn">${editingNaishin ? "閉じる" : "修正"}</button>
         </div>
         <p class="field-note" style="margin:0;">通知表の5段階評価から自動で計算します。主要5教科は×4、副教科は×7.5で、オール5なら250点満点です。</p>
-        <p class="field-note" style="margin:8px 0 0;color:var(--amber);font-weight:600;">お子様の入力に誤りがある場合や、未入力の項目がある場合は、お手数ですが保護者様にて修正・入力をお願いいたします。</p>
         <div class="naishin-tabs">${tabs}</div>
         ${bodyHtml}
       </div>`;
@@ -796,6 +795,7 @@
       <div class="card grades-guide-card">
         <p class="grades-guide-title">スケジュールの見かた</p>
         <p class="grades-guide-item">スケジュールは「当月」と「翌月」をご確認いただけます。プルダウンで確認したい月を選択してください。また、授業日時が変更になった箇所は黄色く表示されます。</p>
+        <p class="grades-guide-item" style="font-weight:700;">「⟳ 更新」ボタンを押してから、最新のスケジュールをご確認ください。</p>
       </div>
     `;
     html += `<div class="card">`;
