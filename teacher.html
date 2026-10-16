@@ -154,7 +154,8 @@
 
   /* 誕生日のお祝い */
   .year-open-btn { display: block; width: 100%; margin: 0 0 12px; padding: 12px; border: 1.5px solid var(--brand); border-radius: 12px; background: var(--card); color: var(--brand); font-size: 14.5px; font-weight: 700; font-family: inherit; }
-  .year-sticky-bar { position: sticky; top: 0; z-index: 20; margin: -4px -16px 12px; padding: max(8px, env(safe-area-inset-top)) 16px 10px; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .year-sticky-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; margin: -4px -16px 12px; padding: 8px 16px 8px; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .year-safe-cover { position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px); background: var(--paper); z-index: 21; }
   .year-bar-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .year-guide { margin-top: 6px; background: var(--brand-soft); border: 1px solid #B9CDEE; border-radius: 10px; padding: 8px 11px; font-size: 12px; line-height: 1.6; color: var(--ink); }
   .year-guide p { margin: 0; }
@@ -162,13 +163,13 @@
   .year-back-btn { background: none; border: none; color: var(--brand); font-size: 14.5px; font-weight: 700; font-family: inherit; padding: 6px 0; white-space: nowrap; }
   #year-month-select { flex: 0 0 auto; font-size: 14px; font-family: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; }
   .year-updated { font-size: 11.5px; color: var(--muted); margin: 10px 0 0; text-align: right; }
-  .year-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
+  .year-legend { display: flex; flex-wrap: wrap; gap: 3px 11px; font-size: 11px; color: var(--muted); margin: 7px 0 0; }
   .year-legend span { display: inline-flex; align-items: center; gap: 5px; }
   .yl-box { display: inline-block; width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); }
   .yl-none { background: #E3E6EC; } .yl-closed { background: #5A6070; border-color: #5A6070; }
   .yl-hol { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 1.5px solid #D93025; border-radius: 50%; font-style: normal; font-size: 9px; color: var(--ink); }
   .yl-spill { font-style: normal; font-size: 10.5px; font-weight: 700; color: var(--amber); background: var(--amber-soft); border-radius: 4px; padding: 1px 4px; }
-  .year-card { padding: 14px 12px 12px; scroll-margin-top: calc(var(--year-sticky-h, 150px) + 8px); }
+  .year-card { padding: 14px 12px 12px; scroll-margin-top: calc(var(--year-sticky-h, 150px) + env(safe-area-inset-top, 0px) + 8px); }
   .year-month-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 2px 10px; }
   .year-month-title { font-family: 'Zilla Slab', serif; font-size: 22px; font-weight: 700; color: var(--brand); }
   .year-month-range { font-size: 12px; color: var(--muted); font-weight: 600; }
@@ -562,14 +563,15 @@
         <p class="year-guide-title">${escapeHtml(YEAR_SCHEDULE.title)}</p>
         <p>各月の平常授業は、どの曜日も必ず<b>4回</b>です。そのため、授業を数える「月」は、カレンダーの月とずれることがあります。例: 10/29〜10/31の授業は、<b>11月分</b>の授業として数えます。日付をタップすると、何月分の第何回の授業かを確認できます。</p>
       </div>
-    </div>`;
-    html += `<div class="year-legend">
-      <span><i class="yl-box yl-none"></i>平常授業なし(教室は自習で利用可)</span>
+      <div class="year-legend">
+      <span><i class="yl-box yl-none"></i>授業なし(自習は可)</span>
       <span><i class="yl-box yl-closed"></i>教室休み</span>
       <span><i class="yl-hol">日</i>祝日</span>
       <span><i class="yl-spill">10/30</i>別の月の日付</span>
       <span><i class="yl-test">📝</i>担当生徒のテスト</span>
+    </div>
     </div>`;
+    html += `<div class="year-safe-cover"></div>`;
     blocks.forEach((b, bi) => {
       html += `<div class="card year-card" id="year-block-${bi}">
         <div class="year-month-head"><span class="year-month-title">${b.m}月分</span><span class="year-month-range">${yearMd(b.first)} 〜 ${yearMd(b.last)}</span></div>
