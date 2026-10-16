@@ -160,7 +160,7 @@
   .bday-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(31,42,68,0.55); display: flex; align-items: center; justify-content: center; padding: 20px; animation: bday-fade 0.3s ease; }
   .bday-modal { position: relative; width: 100%; max-width: 380px; max-height: 86vh; overflow-y: auto; background: #FFFDF6; border: 2px solid #F2C14E; border-radius: 18px; padding: 28px 22px 22px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.25); animation: bday-pop 0.4s cubic-bezier(.2,1.4,.4,1); }
   .bday-emoji { font-size: 46px; line-height: 1.1; margin: 0 0 8px; }
-  .bday-title { font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: #B24D2F; margin: 0 0 14px; line-height: 1.4; }
+  .bday-title { white-space: pre-line; font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: #B24D2F; margin: 0 0 14px; line-height: 1.4; }
   .bday-message { font-size: 14px; line-height: 1.85; color: var(--ink); white-space: pre-wrap; text-align: left; margin: 0 0 20px; }
   .bday-close { width: 100%; padding: 13px; border: none; border-radius: 10px; background: var(--brand); color: #fff; font-size: 15px; font-weight: 700; font-family: inherit; }
   @keyframes bday-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -348,13 +348,16 @@
     if (!b || document.getElementById("bday-overlay")) return;
     const overlay = document.createElement("div");
     overlay.id = "bday-overlay"; overlay.className = "bday-overlay";
-    const lines = String(b.message).split("\n");
-    const title = lines[0]; const body = lines.slice(1).join("\n").replace(/^\n+/, "");
+    // 最初の空行までを見出し(複数行可)、それ以降を本文にする
+    const msg = String(b.message).replace(/\r\n?/g, "\n").trim();
+    const m = msg.match(/\n\s*\n/);
+    const title = m ? msg.slice(0, m.index) : msg.split("\n")[0];
+    const body = m ? msg.slice(m.index + m[0].length) : msg.split("\n").slice(1).join("\n");
     overlay.innerHTML = `<div class="bday-modal" role="dialog" aria-modal="true">
       <p class="bday-emoji">🎉🎂🎉</p>
       <p class="bday-title">${escapeHtml(title)}</p>
       <p class="bday-message">${escapeHtml(body)}</p>
-      <button type="button" class="bday-close">ありがとうございます</button>
+      <button type="button" class="bday-close">HAPPY BIRTHDAY</button>
     </div>`;
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
