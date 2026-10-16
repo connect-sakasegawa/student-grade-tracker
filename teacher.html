@@ -205,6 +205,13 @@
   .bday-title { white-space: pre-line; font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: #B24D2F; margin: 0 0 14px; line-height: 1.4; }
   .bday-message { font-size: 14px; line-height: 1.85; color: var(--ink); white-space: pre-wrap; text-align: left; margin: 0 0 20px; }
   .bday-close { width: 100%; padding: 13px; border: none; border-radius: 10px; background: var(--brand); color: #fff; font-size: 15px; font-weight: 700; font-family: inherit; }
+  .bday-other-banner { background: #EAF1FC; border-color: #9DB7E3; }
+  .bday-sub-line { font-size: 14px; margin: -4px 0 14px; color: var(--ink); }
+  .bday-animal { background: #F6F9FF; border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 12px; margin: 0 0 14px; }
+  .bday-animal-emoji { font-size: 40px; line-height: 1.1; }
+  .bday-animal-name { font-size: 15px; font-weight: 700; color: var(--brand); margin: 4px 0 6px; }
+  .bday-animal-desc { font-size: 13px; line-height: 1.7; text-align: left; }
+  .bday-hint { font-size: 12.5px; color: var(--muted); margin: 0 0 16px; }
   @keyframes bday-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes bday-pop { from { opacity: 0; transform: scale(0.85) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 </style>
@@ -407,6 +414,43 @@
     overlay.querySelector(".bday-close").addEventListener("click", close);
     overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
   }
+  // ===== 今日が誕生日の、ほかの講師のお知らせ =====
+  function otherBirthdays() {
+    const list = currentData && currentData.birthdayTeachers;
+    return Array.isArray(list) ? list : [];
+  }
+  function otherBirthdayName(t) { return String(t.name || "").replace(/[\s\u3000]+/g, ""); }
+  function otherBirthdayBannersHtml() {
+    return otherBirthdays().map((t, i) => {
+      const nm = escapeHtml(otherBirthdayName(t));
+      const main = t.n ? `今日は${nm}先生のコネクト入社後、${t.n}回目のお誕生日です` : `今日は${nm}先生のお誕生日です`;
+      const sub = t.animal ? `${t.animal.emoji} 動物占い「${escapeHtml(t.animal.name)}」 ・ タップで詳細` : "タップで詳細";
+      return `<button type="button" class="bday-banner bday-other-banner" data-bi="${i}">
+        <span class="bday-banner-icon">🎂</span>
+        <span class="bday-banner-text">${main}<span class="bday-banner-sub">${sub}</span></span>
+      </button>`;
+    }).join("");
+  }
+  function showOtherBirthdayPopup(i) {
+    const t = otherBirthdays()[i];
+    if (!t || document.getElementById("bday-overlay")) return;
+    const nm = escapeHtml(otherBirthdayName(t));
+    const overlay = document.createElement("div");
+    overlay.id = "bday-overlay"; overlay.className = "bday-overlay";
+    overlay.innerHTML = `<div class="bday-modal" role="dialog" aria-modal="true">
+      <p class="bday-emoji">🎂🎉</p>
+      <p class="bday-title">今日は${nm}先生の<br>お誕生日です</p>
+      ${t.n ? `<p class="bday-sub-line">コネクト入社後、<b>${t.n}回目</b>のお誕生日です</p>` : ""}
+      ${t.animal ? `<div class="bday-animal"><div class="bday-animal-emoji">${t.animal.emoji}</div><div class="bday-animal-name">動物占いは「${escapeHtml(t.animal.name)}」タイプ</div><div class="bday-animal-desc">${escapeHtml(t.animal.desc)}</div></div>` : ""}
+      <p class="bday-hint">見かけたら、ぜひ一言お祝いを伝えましょう!</p>
+      <button type="button" class="bday-close">おめでとうございます🎉</button>
+    </div>`;
+    document.body.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.querySelector(".bday-close").addEventListener("click", close);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  }
+
   function maybeShowBirthdayPopup() {
     if (!birthdayInfo()) return;
     const key = "connect-bday-shown-" + todayKey();
@@ -421,6 +465,7 @@
       <h1>CONNEC＋</h1>
       <p class="teacher-name">${escapeHtml(data.teacherName)} 先生</p>
       ${birthdayBannerHtml()}
+      ${otherBirthdayBannersHtml()}
       <div id="tab-content"></div>
       <nav class="tabbar">
         <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール${data.hasUnreadSchedule ? '<span class="tab-unread-dot"></span>' : ""}</button>
@@ -432,6 +477,7 @@
     document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
     const bdayBanner = document.getElementById("bday-banner");
     if (bdayBanner) bdayBanner.addEventListener("click", showBirthdayPopup);
+    document.querySelectorAll(".bday-other-banner").forEach((el) => el.addEventListener("click", () => showOtherBirthdayPopup(Number(el.dataset.bi))));
     const tabEl = document.getElementById("tab-content");
     if (currentTab === "schedule") renderSchedule(tabEl);
     else if (currentTab === "grades") renderGrades(tabEl);
