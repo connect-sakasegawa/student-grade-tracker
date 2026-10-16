@@ -449,8 +449,34 @@
     const d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
+  // 担当生徒が入力したテスト日程(日付ごとにまとめる)
+  function testsByDateMap() {
+    const tests = Array.isArray(currentData && currentData.testDates) ? currentData.testDates : [];
+    const map = {};
+    tests.forEach((t) => { (map[t.testDate] = map[t.testDate] || []).push(t); });
+    return map;
+  }
+  function testLabel(t) { return `${t.grade ? t.grade + " " : ""}${t.studentName}(${t.testName})`; }
+  // スケジュール画面の上部に出す「担当生徒のテスト日程」(これからの分)
+  function testScheduleCardHtml() {
+    const today = yearTodayStr();
+    const testsByDate = testsByDateMap();
+    const upcoming = Object.keys(testsByDate).filter((d) => d >= today).sort();
+    let html = `<div class="card year-tests-card"><p class="section-title" style="margin-top:0;">📝 担当生徒のテスト日程</p>`;
+    if (upcoming.length === 0) {
+      html += `<p class="year-tests-empty">これからのテスト日程は、まだ入力されていません。生徒がアプリで入力すると、ここに表示されます。</p>`;
+    } else {
+      upcoming.forEach((d) => {
+        const dt = new Date(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10)));
+        const days = Math.round((dt - new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, Number(today.slice(8, 10)))) / 86400000);
+        html += `<div class="year-test-row"><div class="year-test-date">${yearMd(d)}(${YEAR_DOW[dt.getDay()]})<span class="year-test-days">${days === 0 ? "今日" : "あと" + days + "日"}</span></div><div class="year-test-names">${testsByDate[d].map((t) => `<div>${escapeHtml(testLabel(t))}</div>`).join("")}</div></div>`;
+      });
+    }
+    html += `<p class="year-tests-note">生徒が自分のアプリで入力した日程です。入力されていない生徒の分は表示されません。</p></div>`;
+    return html;
+  }
   function yearOpenButtonHtml() {
-    return `<button type="button" id="year-open-btn" class="year-open-btn">📆 年間スケジュールを見る</button>`;
+    return `<button type="button" id="year-open-btn" class="year-open-btn">📆 年間スケジュールを見る</button>` + testScheduleCardHtml();
   }
   function bindYearOpenButton() {
     const b = document.getElementById("year-open-btn");
@@ -472,11 +498,7 @@
       return { m: mo.m, y: mo.y, cells, first: cells[0].date, last: cells[cells.length - 1].date };
     });
     // 担当生徒が入力したテスト日程(日付ごとにまとめる)
-    const tests = Array.isArray(currentData.testDates) ? currentData.testDates : [];
-    const testsByDate = {};
-    tests.forEach((t) => { (testsByDate[t.testDate] = testsByDate[t.testDate] || []).push(t); });
-    const testLabel = (t) => `${t.grade ? t.grade + " " : ""}${t.studentName}(${t.testName})`;
-    const upcoming = Object.keys(testsByDate).filter((d) => d >= today).sort();
+    const testsByDate = testsByDateMap();
     let curIdx = blocks.findIndex((b) => today >= b.first && today <= b.last);
     if (curIdx < 0) curIdx = today < blocks[0].first ? 0 : blocks.length - 1;
 
@@ -488,17 +510,6 @@
       <p class="guide-item">日付をタップすると、何月分の第何回の授業かを確認できます。</p>
       <p class="year-updated">${escapeHtml(YEAR_SCHEDULE.updated)} 更新</p>
     </div>`;
-    html += `<div class="card year-tests-card"><p class="section-title" style="margin-top:0;">📝 担当生徒のテスト日程</p>`;
-    if (upcoming.length === 0) {
-      html += `<p class="year-tests-empty">これからのテスト日程は、まだ入力されていません。生徒がアプリで入力すると、ここに表示されます。</p>`;
-    } else {
-      upcoming.forEach((d) => {
-        const dt = new Date(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10)));
-        const days = Math.round((dt - new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, Number(today.slice(8, 10)))) / 86400000);
-        html += `<div class="year-test-row"><div class="year-test-date">${yearMd(d)}(${YEAR_DOW[dt.getDay()]})<span class="year-test-days">${days === 0 ? "今日" : "あと" + days + "日"}</span></div><div class="year-test-names">${testsByDate[d].map((t) => `<div>${escapeHtml(testLabel(t))}</div>`).join("")}</div></div>`;
-      });
-    }
-    html += `<p class="year-tests-note">生徒が自分のアプリで入力した日程です。入力されていない生徒の分は表示されません。</p></div>`;
     html += `<div class="field schedule-month-select"><select id="year-month-select">${blocks.map((b, i) => `<option value="${i}" ${i === curIdx ? "selected" : ""}>${b.m}月分</option>`).join("")}</select></div>`;
     html += `<div class="year-legend">
       <span><i class="yl-box yl-none"></i>平常授業なし(教室は自習で利用可)</span>
