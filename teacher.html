@@ -209,6 +209,7 @@
   .bday-other-banner { background: #EAF1FC; border-color: #9DB7E3; }
   .bday-sub-line { font-size: 14px; margin: -4px 0 14px; color: var(--ink); }
   .bday-animal { background: #F6F9FF; border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 12px; margin: 0 0 14px; }
+  .bday-animal-who { font-size: 13.5px; font-weight: 600; color: var(--muted); margin: 0 0 2px; }
   .bday-animal-emoji { font-size: 40px; line-height: 1.1; }
   .bday-animal-name { font-size: 15px; font-weight: 700; color: var(--brand); margin: 4px 0 6px; }
   .bday-animal-desc { font-size: 13px; line-height: 1.7; text-align: left; }
@@ -441,7 +442,7 @@
       <p class="bday-emoji">🎂🎉</p>
       <p class="bday-title">今日は${nm}先生の<br>お誕生日です</p>
       ${t.n ? `<p class="bday-sub-line">コネクト入社後、<b>${t.n}回目</b>のお誕生日です</p>` : ""}
-      ${t.animal ? `<div class="bday-animal"><div class="bday-animal-emoji">${t.animal.emoji}</div><div class="bday-animal-name">動物占いは「${escapeHtml(t.animal.name)}」タイプ</div><div class="bday-animal-desc">${escapeHtml(t.animal.desc)}</div></div>` : ""}
+      ${t.animal ? `<div class="bday-animal"><div class="bday-animal-who">${nm}先生は</div><div class="bday-animal-emoji">${t.animal.emoji}</div><div class="bday-animal-name">動物占いで「${escapeHtml(t.animal.name)}」タイプです</div><div class="bday-animal-desc">${escapeHtml(t.animal.desc)}</div></div>` : ""}
       <p class="bday-hint">見かけたら、ぜひ一言お祝いを伝えましょう!</p>
       <button type="button" class="bday-close">おめでとうございます🎉</button>
     </div>`;
