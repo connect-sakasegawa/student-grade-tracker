@@ -153,6 +153,37 @@
   .toast.show { opacity: 1; transform: translateY(0); }
 
   /* 誕生日のお祝い */
+  .year-open-btn { display: block; width: 100%; margin: 0 0 12px; padding: 12px; border: 1.5px solid var(--brand); border-radius: 12px; background: var(--card); color: var(--brand); font-size: 14.5px; font-weight: 700; font-family: inherit; }
+  .year-back-btn { background: none; border: none; color: var(--brand); font-size: 14px; font-weight: 700; font-family: inherit; padding: 4px 0 12px; }
+  .year-updated { font-size: 11.5px; color: var(--muted); margin: 10px 0 0; text-align: right; }
+  .year-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
+  .year-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .yl-box { display: inline-block; width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); }
+  .yl-none { background: #E3E6EC; } .yl-closed { background: #5A6070; border-color: #5A6070; }
+  .yl-hol { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 1.5px solid #D93025; border-radius: 50%; font-style: normal; font-size: 9px; color: var(--ink); }
+  .yl-spill { font-style: normal; font-size: 10.5px; font-weight: 700; color: var(--amber); background: var(--amber-soft); border-radius: 4px; padding: 1px 4px; }
+  .year-card { padding: 14px 12px 12px; scroll-margin-top: 12px; }
+  .year-month-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 2px 10px; }
+  .year-month-title { font-family: 'Zilla Slab', serif; font-size: 22px; font-weight: 700; color: var(--brand); }
+  .year-month-range { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .year-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .year-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); padding-bottom: 2px; }
+  .year-dow.sun { color: #C0392B; }
+  .year-cell { position: relative; min-height: 46px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); padding: 3px 0 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-family: inherit; }
+  .year-cell.empty { border: none; background: none; }
+  .year-cell.none { background: #E3E6EC; color: #4A5163; }
+  .year-cell.closed { background: #5A6070; border-color: #5A6070; color: #fff; }
+  .year-cell.spill.lesson { background: var(--amber-soft); border-color: #E7B9A8; }
+  .year-cell.spill .year-num { color: var(--amber); font-weight: 700; }
+  .year-cell.spill.none .year-num, .year-cell.spill.closed .year-num { color: inherit; }
+  .year-cell.today { outline: 2.5px solid var(--brand); outline-offset: 0; }
+  .year-num { font-size: 14px; font-weight: 600; line-height: 1; min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; }
+  .year-num small { font-size: 9px; font-weight: 600; margin-right: 1px; }
+  .year-num.hol { border: 1.5px solid #D93025; border-radius: 11px; padding: 0 3px; }
+  .year-nth { font-size: 9.5px; color: var(--muted); line-height: 1; }
+  .year-cell.spill .year-nth { color: var(--amber); }
+  .year-detail { margin: 10px 2px 0; font-size: 13px; color: var(--muted); line-height: 1.6; min-height: 1.6em; }
+  .year-detail.on { color: var(--ink); font-weight: 700; }
   .bday-banner { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: linear-gradient(135deg, #FFF3C9, #FFE0E6); border: 1px solid #F2C14E; border-radius: 12px; padding: 12px 14px; margin: 0 0 16px; font-family: inherit; color: var(--ink); }
   .bday-banner-icon { font-size: 26px; line-height: 1; }
   .bday-banner-text { font-size: 13.5px; font-weight: 700; line-height: 1.5; }
@@ -277,6 +308,7 @@
 
   function switchTab(tab) {
     currentTab = tab;
+    showYearView = false;
     renderShell();
     if (tab === "schedule" && needsScheduleAck()) markTeacherScheduleSeen();
   }
@@ -396,11 +428,97 @@
     else if (currentTab === "rules") renderRules(tabEl);
   }
 
+  // ===== 年間スケジュール(2026年度) =====
+  // c: [日付, 種別(L=平常授業 / N=平常授業なし / X=教室休み), 祝日(1)]
+  const YEAR_SCHEDULE = {"title":"2026年度 年間スケジュール","updated":"2026/01/26","months":[{"y":2026,"m":4,"c":[["2026-04-01","N",0],["2026-04-02","N",0],["2026-04-03","N",0],["2026-04-04","L",0],["2026-04-05","N",0],["2026-04-06","L",0],["2026-04-07","L",0],["2026-04-08","L",0],["2026-04-09","L",0],["2026-04-10","L",0],["2026-04-11","L",0],["2026-04-12","N",0],["2026-04-13","L",0],["2026-04-14","L",0],["2026-04-15","L",0],["2026-04-16","L",0],["2026-04-17","L",0],["2026-04-18","L",0],["2026-04-19","N",0],["2026-04-20","L",0],["2026-04-21","L",0],["2026-04-22","L",0],["2026-04-23","L",0],["2026-04-24","L",0],["2026-04-25","L",0],["2026-04-26","N",0],["2026-04-27","L",0],["2026-04-28","L",0],["2026-04-29","L",1],["2026-04-30","L",0],["2026-05-01","L",0]]},{"y":2026,"m":5,"c":[["2026-05-02","X",0],["2026-05-03","X",1],["2026-05-04","X",1],["2026-05-05","X",1],["2026-05-06","X",1],["2026-05-07","L",0],["2026-05-08","L",0],["2026-05-09","L",0],["2026-05-10","N",0],["2026-05-11","L",0],["2026-05-12","L",0],["2026-05-13","L",0],["2026-05-14","L",0],["2026-05-15","L",0],["2026-05-16","L",0],["2026-05-17","N",0],["2026-05-18","L",0],["2026-05-19","L",0],["2026-05-20","L",0],["2026-05-21","L",0],["2026-05-22","L",0],["2026-05-23","L",0],["2026-05-24","N",0],["2026-05-25","L",0],["2026-05-26","L",0],["2026-05-27","L",0],["2026-05-28","L",0],["2026-05-29","L",0],["2026-05-30","L",0],["2026-05-31","N",0],["2026-06-01","L",0],["2026-06-02","L",0],["2026-06-03","L",0]]},{"y":2026,"m":6,"c":[["2026-06-04","L",0],["2026-06-05","L",0],["2026-06-06","L",0],["2026-06-07","N",0],["2026-06-08","L",0],["2026-06-09","L",0],["2026-06-10","L",0],["2026-06-11","L",0],["2026-06-12","L",0],["2026-06-13","L",0],["2026-06-14","N",0],["2026-06-15","L",0],["2026-06-16","L",0],["2026-06-17","L",0],["2026-06-18","L",0],["2026-06-19","L",0],["2026-06-20","L",0],["2026-06-21","N",0],["2026-06-22","L",0],["2026-06-23","L",0],["2026-06-24","L",0],["2026-06-25","L",0],["2026-06-26","L",0],["2026-06-27","L",0],["2026-06-28","N",0],["2026-06-29","L",0],["2026-06-30","L",0],["2026-07-01","L",0]]},{"y":2026,"m":7,"c":[["2026-07-02","L",0],["2026-07-03","L",0],["2026-07-04","L",0],["2026-07-05","N",0],["2026-07-06","L",0],["2026-07-07","L",0],["2026-07-08","L",0],["2026-07-09","L",0],["2026-07-10","L",0],["2026-07-11","L",0],["2026-07-12","N",0],["2026-07-13","L",0],["2026-07-14","L",0],["2026-07-15","L",0],["2026-07-16","L",0],["2026-07-17","L",0],["2026-07-18","L",0],["2026-07-19","N",0],["2026-07-20","L",1],["2026-07-21","L",0],["2026-07-22","L",0],["2026-07-23","L",0],["2026-07-24","L",0],["2026-07-25","L",0],["2026-07-26","N",0],["2026-07-27","L",0],["2026-07-28","L",0],["2026-07-29","L",0]]},{"y":2026,"m":8,"c":[["2026-07-30","L",0],["2026-07-31","L",0],["2026-08-01","L",0],["2026-08-02","N",0],["2026-08-03","L",0],["2026-08-04","L",0],["2026-08-05","L",0],["2026-08-06","L",0],["2026-08-07","L",0],["2026-08-08","L",0],["2026-08-09","N",0],["2026-08-10","N",0],["2026-08-11","N",1],["2026-08-12","N",0],["2026-08-13","N",0],["2026-08-14","N",0],["2026-08-15","N",0],["2026-08-16","N",0],["2026-08-17","L",0],["2026-08-18","L",0],["2026-08-19","L",0],["2026-08-20","L",0],["2026-08-21","L",0],["2026-08-22","L",0],["2026-08-23","N",0],["2026-08-24","L",0],["2026-08-25","L",0],["2026-08-26","L",0],["2026-08-27","L",0],["2026-08-28","L",0],["2026-08-29","L",0],["2026-08-30","N",0],["2026-08-31","L",0],["2026-09-01","L",0],["2026-09-02","L",0]]},{"y":2026,"m":9,"c":[["2026-09-03","L",0],["2026-09-04","L",0],["2026-09-05","L",0],["2026-09-06","N",0],["2026-09-07","L",0],["2026-09-08","L",0],["2026-09-09","L",0],["2026-09-10","L",0],["2026-09-11","L",0],["2026-09-12","L",0],["2026-09-13","N",0],["2026-09-14","L",0],["2026-09-15","L",0],["2026-09-16","L",0],["2026-09-17","L",0],["2026-09-18","L",0],["2026-09-19","L",0],["2026-09-20","N",0],["2026-09-21","L",1],["2026-09-22","L",1],["2026-09-23","L",1],["2026-09-24","L",0],["2026-09-25","L",0],["2026-09-26","L",0],["2026-09-27","N",0],["2026-09-28","L",0],["2026-09-29","L",0],["2026-09-30","L",0]]},{"y":2026,"m":10,"c":[["2026-10-01","L",0],["2026-10-02","L",0],["2026-10-03","L",0],["2026-10-04","N",0],["2026-10-05","L",0],["2026-10-06","L",0],["2026-10-07","L",0],["2026-10-08","L",0],["2026-10-09","L",0],["2026-10-10","L",0],["2026-10-11","N",0],["2026-10-12","L",1],["2026-10-13","L",0],["2026-10-14","L",0],["2026-10-15","L",0],["2026-10-16","L",0],["2026-10-17","L",0],["2026-10-18","N",0],["2026-10-19","L",0],["2026-10-20","L",0],["2026-10-21","L",0],["2026-10-22","L",0],["2026-10-23","L",0],["2026-10-24","L",0],["2026-10-25","N",0],["2026-10-26","L",0],["2026-10-27","L",0],["2026-10-28","L",0]]},{"y":2026,"m":11,"c":[["2026-10-29","L",0],["2026-10-30","L",0],["2026-10-31","L",0],["2026-11-01","N",0],["2026-11-02","L",0],["2026-11-03","L",1],["2026-11-04","L",0],["2026-11-05","L",0],["2026-11-06","L",0],["2026-11-07","L",0],["2026-11-08","N",0],["2026-11-09","L",0],["2026-11-10","L",0],["2026-11-11","L",0],["2026-11-12","L",0],["2026-11-13","L",0],["2026-11-14","L",0],["2026-11-15","N",0],["2026-11-16","L",0],["2026-11-17","L",0],["2026-11-18","L",0],["2026-11-19","L",0],["2026-11-20","L",0],["2026-11-21","L",0],["2026-11-22","N",0],["2026-11-23","L",1],["2026-11-24","L",0],["2026-11-25","L",0]]},{"y":2026,"m":12,"c":[["2026-11-26","L",0],["2026-11-27","L",0],["2026-11-28","L",0],["2026-11-29","N",0],["2026-11-30","L",0],["2026-12-01","L",0],["2026-12-02","L",0],["2026-12-03","L",0],["2026-12-04","L",0],["2026-12-05","L",0],["2026-12-06","N",0],["2026-12-07","L",0],["2026-12-08","L",0],["2026-12-09","L",0],["2026-12-10","L",0],["2026-12-11","L",0],["2026-12-12","L",0],["2026-12-13","N",0],["2026-12-14","L",0],["2026-12-15","L",0],["2026-12-16","L",0],["2026-12-17","L",0],["2026-12-18","L",0],["2026-12-19","L",0],["2026-12-20","N",0],["2026-12-21","L",0],["2026-12-22","L",0],["2026-12-23","L",0],["2026-12-24","N",0],["2026-12-25","N",0],["2026-12-26","N",0],["2026-12-27","N",0],["2026-12-28","N",0],["2026-12-29","N",0],["2026-12-30","X",0],["2026-12-31","X",0]]},{"y":2027,"m":1,"c":[["2027-01-01","X",1],["2027-01-02","X",0],["2027-01-03","X",0],["2027-01-04","N",0],["2027-01-05","N",0],["2027-01-06","N",0],["2027-01-07","L",0],["2027-01-08","L",0],["2027-01-09","L",0],["2027-01-10","N",0],["2027-01-11","L",1],["2027-01-12","L",0],["2027-01-13","L",0],["2027-01-14","L",0],["2027-01-15","L",0],["2027-01-16","L",0],["2027-01-17","N",0],["2027-01-18","L",0],["2027-01-19","L",0],["2027-01-20","L",0],["2027-01-21","L",0],["2027-01-22","L",0],["2027-01-23","L",0],["2027-01-24","N",0],["2027-01-25","L",0],["2027-01-26","L",0],["2027-01-27","L",0],["2027-01-28","L",0],["2027-01-29","L",0],["2027-01-30","L",0],["2027-01-31","N",0],["2027-02-01","L",0],["2027-02-02","L",0],["2027-02-03","L",0]]},{"y":2027,"m":2,"c":[["2027-02-04","L",0],["2027-02-05","L",0],["2027-02-06","L",0],["2027-02-07","N",0],["2027-02-08","L",0],["2027-02-09","L",0],["2027-02-10","L",0],["2027-02-11","L",1],["2027-02-12","L",0],["2027-02-13","L",0],["2027-02-14","N",0],["2027-02-15","L",0],["2027-02-16","L",0],["2027-02-17","L",0],["2027-02-18","L",0],["2027-02-19","L",0],["2027-02-20","L",0],["2027-02-21","N",0],["2027-02-22","L",0],["2027-02-23","L",1],["2027-02-24","L",0],["2027-02-25","L",0],["2027-02-26","L",0],["2027-02-27","L",0],["2027-02-28","N",0],["2027-03-01","L",0],["2027-03-02","L",0],["2027-03-03","L",0]]},{"y":2027,"m":3,"c":[["2027-03-04","L",0],["2027-03-05","L",0],["2027-03-06","L",0],["2027-03-07","N",0],["2027-03-08","L",0],["2027-03-09","L",0],["2027-03-10","L",0],["2027-03-11","L",0],["2027-03-12","L",0],["2027-03-13","L",0],["2027-03-14","N",0],["2027-03-15","L",0],["2027-03-16","L",0],["2027-03-17","L",0],["2027-03-18","L",0],["2027-03-19","L",0],["2027-03-20","L",0],["2027-03-21","N",1],["2027-03-22","L",1],["2027-03-23","L",0],["2027-03-24","L",0],["2027-03-25","L",0],["2027-03-26","L",0],["2027-03-27","L",0],["2027-03-28","N",0],["2027-03-29","L",0],["2027-03-30","L",0],["2027-03-31","L",0]]}]};
+  let showYearView = false;
+  const YEAR_DOW = ["日", "月", "火", "水", "木", "金", "土"];
+  function yearMd(s) { return Number(s.slice(5, 7)) + "/" + Number(s.slice(8, 10)); }
+  function yearTodayStr() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function yearOpenButtonHtml() {
+    return `<button type="button" id="year-open-btn" class="year-open-btn">📆 年間スケジュールを見る</button>`;
+  }
+  function bindYearOpenButton() {
+    const b = document.getElementById("year-open-btn");
+    if (b) b.addEventListener("click", () => { showYearView = true; renderSchedule(document.getElementById("tab-content")); window.scrollTo(0, 0); });
+  }
+  function renderYearSchedule(el) {
+    const today = yearTodayStr();
+    const ms = YEAR_SCHEDULE.months;
+    // 月ごとに、曜日別の「第○回」を数える
+    const blocks = ms.map((mo) => {
+      const cnt = {};
+      const cells = mo.c.map(([date, k, h]) => {
+        const dt = new Date(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)));
+        const dow = dt.getDay();
+        let nth = 0;
+        if (k === "L") { cnt[dow] = (cnt[dow] || 0) + 1; nth = cnt[dow]; }
+        return { date, k, h, dow, nth, cm: Number(date.slice(5, 7)) };
+      });
+      return { m: mo.m, y: mo.y, cells, first: cells[0].date, last: cells[cells.length - 1].date };
+    });
+    let curIdx = blocks.findIndex((b) => today >= b.first && today <= b.last);
+    if (curIdx < 0) curIdx = today < blocks[0].first ? 0 : blocks.length - 1;
+
+    let html = `<button type="button" id="year-back-btn" class="year-back-btn">← スケジュールに戻る</button>`;
+    html += `<div class="card guide-card">
+      <p class="guide-title">${escapeHtml(YEAR_SCHEDULE.title)}</p>
+      <p class="guide-item">各月の平常授業は、どの曜日も必ず<b>4回</b>です。そのため、授業を数える「月」は、カレンダーの月とずれることがあります。</p>
+      <p class="guide-item">例: 10/29〜10/31の授業は、<b>11月分</b>の授業として数えます。</p>
+      <p class="guide-item">日付をタップすると、何月分の第何回の授業かを確認できます。</p>
+      <p class="year-updated">${escapeHtml(YEAR_SCHEDULE.updated)} 更新</p>
+    </div>`;
+    html += `<div class="field schedule-month-select"><select id="year-month-select">${blocks.map((b, i) => `<option value="${i}" ${i === curIdx ? "selected" : ""}>${b.m}月分</option>`).join("")}</select></div>`;
+    html += `<div class="year-legend">
+      <span><i class="yl-box yl-none"></i>平常授業なし(教室は自習で利用可)</span>
+      <span><i class="yl-box yl-closed"></i>教室休み</span>
+      <span><i class="yl-hol">日</i>祝日</span>
+      <span><i class="yl-spill">10/30</i>別の月の日付</span>
+    </div>`;
+    blocks.forEach((b, bi) => {
+      html += `<div class="card year-card" id="year-block-${bi}">
+        <div class="year-month-head"><span class="year-month-title">${b.m}月分</span><span class="year-month-range">${yearMd(b.first)} 〜 ${yearMd(b.last)}</span></div>
+        <div class="year-grid">${YEAR_DOW.map((w, i) => `<div class="year-dow${i === 0 ? " sun" : ""}">${w}</div>`).join("")}`;
+      const lead = b.cells[0].dow;
+      for (let i = 0; i < lead; i++) html += `<div class="year-cell empty"></div>`;
+      b.cells.forEach((c) => {
+        const spill = c.cm !== b.m;
+        const cls = ["year-cell", c.k === "N" ? "none" : c.k === "X" ? "closed" : "lesson", spill ? "spill" : "", c.date === today ? "today" : ""].join(" ");
+        const num = spill ? `<span class="year-num${c.h ? " hol" : ""}"><small>${c.cm}/</small>${Number(c.date.slice(8, 10))}</span>` : `<span class="year-num${c.h ? " hol" : ""}">${Number(c.date.slice(8, 10))}</span>`;
+        html += `<button type="button" class="${cls}" data-b="${bi}" data-d="${c.date}" data-k="${c.k}" data-h="${c.h}" data-n="${c.nth}" data-w="${c.dow}">${num}${c.nth ? `<span class="year-nth">${c.nth}回</span>` : ""}</button>`;
+      });
+      html += `</div><p class="year-detail" id="year-detail-${bi}">日付をタップすると詳しく表示されます</p></div>`;
+    });
+    el.innerHTML = html;
+
+    document.getElementById("year-back-btn").addEventListener("click", () => { showYearView = false; renderSchedule(document.getElementById("tab-content")); window.scrollTo(0, 0); });
+    const sel = document.getElementById("year-month-select");
+    const goto = (i) => { const t = document.getElementById("year-block-" + i); if (t) t.scrollIntoView({ block: "start" }); };
+    sel.addEventListener("change", (e) => goto(Number(e.target.value)));
+    el.querySelectorAll(".year-cell[data-d]").forEach((btn) => btn.addEventListener("click", () => {
+      const bi = Number(btn.dataset.b); const b = blocks[bi];
+      const dd = btn.dataset.d; const dow = YEAR_DOW[Number(btn.dataset.w)];
+      let text = `${yearMd(dd)}(${dow})`;
+      if (btn.dataset.h === "1") text += " 祝日";
+      if (btn.dataset.k === "L") text += ` → ${b.m}月分 第${btn.dataset.n}回の授業`;
+      else if (btn.dataset.k === "X") text += " → 教室休み";
+      else text += " → 平常授業なし(教室は自習で利用できます)";
+      const box = document.getElementById("year-detail-" + bi);
+      if (box) { box.textContent = text; box.classList.add("on"); }
+    }));
+    // 今月の位置へ移動
+    if (curIdx > 0) setTimeout(() => goto(curIdx), 0);
+  }
+
   // ===== スケジュール =====
   function renderSchedule(el) {
+    if (showYearView) { renderYearSchedule(el); return; }
     const months = (currentData.schedule && currentData.schedule.months) || [];
     if (months.length === 0) {
-      el.innerHTML = `
+      el.innerHTML = yearOpenButtonHtml() + `
         <div class="card">
           <div class="schedule-card-header">
             <p class="section-title" style="margin-top:0;">スケジュール</p>
@@ -409,6 +527,7 @@
           <p class="empty">スケジュールはまだ登録されていません</p>
         </div>
       `;
+      bindYearOpenButton();
       const refreshBtnEmpty = document.getElementById("force-refresh-btn");
       if (refreshBtnEmpty) refreshBtnEmpty.addEventListener("click", forceRefreshApp);
       return;
@@ -431,7 +550,7 @@
     })();
     const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
 
-    let html = `
+    let html = yearOpenButtonHtml() + `
       <div class="card guide-card">
         <p class="guide-title">自分が担当するコマの時間割です</p>
         <p class="guide-item">「当月」と「翌月」をご確認いただけます。プルダウンで確認したい月を選択してください。前回から日時が変更になったコマは黄色く表示されます。</p>
@@ -488,6 +607,7 @@
         renderSchedule(document.getElementById("tab-content"));
       });
     }
+    bindYearOpenButton();
     const refreshBtn = document.getElementById("force-refresh-btn");
     if (refreshBtn) refreshBtn.addEventListener("click", forceRefreshApp);
   }
