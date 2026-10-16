@@ -184,6 +184,17 @@
   .year-cell.spill .year-nth { color: var(--amber); }
   .year-detail { margin: 10px 2px 0; font-size: 13px; color: var(--muted); line-height: 1.6; min-height: 1.6em; }
   .year-detail.on { color: var(--ink); font-weight: 700; }
+  .year-tests-card { padding: 14px 14px 12px; }
+  .year-test-row { display: flex; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); }
+  .year-test-row:first-of-type { border-top: none; }
+  .year-test-date { flex: 0 0 96px; font-size: 13.5px; font-weight: 700; color: var(--brand); line-height: 1.4; }
+  .year-test-days { display: block; font-size: 11.5px; font-weight: 600; color: var(--amber); }
+  .year-test-names { flex: 1; font-size: 13.5px; line-height: 1.6; }
+  .year-tests-empty { font-size: 13px; color: var(--muted); line-height: 1.6; margin: 6px 0 4px; }
+  .year-tests-note { font-size: 11.5px; color: var(--muted); margin: 10px 0 0; line-height: 1.5; }
+  .yl-test { font-style: normal; font-size: 12px; }
+  .year-test-mark { position: absolute; top: 1px; right: 2px; font-size: 10px; line-height: 1; }
+  .year-cell.has-test { box-shadow: inset 0 0 0 2px #F2C14E; }
   .bday-banner { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: linear-gradient(135deg, #FFF3C9, #FFE0E6); border: 1px solid #F2C14E; border-radius: 12px; padding: 12px 14px; margin: 0 0 16px; font-family: inherit; color: var(--ink); }
   .bday-banner-icon { font-size: 26px; line-height: 1; }
   .bday-banner-text { font-size: 13.5px; font-weight: 700; line-height: 1.5; }
@@ -460,6 +471,12 @@
       });
       return { m: mo.m, y: mo.y, cells, first: cells[0].date, last: cells[cells.length - 1].date };
     });
+    // 担当生徒が入力したテスト日程(日付ごとにまとめる)
+    const tests = Array.isArray(currentData.testDates) ? currentData.testDates : [];
+    const testsByDate = {};
+    tests.forEach((t) => { (testsByDate[t.testDate] = testsByDate[t.testDate] || []).push(t); });
+    const testLabel = (t) => `${t.grade ? t.grade + " " : ""}${t.studentName}(${t.testName})`;
+    const upcoming = Object.keys(testsByDate).filter((d) => d >= today).sort();
     let curIdx = blocks.findIndex((b) => today >= b.first && today <= b.last);
     if (curIdx < 0) curIdx = today < blocks[0].first ? 0 : blocks.length - 1;
 
@@ -471,12 +488,24 @@
       <p class="guide-item">日付をタップすると、何月分の第何回の授業かを確認できます。</p>
       <p class="year-updated">${escapeHtml(YEAR_SCHEDULE.updated)} 更新</p>
     </div>`;
+    html += `<div class="card year-tests-card"><p class="section-title" style="margin-top:0;">📝 担当生徒のテスト日程</p>`;
+    if (upcoming.length === 0) {
+      html += `<p class="year-tests-empty">これからのテスト日程は、まだ入力されていません。生徒がアプリで入力すると、ここに表示されます。</p>`;
+    } else {
+      upcoming.forEach((d) => {
+        const dt = new Date(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10)));
+        const days = Math.round((dt - new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, Number(today.slice(8, 10)))) / 86400000);
+        html += `<div class="year-test-row"><div class="year-test-date">${yearMd(d)}(${YEAR_DOW[dt.getDay()]})<span class="year-test-days">${days === 0 ? "今日" : "あと" + days + "日"}</span></div><div class="year-test-names">${testsByDate[d].map((t) => `<div>${escapeHtml(testLabel(t))}</div>`).join("")}</div></div>`;
+      });
+    }
+    html += `<p class="year-tests-note">生徒が自分のアプリで入力した日程です。入力されていない生徒の分は表示されません。</p></div>`;
     html += `<div class="field schedule-month-select"><select id="year-month-select">${blocks.map((b, i) => `<option value="${i}" ${i === curIdx ? "selected" : ""}>${b.m}月分</option>`).join("")}</select></div>`;
     html += `<div class="year-legend">
       <span><i class="yl-box yl-none"></i>平常授業なし(教室は自習で利用可)</span>
       <span><i class="yl-box yl-closed"></i>教室休み</span>
       <span><i class="yl-hol">日</i>祝日</span>
       <span><i class="yl-spill">10/30</i>別の月の日付</span>
+      <span><i class="yl-test">📝</i>担当生徒のテスト</span>
     </div>`;
     blocks.forEach((b, bi) => {
       html += `<div class="card year-card" id="year-block-${bi}">
@@ -486,9 +515,9 @@
       for (let i = 0; i < lead; i++) html += `<div class="year-cell empty"></div>`;
       b.cells.forEach((c) => {
         const spill = c.cm !== b.m;
-        const cls = ["year-cell", c.k === "N" ? "none" : c.k === "X" ? "closed" : "lesson", spill ? "spill" : "", c.date === today ? "today" : ""].join(" ");
+        const cls = ["year-cell", testsByDate[c.date] ? "has-test" : "", c.k === "N" ? "none" : c.k === "X" ? "closed" : "lesson", spill ? "spill" : "", c.date === today ? "today" : ""].join(" ");
         const num = spill ? `<span class="year-num${c.h ? " hol" : ""}"><small>${c.cm}/</small>${Number(c.date.slice(8, 10))}</span>` : `<span class="year-num${c.h ? " hol" : ""}">${Number(c.date.slice(8, 10))}</span>`;
-        html += `<button type="button" class="${cls}" data-b="${bi}" data-d="${c.date}" data-k="${c.k}" data-h="${c.h}" data-n="${c.nth}" data-w="${c.dow}">${num}${c.nth ? `<span class="year-nth">${c.nth}回</span>` : ""}</button>`;
+        html += `<button type="button" class="${cls}" data-b="${bi}" data-d="${c.date}" data-k="${c.k}" data-h="${c.h}" data-n="${c.nth}" data-w="${c.dow}">${num}${c.nth ? `<span class="year-nth">${c.nth}回</span>` : ""}${testsByDate[c.date] ? `<span class="year-test-mark">📝</span>` : ""}</button>`;
       });
       html += `</div><p class="year-detail" id="year-detail-${bi}">日付をタップすると詳しく表示されます</p></div>`;
     });
@@ -507,7 +536,11 @@
       else if (btn.dataset.k === "X") text += " → 教室休み";
       else text += " → 平常授業なし(教室は自習で利用できます)";
       const box = document.getElementById("year-detail-" + bi);
-      if (box) { box.textContent = text; box.classList.add("on"); }
+      if (box) {
+        const ts = testsByDate[dd] || [];
+        box.innerHTML = escapeHtml(text) + ts.map((t) => `<br>📝 ${escapeHtml(testLabel(t))}`).join("");
+        box.classList.add("on");
+      }
     }));
     // 今月の位置へ移動
     if (curIdx > 0) setTimeout(() => goto(curIdx), 0);
