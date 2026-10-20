@@ -265,6 +265,14 @@
   .tab-unread-dot { position: absolute; top: 2px; left: 50%; margin-left: 7px; width: 10px; height: 10px; border-radius: 50%; background: #E63946; border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px #E63946; }
   .tab-btn .tab-icon { font-size: 19px; line-height: 1; }
   .tab-btn.active { color: var(--brand); font-weight: 700; }
+  /* コネーシャのイラストは他の絵文字より少し大きく表示する(はみ出した分だけ余白を詰めて、バーの高さは変えない) */
+  .tab-btn .tab-icon.konesha-icon { height: 19px; display: flex; align-items: center; justify-content: center; }
+  .tab-btn .tab-icon.konesha-icon svg, .tab-btn .tab-icon.konesha-icon img { width: 34px; height: 34px; display: block; margin: -8px 0 -7px; object-fit: contain; }
+
+  .konesha-card { text-align: center; }
+  .konesha-hero svg, .konesha-hero img { width: 150px; height: 150px; display: inline-block; object-fit: contain; }
+  .konesha-title { font-family: 'Zilla Slab', serif; font-size: 22px; font-weight: 700; color: var(--brand); margin: 6px 0 8px; }
+  .konesha-sub { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin: 0; }
 
   #toast-container { position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom) + 10px); z-index: 30; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
   .toast { background: var(--ink); color: #fff; padding: 11px 14px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.18); opacity: 0; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; }
@@ -322,6 +330,14 @@
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
   const LOADING_TEXT = `<p class="loading-title">CONNEC＋</p><p class="loading-sub">『自分ひとりで勉強できる力と姿勢を育む』</p>`;
+
+  // コネーシャの画像。オリジナルのイラスト(PNGなど)を使うときは、GitHubの icons フォルダに画像をアップロードして、
+  // 下の "" をその画像のパス(例: "icons/konesha.png")に書き換える。空欄のあいだは、下の簡易イラストを表示する
+  const KONESHA_IMAGE_URL = "";
+  const KONESHA_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="19" cy="46" rx="15" ry="19" fill="#BDB6AC"/><ellipse cx="19" cy="47" rx="9" ry="13" fill="#F2C9BE"/><ellipse cx="81" cy="46" rx="15" ry="19" fill="#BDB6AC"/><ellipse cx="81" cy="47" rx="9" ry="13" fill="#F2C9BE"/><path d="M14 100 Q16 77 50 74 Q84 77 86 100 Z" fill="#D9720B"/><path d="M27 80 Q50 92 73 80" fill="none" stroke="#E8C24A" stroke-width="3.2" stroke-linecap="round"/><circle cx="50" cy="90" r="3" fill="#E8C24A"/><circle cx="36" cy="88" r="1.8" fill="#E8C24A"/><circle cx="64" cy="88" r="1.8" fill="#E8C24A"/><circle cx="50" cy="46" r="26" fill="#CFC9BF"/><path d="M27 33 Q50 18 73 33" fill="none" stroke="#E8C24A" stroke-width="4.5" stroke-linecap="round"/><circle cx="50" cy="25" r="3.2" fill="#D9720B" stroke="#E8C24A" stroke-width="1.4"/><path d="M50 52 Q50 70 58 77" fill="none" stroke="#CFC9BF" stroke-width="11" stroke-linecap="round"/><circle cx="41" cy="44" r="3" fill="#1F2A44"/><circle cx="59" cy="44" r="3" fill="#1F2A44"/><circle cx="42" cy="43" r="1" fill="#FFFFFF"/><circle cx="60" cy="43" r="1" fill="#FFFFFF"/><ellipse cx="33" cy="54" rx="4.5" ry="3" fill="#F2B8AC" opacity="0.7"/><ellipse cx="67" cy="54" rx="4.5" ry="3" fill="#F2B8AC" opacity="0.7"/></svg>`;
+  function koneshaIconHtml() {
+    return KONESHA_IMAGE_URL ? `<img src="${KONESHA_IMAGE_URL}" alt="コネーシャ" />` : KONESHA_SVG;
+  }
 
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
   const MAIN5_SUBJECTS = ["国語", "社会", "数学", "理科", "英語"];
@@ -690,6 +706,9 @@
   function renderShell() {
     const data = currentData;
     const rank = data.rank;
+    // 階級は「畑」タブの下に移動した。コネーシャは小学生には表示しない
+    if (currentTab === "ranks") currentTab = "garden";
+    if (currentTab === "konesha" && data.isElementary) currentTab = "notebook";
     appEl.innerHTML = `
       <p class="eyebrow">個別指導塾コネクト</p>
       <h1>CONNEC＋</h1>
@@ -708,7 +727,7 @@
         ${data.isElementary ? "" : `<button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>私の成績表</button>`}
         <button class="tab-btn ${currentTab === "notebook" ? "active" : ""}" data-tab="notebook"><span class="tab-icon">📔</span>学習手帳</button>
         <button class="tab-btn ${currentTab === "garden" ? "active" : ""}" data-tab="garden"><span class="tab-icon">🌾</span>畑</button>
-        <button class="tab-btn ${currentTab === "ranks" ? "active" : ""}" data-tab="ranks"><span class="tab-icon">🎖️</span>階級</button>
+        ${data.isElementary ? "" : `<button class="tab-btn ${currentTab === "konesha" ? "active" : ""}" data-tab="konesha"><span class="tab-icon konesha-icon">${koneshaIconHtml()}</span>コネーシャ</button>`}
         <button class="tab-btn ${currentTab === "schedule" ? "active" : ""}" data-tab="schedule"><span class="tab-icon">📅</span>スケジュール${data.hasUnreadSchedule ? '<span class="tab-unread-dot"></span>' : ""}</button>
       </nav>
     `;
@@ -717,8 +736,19 @@
     if (currentTab === "grades") renderGrades(contentEl);
     else if (currentTab === "notebook") renderNotebook(contentEl);
     else if (currentTab === "garden") renderGarden(contentEl);
-    else if (currentTab === "ranks") renderRanks(contentEl);
+    else if (currentTab === "konesha") renderKonesha(contentEl);
     else if (currentTab === "schedule") renderSchedule(contentEl);
+  }
+
+  // ---------- コネーシャタブ(今は準備中の画面) ----------
+  function renderKonesha(el) {
+    el.innerHTML = `
+      <div class="card konesha-card">
+        <div class="konesha-hero">${koneshaIconHtml()}</div>
+        <p class="konesha-title">コネーシャ</p>
+        <p class="konesha-sub">ただいま準備中です。<br />もうすぐ、勉強のわからないところを質問できるようになります。</p>
+      </div>
+    `;
   }
 
   // ホーム画面に追加した状態(ブラウザの更新ボタンがない状態)でも、
@@ -1714,6 +1744,8 @@
           return `<div class="entry"><div>${iconHtml}${stripped}</div><div class="entry-meta">${formatDate(h.harvestedAt)}</div></div>`;
         }).join("")}
       </div>
+      <p class="section-title">階級</p>
+      ${renderRanksHtml()}
     `;
     const harvestBtn = document.getElementById("harvest-btn");
     if (harvestBtn) harvestBtn.addEventListener("click", harvestGarden);
@@ -1742,8 +1774,8 @@
     }
   }
 
-  // ---------- 階級一覧タブ ----------
-  function renderRanks(el) {
+  // ---------- 階級(畑タブの下に表示する) ----------
+  function renderRanksHtml() {
     const rank = currentData.rank || { rankName: "雑用", pointsInCycle: 0, nextRankName: null, pointsToNext: 0, totalPoints: 0, className: "見習いクラス" };
     const isUra = rank.rankName.indexOf("裏・") === 0;
     const style = CLASS_CARD_STYLES[rank.className] || CLASS_CARD_STYLES["見習いクラス"];
@@ -1763,7 +1795,7 @@
       html += `<div class="rank-row ${isCurrent ? "current" : ""}"><span>${displayName}</span><span class="pt">${r.threshold}pt</span></div>`;
     });
     html += `</div>`;
-    el.innerHTML = html;
+    return html;
   }
 
   // ---------- スケジュールタブ ----------
