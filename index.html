@@ -314,7 +314,7 @@
   .konesha-figure span { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
   .konesha-bubble .katex { font-size: 1.05em; }
   .konesha-bubble .katex-display { margin: 6px 0; overflow-x: auto; overflow-y: hidden; }
-    .konesha-voice { font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif; font-weight: 500; color: #6B2FB3; }
+    .konesha-voice { font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif; font-weight: 700; color: #6B2FB3; }
   .konesha-greet.konesha-voice { font-size: 16px; line-height: 1.9; }
   .konesha-row.bot .konesha-bubble.konesha-voice { font-size: 15px; line-height: 1.9; }
   .konesha-thumb { display: block; max-width: 100%; max-height: 180px; border-radius: 8px; margin-bottom: 4px; }
@@ -859,12 +859,12 @@
   }
 
   // ---- コネーシャ質問チャット ----
-  const KONESHA_DESC_LINES = ["コネクトに住みつく学問の神様。", "趣味は寺社仏閣巡り。", "店員にタメ口で話す人が苦手"];
+  const KONESHA_DESC_LINES = ["コネクトに住みつく学問の神様", "趣味は寺社仏閣巡り", "店員にタメ口で話す人が苦手"];
   const KONESHA_NO_TEXT_LABEL = "(画像を送りました)";
   const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", messages: [], busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
 
   function koneshaGreeting(info) {
-    let t = `${escapeHtml(info.studentName)}さん、よう来たのう。`;
+    let t = `${escapeHtml(info.studentName)}さん<br />よう来たのう。`;
     if (info.nextTest) {
       if (info.nextTest.daysUntil === 0) t += `<br />今日は${escapeHtml(info.nextTest.testName)}じゃな。落ち着いて、力を出してくるのじゃぞ。`;
       else t += `<br />${escapeHtml(info.nextTest.testName)}まで、あと${info.nextTest.daysUntil}日じゃな。`;
