@@ -866,10 +866,10 @@
   function koneshaGreeting(info) {
     let t = `${escapeHtml(info.studentName)}さん<br />よう来たのう。`;
     if (info.nextTest) {
-      if (info.nextTest.daysUntil === 0) t += `<br />今日は${escapeHtml(info.nextTest.testName)}じゃな。落ち着いて、力を出してくるのじゃぞ。`;
-      else t += `<br />${escapeHtml(info.nextTest.testName)}まで、あと${info.nextTest.daysUntil}日じゃな。`;
+      if (info.nextTest.daysUntil === 0) t += `今日は${escapeHtml(info.nextTest.testName)}じゃな。落ち着いて、力を出してくるのじゃぞ。`;
+      else t += `${escapeHtml(info.nextTest.testName)}まで、あと${info.nextTest.daysUntil}日じゃな。`;
     }
-    return t + `<br />わからぬところは、わしと一緒に考えようぞ。`;
+    return t + (info.nextTest ? `<br />` : "") + `わからぬところは、わしと一緒に考えようぞ。`;
   }
   function koneshaRemainHtml(info, inline) {
     if (!info) return "";
