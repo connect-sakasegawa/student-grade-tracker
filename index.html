@@ -304,6 +304,19 @@
   .konesha-input textarea { flex: 1; min-height: 44px; max-height: 140px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: 16px; resize: none; background: #fff; color: var(--ink); box-sizing: border-box; }
   .konesha-send { flex: none; border: none; background: var(--brand); color: #fff; border-radius: 12px; padding: 0 16px; height: 44px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
   .konesha-send:disabled { opacity: .5; cursor: default; }
+  .konesha-mode button[data-mode="hint"] { color: #2A5FB4; border-color: #2A5FB4; }
+  .konesha-mode button[data-mode="hint"].on { background: #2A5FB4; color: #fff; }
+  .konesha-mode button[data-mode="explain"] { color: var(--brand); border-color: var(--brand); }
+  .konesha-mode button[data-mode="explain"].on { background: var(--brand); color: #fff; }
+  .konesha-mode button:disabled, .konesha-level button:disabled { opacity: .6; cursor: default; }
+  .konesha-level { display: flex; gap: 6px; margin: -4px 0 8px; }
+  .konesha-level button { flex: 1; border: 1px solid #9DB8E3; background: #fff; color: #2A5FB4; border-radius: 8px; padding: 7px 4px; font-family: inherit; font-size: 12.5px; cursor: pointer; }
+  .konesha-level button.on { background: #E4EEFB; border-color: #2A5FB4; font-weight: 700; }
+  .konesha-modehelp { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+  .konesha-chat { border-top: 5px solid var(--brand); }
+  .konesha-chat.m-hint { border-top-color: #2A5FB4; }
+  .konesha-chat.m-hint .konesha-row.bot .konesha-bubble { background: #E4EEFB; }
+  .konesha-chat.m-hint .konesha-row.bot .konesha-bubble.err { background: var(--amber-soft); }
   .konesha-desc-box { border: 2px solid var(--gold); background: var(--gold-soft); border-radius: 12px; padding: 10px 14px; margin: 6px 0 14px; text-align: center; }
   .konesha-desc-box p { margin: 3px 0; font-size: 13px; line-height: 1.6; color: var(--ink); }
   .konesha-row.bot .konesha-bubble.konesha-voice { color: #6B2FB3; }
@@ -861,7 +874,7 @@
   // ---- コネーシャ質問チャット ----
   const KONESHA_DESC_LINES = ["コネクトに住みつく学問の神様", "趣味は寺社仏閣巡り", "店員にタメ口で話す人が苦手"];
   const KONESHA_NO_TEXT_LABEL = "(画像を送りました)";
-  const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", messages: [], busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
+  const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", hintLevel: "light", chats: { hint: [], explain: [], study: [] }, busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
 
   function koneshaGreeting(info) {
     let t = `${escapeHtml(info.studentName)}さん<br />よう来たのう。`;
@@ -893,18 +906,21 @@
     koneshaRerender();
   }
 
+  // いまのチャット欄(ヒントと解説は別々に記録する)
+  function koneshaKey() { return koneshaState.category === "subject" ? koneshaState.mode : "study"; }
+
   function koneshaRerender() {
     const el = koneshaState.el;
     if (currentTab === "konesha" && el && document.body.contains(el)) renderKonesha(el);
   }
 
   function koneshaStart(category) {
-    Object.assign(koneshaState, { category, messages: [], error: "", draft: "", image: null });
+    Object.assign(koneshaState, { category, chats: { hint: [], explain: [], study: [] }, error: "", draft: "", image: null });
     koneshaRerender();
   }
   function koneshaBack() {
     if (koneshaState.busy) return;
-    Object.assign(koneshaState, { category: null, messages: [], error: "", draft: "", image: null });
+    Object.assign(koneshaState, { category: null, chats: { hint: [], explain: [], study: [] }, error: "", draft: "", image: null });
     koneshaRerender();
   }
 
@@ -950,22 +966,23 @@
     const image = st.image;
     if (!text && !image) return;
     if (st.info && st.info.remaining <= 0) { st.error = "今月の質問回数の上限に達したようじゃ。来月になればまた質問できるぞ。急ぎのときは、教室のLINEで先生に聞くとよい。"; koneshaRerender(); return; }
-    st.messages.push({ role: "user", content: text || KONESHA_NO_TEXT_LABEL, thumb: image ? image.dataUrl : null });
+    const chat = st.chats[koneshaKey()];
+    chat.push({ role: "user", content: text || KONESHA_NO_TEXT_LABEL, thumb: image ? image.dataUrl : null });
     st.draft = ""; st.image = null; st.error = ""; st.busy = true;
     koneshaRerender(); koneshaScrollEnd();
     try {
-      const payload = { action: "askKonesha", studentId, category: st.category, mode: st.mode, messages: st.messages.map((m) => ({ role: m.role, content: m.content })) };
+      const payload = { action: "askKonesha", studentId, category: st.category, mode: st.mode, hintLevel: st.hintLevel, messages: chat.map((m) => ({ role: m.role, content: m.content })) };
       if (image) payload.image = { mediaType: image.mediaType, data: image.base64 };
       const r = await koneshaPost(payload);
       if (r && r.ok) {
-        st.messages.push({ role: "assistant", content: r.reply });
+        chat.push({ role: "assistant", content: r.reply });
       } else {
-        st.messages.pop(); st.draft = text; st.image = image; // 送れなかった質問は入力欄にもどす
+        chat.pop(); st.draft = text; st.image = image; // 送れなかった質問は入力欄にもどす
         st.error = (r && r.error) || "うまく答えられなんだ。もう一度たずねてくれ。";
       }
       if (r && typeof r.remaining === "number" && st.info) { st.info.remaining = r.remaining; st.info.used = r.used; st.info.limit = r.limit; }
     } catch (e) {
-      st.messages.pop(); st.draft = text; st.image = image;
+      chat.pop(); st.draft = text; st.image = image;
       st.error = "通信できなんだ。電波のよいところで、もう一度ためしてくれ。(回数は減っておらぬぞ)";
     }
     st.busy = false;
@@ -1008,17 +1025,34 @@
     }
     // チャット画面
     const isSubject = st.category === "subject";
+    const key = koneshaKey();
+    const dis = st.busy ? "disabled" : "";
+    const HELP = {
+      light: "解き方の取っかかり(どの知識を使うか)を、ちょっとだけ教えます",
+      strong: "解き方の道すじを、答えの手前まで教えます",
+      explain: "最初から最後まで、できるだけ詳しく解説します",
+    };
+    const helpKey = st.mode === "explain" ? "explain" : st.hintLevel;
     const modeHtml = isSubject ? `
       <div class="konesha-mode">
-        <button data-mode="hint" class="${st.mode === "hint" ? "on" : ""}">ヒントをもらう</button>
-        <button data-mode="explain" class="${st.mode === "explain" ? "on" : ""}">解説してもらう</button>
-      </div>` : "";
-    const intro = isSubject
-      ? (st.mode === "hint" ? "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。まずはヒントを出そうぞ。" : "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。ていねいに解説しよう。")
-      : "勉強の進め方でも、教材のことでも、なんでもたずねるがよい。";
+        <button data-mode="hint" class="${st.mode === "hint" ? "on" : ""}" ${dis}>ヒント</button>
+        <button data-mode="explain" class="${st.mode === "explain" ? "on" : ""}" ${dis}>解説</button>
+      </div>
+      ${st.mode === "hint" ? `<div class="konesha-level">
+        <button data-level="light" class="${st.hintLevel === "light" ? "on" : ""}" ${dis}>ちょっとだけヒント</button>
+        <button data-level="strong" class="${st.hintLevel === "strong" ? "on" : ""}" ${dis}>がっつりヒント</button>
+      </div>` : ""}
+      <p class="konesha-modehelp">${HELP[helpKey]}</p>` : "";
+    const INTRO = {
+      light: "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。まずは取っかかりだけ、ちょっとだけ教えようぞ。",
+      strong: "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。道すじまで、がっつりヒントを出そうぞ。",
+      explain: "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。できる限り詳しく解説しよう。",
+      study: "勉強の進め方でも、教材のことでも、なんでもたずねるがよい。",
+    };
+    const intro = isSubject ? (st.mode === "explain" ? INTRO.explain : INTRO[st.hintLevel]) : INTRO.study;
     const avatar = `<div class="konesha-avatar">${koneshaIconHtml()}</div>`;
     let msgs = `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">${escapeHtml(intro)}</div></div>`;
-    st.messages.forEach((m) => {
+    st.chats[key].forEach((m) => {
       if (m.role === "user") {
         const thumb = m.thumb ? `<img class="konesha-thumb" src="${m.thumb}" alt="送った写真" />` : "";
         const showText = !(m.thumb && m.content === KONESHA_NO_TEXT_LABEL);
@@ -1032,7 +1066,7 @@
     const previewHtml = st.imageBusy ? `<div class="konesha-preview">写真を読み込み中…</div>`
       : st.image ? `<div class="konesha-preview"><img src="${st.image.dataUrl}" alt="選んだ写真" /><span>この写真を送ります</span><button class="konesha-link" id="konesha-img-remove">✕ とりやめ</button></div>` : "";
     el.innerHTML = `
-      <div class="card">
+      <div class="card konesha-chat m-${key}">
         <div class="konesha-bar">
           <button class="konesha-link" id="konesha-back">← 最初にもどる</button>
           ${koneshaRemainHtml(st.info, true)}
@@ -1049,7 +1083,8 @@
         <div id="konesha-end"></div>
       </div>`;
     document.getElementById("konesha-back").onclick = koneshaBack;
-    el.querySelectorAll(".konesha-mode button").forEach((b) => { b.onclick = () => { st.mode = b.dataset.mode; koneshaRerender(); }; });
+    el.querySelectorAll(".konesha-mode button").forEach((b) => { b.onclick = () => { st.mode = b.dataset.mode; st.error = ""; koneshaRerender(); }; });
+    el.querySelectorAll(".konesha-level button").forEach((b) => { b.onclick = () => { st.hintLevel = b.dataset.level; koneshaRerender(); }; });
     const ta = document.getElementById("konesha-text");
     ta.oninput = () => { st.draft = ta.value; };
     document.getElementById("konesha-send").onclick = koneshaSend;
