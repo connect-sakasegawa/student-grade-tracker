@@ -43,7 +43,7 @@
 </script>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Hachi+Maru+Pop&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@500;700&display=swap');
   :root {
     --ink: #1F2A44; --paper: #FFF6EC; --card: #FFFFFF; --line: #E8D9C6;
     --brand: #D9720B; --brand-soft: #FBE7D0;
@@ -314,7 +314,7 @@
   .konesha-figure span { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
   .konesha-bubble .katex { font-size: 1.05em; }
   .konesha-bubble .katex-display { margin: 6px 0; overflow-x: auto; overflow-y: hidden; }
-    .konesha-voice { font-family: 'Hachi Maru Pop', 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif; color: #6B2FB3; }
+    .konesha-voice { font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif; font-weight: 500; color: #6B2FB3; }
   .konesha-greet.konesha-voice { font-size: 16px; line-height: 1.9; }
   .konesha-row.bot .konesha-bubble.konesha-voice { font-size: 15px; line-height: 1.9; }
   .konesha-thumb { display: block; max-width: 100%; max-height: 180px; border-radius: 8px; margin-bottom: 4px; }
@@ -981,7 +981,7 @@
     st.el = el;
     // 入口画面: 初回は案内情報を読み込む
     if (!st.info && !st.infoError) {
-      el.innerHTML = `<div class="card konesha-card"><div class="konesha-hero">${koneshaIconHtml()}</div><p class="konesha-sub konesha-voice">コネーシャを呼んでおる…</p></div>`;
+      el.innerHTML = `<div class="card konesha-card"><div class="konesha-hero">${koneshaIconHtml()}</div><p class="konesha-sub">読み込み中…</p></div>`;
       koneshaLoadInfo();
       return;
     }
@@ -1041,8 +1041,8 @@
         <div class="konesha-msgs">${msgs}</div>
         ${previewHtml}
         <div class="konesha-input">
-          <label class="konesha-attach" title="写真を送る">📱<input type="file" accept="image/*" id="konesha-file" hidden /></label>
-          <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="質問を書くか、📱で写真を送ってね">${escapeHtml(st.draft)}</textarea>
+          <label class="konesha-attach" title="写真を送る"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D9720B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><line x1="10.5" y1="18.5" x2="13.5" y2="18.5"/></svg><input type="file" accept="image/*" id="konesha-file" hidden /></label>
+          <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="質問を書くか、左のボタンで写真を送ってね">${escapeHtml(st.draft)}</textarea>
           <button class="konesha-send" id="konesha-send" ${st.busy || st.imageBusy ? "disabled" : ""}>送る</button>
         </div>
         <p class="konesha-note" style="margin-top:8px;">写真には、名前や住所などが写らないようにしてね。</p>
@@ -2021,7 +2021,7 @@
     el.innerHTML = `
       <div class="garden-switch">
         <button class="gs-garden" id="gs-garden"><b>🌾 畑</b><small>果実を育てて収穫</small></button>
-        <button class="gs-rank" id="gs-rank"><b>🏅 階級</b><small>${currentData.rank ? escapeHtml(currentData.rank.rankName) : "ランクを見る"} ↓</small></button>
+        <button class="gs-rank" id="gs-rank"><b>🏅 階級</b><small>バッジを集めてランクアップ</small></button>
       </div>
       <div id="sec-garden" class="section-banner garden"><span class="sb-ico">🌾</span><div><b>畑</b><small>ミッションで育てて、果実を収穫しよう</small></div></div>
       <div class="card">
