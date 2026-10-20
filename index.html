@@ -270,9 +270,11 @@
   /* コネーシャのイラストは他の絵文字より少し大きく表示する(はみ出した分だけ余白を詰めて、バーの高さは変えない) */
   .tab-btn .tab-icon.konesha-icon { height: 19px; display: flex; align-items: center; justify-content: center; }
   .tab-btn .tab-icon.konesha-icon svg, .tab-btn .tab-icon.konesha-icon img { width: 34px; height: 34px; display: block; margin: -8px 0 -7px; object-fit: contain; clip-path: inset(0 0 26% 0); }
+  .tab-btn .tab-icon.konesha-icon img { width: 36px; height: 36px; margin: -9px 0 -8px; clip-path: none; }
 
   .konesha-card { text-align: center; }
-  .konesha-hero svg, .konesha-hero img { width: 150px; height: 150px; display: inline-block; object-fit: contain; }
+  .konesha-hero svg { width: 150px; height: 150px; display: inline-block; object-fit: contain; }
+  .konesha-hero img { height: 230px; width: auto; max-width: 100%; display: inline-block; object-fit: contain; }
   .konesha-title { font-family: 'Zilla Slab', serif; font-size: 22px; font-weight: 700; color: var(--brand); margin: 6px 0 8px; }
   .konesha-sub { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin: 0; }
   .konesha-hero-sm svg, .konesha-hero-sm img { width: 84px; height: 84px; display: inline-block; object-fit: contain; }
@@ -410,11 +412,20 @@
 
   // コネーシャの画像。オリジナルのイラスト(PNGなど)を使うときは、GitHubの icons フォルダに画像をアップロードして、
   // 下の "" をその画像のパス(例: "icons/konesha.png")に書き換える。空欄のあいだは、下の簡易イラストを表示する
-  const KONESHA_IMAGE_URL = "";
+  const KONESHA_IMAGE_URL = "icons/konesha.png";      // コネーシャページの大きな全身イラスト
+  const KONESHA_ICON_URL = "icons/konesha-icon.png"; // 下部バー・吹き出しの小さな顔アイコン(読み込めないときは簡易イラストを表示)
   const KONESHA_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="19" cy="46" rx="15" ry="19" fill="#BDB6AC"/><ellipse cx="19" cy="47" rx="9" ry="13" fill="#F2C9BE"/><ellipse cx="81" cy="46" rx="15" ry="19" fill="#BDB6AC"/><ellipse cx="81" cy="47" rx="9" ry="13" fill="#F2C9BE"/><path d="M14 100 Q16 77 50 74 Q84 77 86 100 Z" fill="#D9720B"/><path d="M27 80 Q50 92 73 80" fill="none" stroke="#E8C24A" stroke-width="3.2" stroke-linecap="round"/><circle cx="50" cy="90" r="3" fill="#E8C24A"/><circle cx="36" cy="88" r="1.8" fill="#E8C24A"/><circle cx="64" cy="88" r="1.8" fill="#E8C24A"/><circle cx="50" cy="46" r="26" fill="#CFC9BF"/><path d="M27 33 Q50 18 73 33" fill="none" stroke="#E8C24A" stroke-width="4.5" stroke-linecap="round"/><circle cx="50" cy="25" r="3.2" fill="#D9720B" stroke="#E8C24A" stroke-width="1.4"/><path d="M50 52 Q50 70 58 77" fill="none" stroke="#CFC9BF" stroke-width="11" stroke-linecap="round"/><circle cx="41" cy="44" r="3" fill="#1F2A44"/><circle cx="59" cy="44" r="3" fill="#1F2A44"/><circle cx="42" cy="43" r="1" fill="#FFFFFF"/><circle cx="60" cy="43" r="1" fill="#FFFFFF"/><ellipse cx="33" cy="54" rx="4.5" ry="3" fill="#F2B8AC" opacity="0.7"/><ellipse cx="67" cy="54" rx="4.5" ry="3" fill="#F2B8AC" opacity="0.7"/></svg>`;
   function koneshaIconHtml() {
-    return KONESHA_IMAGE_URL ? `<img src="${KONESHA_IMAGE_URL}" alt="コネーシャ" />` : KONESHA_SVG;
+    return KONESHA_ICON_URL ? `<img src="${KONESHA_ICON_URL}" alt="コネーシャ" data-konesha="1" />` : KONESHA_SVG;
   }
+  function koneshaHeroHtml() {
+    return KONESHA_IMAGE_URL ? `<img src="${KONESHA_IMAGE_URL}" alt="コネーシャ" data-konesha="1" />` : KONESHA_SVG;
+  }
+  // 画像ファイルがまだアップロードされていないときは、簡易イラストにきりかえる
+  document.addEventListener("error", (e) => {
+    const t = e.target;
+    if (t && t.tagName === "IMG" && t.dataset && t.dataset.konesha) t.outerHTML = KONESHA_SVG;
+  }, true);
 
   const SUBJECTS = ["国語", "社会", "数学", "理科", "音楽", "美術", "保体", "技家", "英語"];
   const MAIN5_SUBJECTS = ["国語", "社会", "数学", "理科", "英語"];
@@ -1039,19 +1050,19 @@
     if (!st.loaded) koneshaLoadChats();
     // 入口画面: 初回は案内情報を読み込む
     if (!st.info && !st.infoError) {
-      el.innerHTML = `<div class="card konesha-card"><div class="konesha-hero">${koneshaIconHtml()}</div><p class="konesha-sub">読み込み中…</p></div>`;
+      el.innerHTML = `<div class="card konesha-card"><div class="konesha-hero">${koneshaHeroHtml()}</div><p class="konesha-sub">読み込み中…</p></div>`;
       koneshaLoadInfo();
       return;
     }
     if (!st.info) {
-      el.innerHTML = `<div class="card konesha-card"><div class="konesha-hero">${koneshaIconHtml()}</div><p class="konesha-title">コネーシャ</p><p class="konesha-sub">${escapeHtml(st.infoError)}</p><button class="konesha-send" id="konesha-retry" style="margin-top:12px;">もう一度ためす</button></div>`;
+      el.innerHTML = `<div class="card konesha-card"><div class="konesha-hero">${koneshaHeroHtml()}</div><p class="konesha-title">コネーシャ</p><p class="konesha-sub">${escapeHtml(st.infoError)}</p><button class="konesha-send" id="konesha-retry" style="margin-top:12px;">もう一度ためす</button></div>`;
       document.getElementById("konesha-retry").onclick = () => { st.infoError = ""; renderKonesha(el); };
       return;
     }
     if (!st.category) {
       el.innerHTML = `
         <div class="card konesha-card">
-          <div class="konesha-hero">${koneshaIconHtml()}</div>
+          <div class="konesha-hero">${koneshaHeroHtml()}</div>
           <p class="konesha-title">コネーシャ</p>
           <div class="konesha-desc-box">${KONESHA_DESC_LINES.map((l) => `<p>${escapeHtml(l)}</p>`).join("")}</div>
           <p class="konesha-greet konesha-voice">${koneshaGreeting(st.info)}</p>
