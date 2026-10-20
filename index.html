@@ -13,6 +13,8 @@
 <meta name="apple-mobile-web-app-title" content="CONNEC＋" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <link rel="icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" />
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 
 <script>
   (function () {
@@ -41,7 +43,7 @@
 </script>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Yuji+Syuku&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Hachi+Maru+Pop&display=swap');
   :root {
     --ink: #1F2A44; --paper: #FFF6EC; --card: #FFFFFF; --line: #E8D9C6;
     --brand: #D9720B; --brand-soft: #FBE7D0;
@@ -276,9 +278,13 @@
   .konesha-hero-sm svg, .konesha-hero-sm img { width: 84px; height: 84px; display: inline-block; object-fit: contain; }
   .konesha-greet { font-size: 15px; line-height: 1.8; color: var(--ink); margin: 4px 0 4px; }
   .konesha-remain { display: inline-block; font-size: 12px; color: var(--muted); background: var(--gold-soft); border-radius: 999px; padding: 3px 12px; margin: 6px 0 14px; }
-  .konesha-entry { display: block; width: 100%; text-align: left; background: var(--brand-soft); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; font-family: inherit; color: var(--ink); cursor: pointer; }
-  .konesha-entry b { display: block; font-size: 15px; color: var(--brand); margin-bottom: 2px; }
-  .konesha-entry span { font-size: 12.5px; color: var(--muted); }
+  .konesha-entry { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: var(--brand); border: none; border-radius: 14px; padding: 15px 16px; margin-bottom: 14px; font-family: inherit; color: #fff; cursor: pointer; box-shadow: 0 4px 0 #A85608; transition: transform .08s, box-shadow .08s; }
+  .konesha-entry.green { background: var(--growth); box-shadow: 0 4px 0 #2B5A40; }
+  .konesha-entry:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+  .konesha-entry .ke-text { flex: 1; }
+  .konesha-entry b { display: block; font-size: 16px; color: #fff; margin-bottom: 3px; }
+  .konesha-entry span { font-size: 12px; color: rgba(255,255,255,.9); line-height: 1.5; }
+  .konesha-entry .ke-go { flex: none; font-size: 26px; line-height: 1; opacity: .9; }
   .konesha-note { font-size: 11.5px; color: var(--muted); line-height: 1.7; margin: 10px 0 0; text-align: left; }
   .konesha-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
   .konesha-link { background: none; border: none; color: var(--brand); font-family: inherit; font-size: 13px; cursor: pointer; padding: 4px 0; }
@@ -298,10 +304,19 @@
   .konesha-input textarea { flex: 1; min-height: 44px; max-height: 140px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: 16px; resize: none; background: #fff; color: var(--ink); box-sizing: border-box; }
   .konesha-send { flex: none; border: none; background: var(--brand); color: #fff; border-radius: 12px; padding: 0 16px; height: 44px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
   .konesha-send:disabled { opacity: .5; cursor: default; }
-  .konesha-desc { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin: 0 8px 10px; }
-  .konesha-voice { font-family: 'Yuji Syuku', 'Hiragino Mincho ProN', 'Yu Mincho', serif; letter-spacing: .02em; }
-  .konesha-greet.konesha-voice { font-size: 16.5px; line-height: 1.9; }
-  .konesha-row.bot .konesha-bubble.konesha-voice { font-size: 15.5px; line-height: 1.85; }
+  .konesha-desc-box { border: 2px solid var(--gold); background: var(--gold-soft); border-radius: 12px; padding: 10px 14px; margin: 6px 0 14px; text-align: center; }
+  .konesha-desc-box p { margin: 3px 0; font-size: 13px; line-height: 1.6; color: var(--ink); }
+  .konesha-row.bot .konesha-bubble.konesha-voice { color: #6B2FB3; }
+  .konesha-row.bot .konesha-bubble.konesha-voice.err { color: var(--amber); }
+  .konesha-bubble:has(.konesha-figure) { max-width: 96%; }
+  .konesha-figure { margin: 8px 0; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px; text-align: center; }
+  .konesha-figure img { display: block; width: 100%; max-width: 380px; height: auto; margin: 0 auto; }
+  .konesha-figure span { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .konesha-bubble .katex { font-size: 1.05em; }
+  .konesha-bubble .katex-display { margin: 6px 0; overflow-x: auto; overflow-y: hidden; }
+    .konesha-voice { font-family: 'Hachi Maru Pop', 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif; color: #6B2FB3; }
+  .konesha-greet.konesha-voice { font-size: 16px; line-height: 1.9; }
+  .konesha-row.bot .konesha-bubble.konesha-voice { font-size: 15px; line-height: 1.9; }
   .konesha-thumb { display: block; max-width: 100%; max-height: 180px; border-radius: 8px; margin-bottom: 4px; }
   .konesha-attach { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); cursor: pointer; }
   .konesha-preview { display: flex; align-items: center; gap: 10px; background: var(--gold-soft); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; font-size: 12.5px; color: var(--muted); }
@@ -789,8 +804,62 @@
   }
 
   // ---------- コネーシャタブ(今は準備中の画面) ----------
+  // ---- コネーシャの返事の表示(数式・図) ----
+  const KONESHA_SVG_OK_TAGS = new Set(["svg", "g", "path", "line", "polyline", "polygon", "rect", "circle", "ellipse", "text", "tspan", "defs", "marker", "title", "desc"]);
+  function koneshaCleanSvgAttrs(node) {
+    Array.from(node.attributes).forEach((a) => {
+      const n = a.name.toLowerCase(), v = String(a.value);
+      if (n.indexOf("on") === 0 || n.indexOf("href") !== -1 || /javascript:|data:text|expression\(|@import/i.test(v) || (n === "style" && /url\(/i.test(v))) node.removeAttribute(a.name);
+    });
+  }
+  // AIが描いた図を、安全な部品だけに絞る(スクリプトや外部読み込みは取り除く)
+  function koneshaSanitizeSvg(src) {
+    try {
+      const doc = new DOMParser().parseFromString(src, "image/svg+xml");
+      const root = doc.documentElement;
+      if (!root || root.localName.toLowerCase() !== "svg" || doc.getElementsByTagName("parsererror").length) return "";
+      if (!root.getAttribute("viewBox")) return "";
+      const walk = (node) => {
+        Array.from(node.children).forEach((ch) => {
+          if (!KONESHA_SVG_OK_TAGS.has(ch.localName.toLowerCase())) { ch.remove(); return; }
+          koneshaCleanSvgAttrs(ch); walk(ch);
+        });
+      };
+      koneshaCleanSvgAttrs(root); walk(root);
+      root.removeAttribute("width"); root.removeAttribute("height");
+      root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      return new XMLSerializer().serializeToString(root);
+    } catch (e) { return ""; }
+  }
+  // 文章のなかの数式($...$ / $$...$$)をきれいに表示する
+  function koneshaMathHtml(raw) {
+    raw = raw.replace(/^\n+|\n+$/g, "");
+    if (!raw) return "";
+    return raw.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g).map((p, i) => {
+      if (i % 2 === 0) return koneshaBubbleHtml(p);
+      const display = p.indexOf("$$") === 0;
+      const tex = display ? p.slice(2, -2) : p.slice(1, -1);
+      if (window.katex) { try { return window.katex.renderToString(tex, { displayMode: display, throwOnError: false }); } catch (e) {} }
+      return escapeHtml(tex);
+    }).join("");
+  }
+  function koneshaRichHtml(text) {
+    let out = "", last = 0, m;
+    const re = /\[\[図\]\]([\s\S]*?)\[\[\/図\]\]/g;
+    while ((m = re.exec(text))) {
+      out += koneshaMathHtml(text.slice(last, m.index));
+      const svg = koneshaSanitizeSvg(m[1].trim());
+      if (svg) out += `<div class="konesha-figure"><img alt="コネーシャの図" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}" /><span>イメージ図</span></div>`;
+      last = re.lastIndex;
+    }
+    let rest = text.slice(last);
+    const open = rest.indexOf("[[図]]");
+    if (open !== -1) rest = rest.slice(0, open); // 途中で切れた図は表示しない
+    return out + koneshaMathHtml(rest);
+  }
+
   // ---- コネーシャ質問チャット ----
-  const KONESHA_DESC = "コネクトに住みつく学問の神様。趣味は寺社仏閣巡り。店員にタメ口で話す人が苦手";
+  const KONESHA_DESC_LINES = ["コネクトに住みつく学問の神様。", "趣味は寺社仏閣巡り。", "店員にタメ口で話す人が苦手"];
   const KONESHA_NO_TEXT_LABEL = "(画像を送りました)";
   const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", messages: [], busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
 
@@ -926,11 +995,11 @@
         <div class="card konesha-card">
           <div class="konesha-hero">${koneshaIconHtml()}</div>
           <p class="konesha-title">コネーシャ</p>
-          <p class="konesha-desc">${escapeHtml(KONESHA_DESC)}</p>
+          <div class="konesha-desc-box">${KONESHA_DESC_LINES.map((l) => `<p>${escapeHtml(l)}</p>`).join("")}</div>
           <p class="konesha-greet konesha-voice">${koneshaGreeting(st.info)}</p>
           ${koneshaRemainHtml(st.info)}
-          <button class="konesha-entry" id="konesha-e-subject"><b>勉強のわからないところ</b><span>英語・数学・国語・理科・社会の質問。問題の写真も送れます。ヒントか解説を選べます</span></button>
-          <button class="konesha-entry" id="konesha-e-study"><b>勉強法・教材の相談</b><span>テスト勉強の進め方、ワークの使い方など</span></button>
+          <button class="konesha-entry" id="konesha-e-subject"><div class="ke-text"><b>勉強のわからないところ</b><span>英語・数学・国語・理科・社会の質問。問題の写真も送れます。ヒントか解説を選べます</span></div><div class="ke-go">›</div></button>
+          <button class="konesha-entry green" id="konesha-e-study"><div class="ke-text"><b>勉強法・教材の相談</b><span>テスト勉強の進め方、ワークの使い方など</span></div><div class="ke-go">›</div></button>
           <p class="konesha-note">AIが答えるので、まちがうこともあります。大事なところは先生にも確認してね。質問の内容(写真は保存しません)はコネクトの先生が見ることがあります。</p>
         </div>`;
       document.getElementById("konesha-e-subject").onclick = () => koneshaStart("subject");
@@ -955,7 +1024,7 @@
         const showText = !(m.thumb && m.content === KONESHA_NO_TEXT_LABEL);
         msgs += `<div class="konesha-row me"><div class="konesha-bubble">${thumb}${showText ? koneshaBubbleHtml(m.content) : ""}</div></div>`;
       } else {
-        msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">${koneshaBubbleHtml(m.content)}</div></div>`;
+        msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">${koneshaRichHtml(m.content)}</div></div>`;
       }
     });
     if (st.busy) msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">ふむ…考え中じゃ…</div></div>`;
@@ -972,8 +1041,8 @@
         <div class="konesha-msgs">${msgs}</div>
         ${previewHtml}
         <div class="konesha-input">
-          <label class="konesha-attach" title="写真を送る">📷<input type="file" accept="image/*" id="konesha-file" hidden /></label>
-          <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="ここに質問を書くか、📷で問題の写真を送ってね">${escapeHtml(st.draft)}</textarea>
+          <label class="konesha-attach" title="写真を送る">📱<input type="file" accept="image/*" id="konesha-file" hidden /></label>
+          <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="質問を書くか、📱で写真を送ってね">${escapeHtml(st.draft)}</textarea>
           <button class="konesha-send" id="konesha-send" ${st.busy || st.imageBusy ? "disabled" : ""}>送る</button>
         </div>
         <p class="konesha-note" style="margin-top:8px;">写真には、名前や住所などが写らないようにしてね。</p>
