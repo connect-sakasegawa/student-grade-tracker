@@ -891,12 +891,12 @@
   const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", hintLevel: "light", chats: { hint: [], explain: [], study: [] }, loaded: false, busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
 
   function koneshaGreeting(info) {
-    let t = `${escapeHtml(info.studentName)}さん<br />よう来たのう。`;
+    let t = `${escapeHtml(info.studentName)}さん<br />よう来たな。`;
     if (info.nextTest) {
-      if (info.nextTest.daysUntil === 0) t += `今日は${escapeHtml(info.nextTest.testName)}じゃな。落ち着いて、力を出してくるのじゃぞ。`;
-      else t += `${escapeHtml(info.nextTest.testName)}まで、あと${info.nextTest.daysUntil}日じゃな。`;
+      if (info.nextTest.daysUntil === 0) t += `今日は${escapeHtml(info.nextTest.testName)}やな。落ち着いて、力出してきいや。`;
+      else t += `${escapeHtml(info.nextTest.testName)}まで、あと${info.nextTest.daysUntil}日やな。`;
     }
-    return t + (info.nextTest ? `<br />` : "") + `わからぬところは、わしと一緒に考えようぞ。`;
+    return t + (info.nextTest ? `<br />` : "") + `わからんとこは、わしと一緒に考えよか。`;
   }
   function koneshaRemainHtml(info, inline) {
     if (!info) return "";
@@ -1006,7 +1006,7 @@
     if (!file || koneshaState.busy) return;
     koneshaState.imageBusy = true; koneshaState.error = ""; koneshaRerender();
     try { koneshaState.image = await koneshaPrepareImage(file); }
-    catch (e) { koneshaState.image = null; koneshaState.error = "この写真は読み込めなんだ。別の写真で試してくれ。"; }
+    catch (e) { koneshaState.image = null; koneshaState.error = "この写真は読み込めへんかったわ。別の写真で試してな。"; }
     koneshaState.imageBusy = false;
     koneshaRerender();
   }
@@ -1017,7 +1017,7 @@
     const text = (st.draft || "").trim();
     const image = st.image;
     if (!text && !image) return;
-    if (st.info && st.info.remaining <= 0) { st.error = "今月の質問回数の上限に達したようじゃ。来月になればまた質問できるぞ。急ぎのときは、教室のLINEで先生に聞くとよい。"; koneshaRerender(); return; }
+    if (st.info && st.info.remaining <= 0) { st.error = "今月の質問回数の上限に達したみたいや。来月になったらまた質問できるで。急ぎのときは、教室のLINEで先生に聞いてみてな。"; koneshaRerender(); return; }
     const chat = st.chats[koneshaKey()];
     chat.push({ role: "user", content: text || KONESHA_NO_TEXT_LABEL, thumb: image ? image.dataUrl : null, t: Date.now() });
     st.draft = ""; st.image = null; st.error = ""; st.busy = true;
@@ -1030,12 +1030,12 @@
         chat.push({ role: "assistant", content: r.reply, t: Date.now() });
       } else {
         chat.pop(); st.draft = text; st.image = image; // 送れなかった質問は入力欄にもどす
-        st.error = (r && r.error) || "うまく答えられなんだ。もう一度たずねてくれ。";
+        st.error = (r && r.error) || "うまく答えられへんかったわ。もう一回聞いてな。";
       }
       if (r && typeof r.remaining === "number" && st.info) { st.info.remaining = r.remaining; st.info.used = r.used; st.info.limit = r.limit; }
     } catch (e) {
       chat.pop(); st.draft = text; st.image = image;
-      st.error = "通信できなんだ。電波のよいところで、もう一度ためしてくれ。(回数は減っておらぬぞ)";
+      st.error = "通信できへんかったわ。電波のええとこで、もう一回試してな。(回数は減ってへんで)";
     }
     st.busy = false;
     koneshaSaveChats(); koneshaTrimInPlace();
@@ -1098,9 +1098,9 @@
       </div>` : ""}
       <p class="konesha-modehelp">${HELP[helpKey]}</p>` : "";
     const INTRO = {
-      light: "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。まずは取っかかりだけ、ちょっとだけ教えようぞ。",
-      strong: "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。道すじまで、がっつりヒントを出そうぞ。",
-      explain: "どの問題がわからぬのじゃ?問題文を書くか、写真を送ってくれ。できる限り詳しく解説しよう。",
+      light: "どの問題がわからんの?問題文を書くか、写真を送ってや。まずは取っかかりだけ、ちょっとだけ教えるで。",
+      strong: "どの問題がわからんの?問題文を書くか、写真を送ってや。道すじまで、がっつりヒント出すで。",
+      explain: "どの問題がわからんの?問題文を書くか、写真を送ってや。できる限り詳しく解説するで。",
       study: "勉強の進め方でも、教材のことでも、なんでもたずねるがよい。",
     };
     const intro = isSubject ? (st.mode === "explain" ? INTRO.explain : INTRO[st.hintLevel]) : INTRO.study;
@@ -1115,7 +1115,7 @@
         msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">${koneshaRichHtml(m.content)}</div></div>`;
       }
     });
-    if (st.busy) msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">ふむ…考え中じゃ…</div></div>`;
+    if (st.busy) msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">ふむ…考え中やで…</div></div>`;
     if (st.error) msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice err">${koneshaBubbleHtml(st.error)}</div></div>`;
     const previewHtml = st.imageBusy ? `<div class="konesha-preview">写真を読み込み中…</div>`
       : st.image ? `<div class="konesha-preview"><img src="${st.image.dataUrl}" alt="選んだ写真" /><span>この写真を送ります</span><button class="konesha-link" id="konesha-img-remove">✕ とりやめ</button></div>` : "";
