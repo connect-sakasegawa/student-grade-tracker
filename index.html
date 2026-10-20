@@ -1079,7 +1079,7 @@
           <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="質問を書くか、左のボタンで写真を送ってね">${escapeHtml(st.draft)}</textarea>
           <button class="konesha-send" id="konesha-send" ${st.busy || st.imageBusy ? "disabled" : ""}>送る</button>
         </div>
-        <p class="konesha-note" style="margin-top:8px;">写真には、名前や住所などが写らないようにしてね。</p>
+        <p class="konesha-note" style="margin-top:8px;">※写真の中のどの問題がわからないか伝えてね。<br />※写真には、名前や住所などが写らないようにしてね。</p>
         <div id="konesha-end"></div>
       </div>`;
     document.getElementById("konesha-back").onclick = koneshaBack;
