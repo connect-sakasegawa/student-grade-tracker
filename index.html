@@ -322,7 +322,7 @@
   .konesha-chat.m-hint .konesha-row.bot .konesha-bubble.err { background: var(--amber-soft); }
   .konesha-desc-box { border: 2px solid var(--gold); background: var(--gold-soft); border-radius: 12px; padding: 10px 14px; margin: 6px 0 14px; text-align: center; }
   .konesha-desc-box p { margin: 3px 0; font-size: 13px; line-height: 1.6; color: var(--ink); }
-  .konesha-row.bot .konesha-bubble.konesha-voice { color: #6B2FB3; }
+  .konesha-row.bot .konesha-bubble.konesha-voice { color: #E06A00; }
   .konesha-row.bot .konesha-bubble.konesha-voice.err { color: var(--amber); }
   .konesha-bubble:has(.konesha-figure) { max-width: 96%; }
   .konesha-figure { margin: 8px 0; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px; text-align: center; }
@@ -330,7 +330,7 @@
   .konesha-figure span { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
   .konesha-bubble .katex { font-size: 1.05em; }
   .konesha-bubble .katex-display { margin: 6px 0; overflow-x: auto; overflow-y: hidden; }
-    .konesha-voice { font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif; font-weight: 700; color: #6B2FB3; }
+    .konesha-voice { font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif; font-weight: 700; color: #E06A00; }
   .konesha-greet.konesha-voice { font-size: 16px; line-height: 1.9; }
   .konesha-row.bot .konesha-bubble.konesha-voice { font-size: 15px; line-height: 1.9; }
   .konesha-thumb { display: block; max-width: 100%; max-height: 180px; border-radius: 8px; margin-bottom: 4px; }
@@ -1069,7 +1069,7 @@
           ${koneshaRemainHtml(st.info)}
           <button class="konesha-entry" id="konesha-e-subject"><div class="ke-text"><b>勉強のわからないところ</b><span>英語・数学・国語・理科・社会の質問。問題の写真も送れます。ヒントか解説を選べます</span></div><div class="ke-go">›</div></button>
           <button class="konesha-entry green" id="konesha-e-study"><div class="ke-text"><b>勉強法・教材の相談</b><span>テスト勉強の進め方、ワークの使い方など</span></div><div class="ke-go">›</div></button>
-          <p class="konesha-note">AIが答えるので、まちがうこともあります。大事なところは先生にも確認してね。質問の内容(写真は保存しません)はコネクトの先生が見ることがあります。</p>
+          <p class="konesha-note">AIが答えるので間違うこともあります。大事なところは先生にも確認してね。質問内容はコネクトの先生も見ることがあります。</p>
         </div>`;
       document.getElementById("konesha-e-subject").onclick = () => koneshaStart("subject");
       document.getElementById("konesha-e-study").onclick = () => koneshaStart("study");
