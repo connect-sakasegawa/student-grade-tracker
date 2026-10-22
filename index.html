@@ -1134,7 +1134,7 @@
           <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="質問を書くか、左のボタンで写真を送ってね">${escapeHtml(st.draft)}</textarea>
           <button class="konesha-send" id="konesha-send" ${st.busy || st.imageBusy ? "disabled" : ""}>送る</button>
         </div>
-        <p class="konesha-note" style="margin-top:8px;">※写真の中のどの問題がわからないか伝えてね。<br />※写真には、名前や住所などが写らないようにしてね。<br />※会話は、この端末に${KONESHA_KEEP_DAYS}日間(各チャット欄で最新${KONESHA_KEEP_COUNT}件まで)残ります。</p>
+        <p class="konesha-note" style="margin-top:8px;">※文字が見えやすいように写真はきれいに撮ってや<br />※写真の中のどの問題がわからへんのか教えてや<br />※写真に名前や住所が写らんようにしてや<br />※質問内容は${KONESHA_KEEP_DAYS}日後に自動で消えるで</p>
         <div id="konesha-end"></div>
       </div>`;
     document.getElementById("konesha-back").onclick = koneshaBack;
