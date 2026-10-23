@@ -145,6 +145,10 @@
   .photo-btn.done { border-color: var(--growth); background: var(--growth-soft); color: var(--growth); }
   input[type="file"] { display: none; }
 
+  .coming-soon-card { text-align: center; padding: 32px 18px 28px; }
+  .coming-soon-card .cs-icon { font-size: 44px; line-height: 1; margin-bottom: 12px; }
+  .coming-soon-card .cs-title { font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 10px; }
+  .coming-soon-card .cs-text { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin: 0; }
   .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 10px; }
   .id-error { text-align: center; padding: 60px 16px; color: var(--muted); font-size: 14px; }
   .install-hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; display: none; }
@@ -410,6 +414,8 @@
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
+  // 学習手帳の公開スイッチ。false のあいだは「現在準備中」と表示する。公開するときは true に書き換える
+  const NOTEBOOK_ENABLED = false;
   const LOADING_TEXT = `<p class="loading-title">CONNEC＋</p><p class="loading-sub">『自分ひとりで勉強できる力と姿勢を育む』</p>`;
 
   // コネーシャの画像。オリジナルのイラスト(PNGなど)を使うときは、GitHubの icons フォルダに画像をアップロードして、
@@ -750,7 +756,7 @@
     checkRankChange(data.rank);
     currentData = data;
     if (!selectedWeekStart) selectedWeekStart = data.weekStart;
-    if (data.isElementary && currentTab === "grades") currentTab = "notebook";
+    if (data.isElementary && currentTab === "grades") currentTab = NOTEBOOK_ENABLED ? "notebook" : "schedule";
     renderShell();
   }
 
@@ -798,7 +804,7 @@
     const rank = data.rank;
     // 階級は「畑」タブの下に移動した。コネーシャは小学生には表示しない
     if (currentTab === "ranks") currentTab = "garden";
-    if (currentTab === "konesha" && data.isElementary) currentTab = "notebook";
+    if (currentTab === "konesha" && data.isElementary) currentTab = NOTEBOOK_ENABLED ? "notebook" : "schedule";
     appEl.innerHTML = `
       <p class="eyebrow">個別指導塾コネクト</p>
       <h1>CONNEC＋</h1>
@@ -1676,6 +1682,15 @@
 
   // ---------- 学習手帳タブ ----------
   function renderNotebook(el) {
+    if (!NOTEBOOK_ENABLED) {
+      el.innerHTML = `
+        <div class="card coming-soon-card">
+          <div class="cs-icon">📔</div>
+          <p class="cs-title">現在準備中です</p>
+          <p class="cs-text">学習手帳は、ただいま公開の準備をしています。<br>使えるようになるまで、もう少しお待ちください。</p>
+        </div>`;
+      return;
+    }
     const missions = currentData.missions || [];
     const presets = currentData.missionPresets || [];
     const weekStart = selectedWeekStart || currentData.weekStart;
@@ -2079,7 +2094,7 @@
   function renderGardenStage() {
     const garden = currentData.garden || { nutrientCount: 0, readyCount: 0, missionsPerStage: 3 };
     const n = garden.nutrientCount;
-    let iconSvg = "", statusText = "まだ何も植えていません。学習手帳でミッションを完了すると育ち始めます";
+    let iconSvg = "", statusText = NOTEBOOK_ENABLED ? "まだ何も植えていません。学習手帳でミッションを完了すると育ち始めます" : "まだ何も植えていません。学習手帳が始まったら、ミッションを完了すると育ち始めます";
     if (n === 1) { iconSvg = SPROUT_ICON; statusText = "芽が出た!"; }
     else if (n === 2) { iconSvg = BUD_ICON; statusText = "つぼみがふくらんできた"; }
     else if (garden.readyCount > 0 && n === 0) { statusText = "次の株を育て始めています"; }
