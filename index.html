@@ -43,7 +43,7 @@
 </script>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@500;700&family=Klee+One:wght@400;600&display=swap');
   :root {
     --ink: #1F2A44; --paper: #FFF6EC; --card: #FFFFFF; --line: #E8D9C6;
     --brand: #D9720B; --brand-soft: #FBE7D0;
@@ -344,6 +344,61 @@
   .konesha-preview { display: flex; align-items: center; gap: 10px; background: var(--gold-soft); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; font-size: 12.5px; color: var(--muted); }
   .konesha-preview img { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; flex: none; }
   .konesha-preview span { flex: 1; }
+  /* ---- コネーシャのホワイトボード ---- */
+  .konesha-tools { display: flex; gap: 8px; margin: 0 0 12px; }
+  .konesha-histbtn { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 6px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+  .konesha-histbtn b { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .konesha-card .konesha-histbtn { width: 100%; margin: 0 0 4px; }
+  .konesha-newbtn { flex: none; border: none; background: var(--ink); color: #fff; border-radius: 12px; padding: 10px 14px; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+  .konesha-histbtn:disabled, .konesha-newbtn:disabled { opacity: .5; cursor: default; }
+  .wb { position: relative; margin: 0 -10px 4px; padding: 9px 9px 0; border-radius: 7px; background: linear-gradient(180deg, #E9ECEF 0%, #C4C9CF 45%, #DADDE1 100%); box-shadow: 0 3px 8px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.8); }
+  .wb-surface { min-height: 50vh; box-sizing: border-box; padding: 18px 16px 22px; border-radius: 2px; background-color: #FBFCFC; background-image: linear-gradient(rgba(140,160,180,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(140,160,180,.13) 1px, transparent 1px), linear-gradient(160deg, rgba(255,255,255,.9) 0%, rgba(235,240,244,.5) 60%, rgba(255,255,255,.7) 100%); background-size: 28px 28px, 28px 28px, 100% 100%; box-shadow: inset 0 0 0 1px #A9AFB6, inset 0 2px 6px rgba(0,0,0,.08); font-family: 'Klee One', 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', sans-serif; font-weight: 600; font-size: 16px; line-height: 2; color: #1F2328; text-align: left; word-break: break-word; overflow-wrap: anywhere; }
+  .wb-tray { position: relative; height: 15px; margin: 0 -9px; border-radius: 0 0 7px 7px; background: linear-gradient(180deg, #F2F4F6 0%, #BFC5CB 55%, #9EA5AD 100%); box-shadow: 0 2px 3px rgba(0,0,0,.18); }
+  .wb-eraser { position: absolute; right: 18%; bottom: 6px; width: 54px; height: 15px; border-radius: 3px; background: linear-gradient(180deg, #EEF0F2, #C9CDD2); box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .wb-marker { position: absolute; bottom: 6px; width: 46px; height: 8px; border-radius: 4px; background: #F4F4F4; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .wb-marker::after { content: ""; position: absolute; left: 0; top: 0; width: 13px; height: 8px; border-radius: 4px 1px 1px 4px; }
+  .wb-mk-k { left: 10%; } .wb-mk-k::after { background: #222; }
+  .wb-mk-r { left: calc(10% + 52px); } .wb-mk-r::after { background: #D0263A; }
+  .wb-mk-b { left: calc(10% + 104px); } .wb-mk-b::after { background: #1F3F9E; }
+  .wb-red { color: #D0263A; }
+  .wb-blue { color: #1F3F9E; }
+  .wb-wave { text-decoration: underline wavy #D0263A; text-decoration-thickness: 1.5px; text-underline-offset: 5px; }
+  .wb-box { position: relative; display: block; margin: 22px 2px 10px; padding: 6px 12px; border: 2px solid #D0263A; border-radius: 3px; }
+  .wb-box-label { position: absolute; top: -21px; left: 2px; font-size: 13px; line-height: 1; color: #D0263A; font-style: italic; text-decoration: underline; text-underline-offset: 3px; }
+  .wb-surface .katex { font-size: 1.08em; }
+  .wb-surface .katex-display { margin: 4px 0; overflow-x: auto; overflow-y: hidden; }
+  .wb-surface .konesha-figure { background: transparent; border: none; padding: 4px 0; }
+  .wb-surface.wb-short { min-height: 30vh; }
+  .wb-intro { color: #1F2328; font-size: 17px; padding-top: 6px; }
+  .wb-thinking { color: #5A6470; font-size: 17px; padding-top: 6px; }
+  .wb-dots i { display: inline-block; width: 6px; height: 6px; margin-left: 4px; border-radius: 50%; background: #5A6470; animation: wbDot 1.2s infinite ease-in-out; }
+  .wb-dots i:nth-child(2) { animation-delay: .2s; } .wb-dots i:nth-child(3) { animation-delay: .4s; }
+  @keyframes wbDot { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
+  .wb-write > * { animation: wbWrite .9s ease-out both; }
+  @keyframes wbWrite { from { opacity: 0; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+  @media (prefers-reduced-motion: reduce) { .wb-write > *, .wb-dots i { animation: none; } }
+  .wb-note { position: relative; margin: 4px 6px 14px; padding: 12px 14px 10px; background: #FFF5B5; border-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,.16); transform: rotate(-.6deg); font-size: 14px; line-height: 1.7; color: #3A3320; text-align: left; word-break: break-word; }
+  .wb-note::before { content: ""; position: absolute; top: -8px; left: 50%; width: 70px; height: 16px; margin-left: -35px; background: rgba(215,220,226,.75); transform: rotate(1.5deg); }
+  .wb-note-label { font-size: 11px; color: #8A7A3A; margin-bottom: 4px; font-weight: 700; }
+  .wb-pager { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: -4px 0 10px; font-size: 12.5px; color: var(--muted); }
+  .wb-pager button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-family: inherit; font-size: 12.5px; cursor: pointer; }
+  .wb-pager button:disabled { opacity: .4; cursor: default; }
+  .wb-under { text-align: right; margin: 6px 0 2px; }
+  .konesha-board-err { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--amber-soft); color: var(--amber); font-size: 13.5px; line-height: 1.7; text-align: left; }
+  .konesha-input-label { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 14px 0 6px; text-align: left; }
+  .wb-full { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 10px); background: #E7DCCB; overscroll-behavior: contain; }
+  .wb-full-bar { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 8px; font-size: 13px; font-weight: 700; color: #5A4A35; }
+  .wb-full-bar button { border: none; background: #fff; color: var(--ink); border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .wb.wb-full-board { flex: 1; min-height: 0; margin: 0; display: flex; flex-direction: column; }
+  .wb-full-board .wb-surface { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; font-size: 17px; }
+  .konesha-hist { text-align: left; }
+  .kh-title { font-size: 17px; font-weight: 700; color: var(--ink); margin: 4px 0 4px; }
+  .kh-item { display: block; width: 100%; text-align: left; border: 1px solid var(--line); border-left: 5px solid var(--brand); background: var(--card); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-family: inherit; cursor: pointer; }
+  .kh-item.kh-hint { border-left-color: #2A5FB4; }
+  .kh-item.kh-study { border-left-color: var(--growth); }
+  .kh-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+  .kh-tag { font-weight: 700; color: var(--ink); }
+  .kh-q { font-size: 14px; line-height: 1.6; color: var(--ink); word-break: break-word; }
   .garden-switch { display: flex; gap: 10px; margin-bottom: 16px; }
   .garden-switch button { flex: 1; border: 2px solid var(--line); border-radius: 14px; padding: 10px 6px; font-family: inherit; background: var(--card); cursor: pointer; text-align: center; line-height: 1.35; }
   .garden-switch button b { display: block; font-size: 16px; }
@@ -864,23 +919,34 @@
       return new XMLSerializer().serializeToString(root);
     } catch (e) { return ""; }
   }
-  // 文章のなかの数式($...$ / $$...$$)をきれいに表示する
-  function koneshaMathHtml(raw) {
-    raw = raw.replace(/^\n+|\n+$/g, "");
+  // 板書の色の目印: [赤]重要[/赤] [青]見出し・まとめ[/青] [波]赤い波線[/波] [枠]ポイントの枠[/枠]
+  const KONESHA_INK_TAGS = { "赤": "wb-red", "青": "wb-blue", "波": "wb-wave" };
+  // 文章のなかの数式($...$ / $$...$$)と色の目印を、板書の表示にする
+  function koneshaInkHtml(raw) {
+    raw = raw.replace(/^\n+|\n+$/g, "").replace(/\n?\[枠\]\n?/g, "[枠]").replace(/\n?\[\/枠\]\n?/g, "[/枠]").replace(/\n?(\$\$[\s\S]+?\$\$)\n?/g, "$1");
     if (!raw) return "";
-    return raw.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g).map((p, i) => {
-      if (i % 2 === 0) return koneshaBubbleHtml(p);
+    const math = [];
+    let s = raw.replace(/\$\$[\s\S]+?\$\$|\$[^$\n]+?\$/g, (p) => { math.push(p); return "\u0000" + (math.length - 1) + "\u0000"; });
+    s = escapeHtml(s);
+    for (let i = 0; i < 3; i++) {
+      s = s.replace(/\[(赤|青|波|枠)\]([\s\S]*?)\[\/\1\]/g, (m, t, inner) => t === "枠"
+        ? `<span class="wb-box"><span class="wb-box-label">point</span>${inner}</span>`
+        : `<span class="${KONESHA_INK_TAGS[t]}">${inner}</span>`);
+    }
+    s = s.replace(/\[\/?(赤|青|波|枠)\]/g, "").replace(/\n/g, "<br />"); // 閉じ忘れた目印は消す
+    return s.replace(/\u0000(\d+)\u0000/g, (m, i) => {
+      const p = math[Number(i)];
       const display = p.indexOf("$$") === 0;
       const tex = display ? p.slice(2, -2) : p.slice(1, -1);
       if (window.katex) { try { return window.katex.renderToString(tex, { displayMode: display, throwOnError: false }); } catch (e) {} }
       return escapeHtml(tex);
-    }).join("");
+    });
   }
   function koneshaRichHtml(text) {
     let out = "", last = 0, m;
     const re = /\[\[図\]\]([\s\S]*?)\[\[\/図\]\]/g;
     while ((m = re.exec(text))) {
-      out += koneshaMathHtml(text.slice(last, m.index));
+      out += koneshaInkHtml(text.slice(last, m.index));
       const svg = koneshaSanitizeSvg(m[1].trim());
       if (svg) out += `<div class="konesha-figure"><img alt="コネーシャの図" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}" /><span>イメージ図</span></div>`;
       last = re.lastIndex;
@@ -888,13 +954,13 @@
     let rest = text.slice(last);
     const open = rest.indexOf("[[図]]");
     if (open !== -1) rest = rest.slice(0, open); // 途中で切れた図は表示しない
-    return out + koneshaMathHtml(rest);
+    return out + koneshaInkHtml(rest);
   }
 
   // ---- コネーシャ質問チャット ----
   const KONESHA_DESC_LINES = ["コネクトに住みつく学問の神様", "趣味は寺社仏閣巡り", "カメムシが苦手"];
   const KONESHA_NO_TEXT_LABEL = "(画像を送りました)";
-  const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", hintLevel: "light", chats: { hint: [], explain: [], study: [] }, loaded: false, busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
+  const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", hintLevel: "light", sessions: { hint: [], explain: [], study: [] }, cur: { hint: null, explain: null, study: null }, view: "board", page: null, full: false, fresh: false, loaded: false, busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
 
   function koneshaGreeting(info) {
     let t = `${escapeHtml(info.callName || (info.studentName + "さん"))}<br />よう来たな。`;
@@ -926,16 +992,30 @@
     koneshaRerender();
   }
 
-  // ---- 会話の保存(この端末のブラウザに、一定期間・一定件数だけ残す) ----
-  const KONESHA_KEEP_DAYS = 7;   // この日数をすぎた会話は自動で消える
-  const KONESHA_KEEP_COUNT = 30; // 各チャット欄で残す最大件数(質問と返事を合わせた数)
+  // ---- 質問の保存(この端末のブラウザに、一定期間・一定件数だけ残す) ----
+  // 1つの質問 = 最初の質問と、その板書について続けて聞いたやり取りのまとまり
+  const KONESHA_KEEP_DAYS = 7;      // この日数をすぎた質問は自動で消える
+  const KONESHA_KEEP_SESSIONS = 20; // 各欄(ヒント・解説・勉強法)で残す最大の質問数
+  const KONESHA_MAX_TURNS = 5;      // 1つの板書について続けて聞ける回数
+  const KONESHA_KEYS = ["hint", "explain", "study"];
+  const KONESHA_KEY_LABEL = { hint: "ヒント", explain: "解説", study: "勉強法・教材" };
   function koneshaStoreKey() { return "connect_konesha_chats_" + studentId; }
-  function koneshaPruneList(list) {
+  function koneshaPruneSessions(list) {
     const limit = Date.now() - KONESHA_KEEP_DAYS * 86400000;
-    let out = (list || []).filter((m) => m && m.t && m.t >= limit && (m.role === "user" || m.role === "assistant") && typeof m.content === "string");
-    out = out.slice(-KONESHA_KEEP_COUNT);
-    while (out.length && out[0].role !== "user") out.shift();
-    return out;
+    return (list || []).filter((s) => s && s.id && s.t && s.t >= limit && Array.isArray(s.turns) && s.turns.length)
+      .map((s) => Object.assign(s, { turns: s.turns.filter((u) => u && typeof u.q === "string" && typeof u.a === "string") }))
+      .filter((s) => s.turns.length)
+      .slice(-KONESHA_KEEP_SESSIONS);
+  }
+  // 前の版(チャット形式)で保存した会話は、質問と返事の1組ずつを1つの質問として引きつぐ
+  function koneshaFromOldChat(list) {
+    const out = [];
+    (list || []).forEach((m) => {
+      if (!m || typeof m.content !== "string") return;
+      if (m.role === "user") out.push({ id: "o" + m.t + "_" + out.length, t: m.t, turns: [{ q: m.content, hadImage: !!m.hadImage, a: null, t: m.t }] });
+      else if (m.role === "assistant" && out.length && out[out.length - 1].turns[0].a === null) { out[out.length - 1].turns[0].a = m.content; out[out.length - 1].t = m.t; }
+    });
+    return out.filter((s) => s.turns[0].a !== null);
   }
   function koneshaLoadChats() {
     koneshaState.loaded = true;
@@ -943,29 +1023,28 @@
       const raw = localStorage.getItem(koneshaStoreKey());
       if (!raw) return;
       const d = JSON.parse(raw);
-      ["hint", "explain", "study"].forEach((k) => { koneshaState.chats[k] = koneshaPruneList(d && d.chats && d.chats[k]); });
+      KONESHA_KEYS.forEach((k) => {
+        koneshaState.sessions[k] = koneshaPruneSessions(d && d.v === 2 ? d.sessions && d.sessions[k] : koneshaFromOldChat(d && d.chats && d.chats[k]));
+      });
     } catch (e) {}
   }
   function koneshaSaveChats() {
     try {
       const out = {};
-      ["hint", "explain", "study"].forEach((k) => {
-        out[k] = koneshaPruneList(koneshaState.chats[k]).map((m) => ({ role: m.role, content: m.content, t: m.t, hadImage: !!(m.thumb || m.hadImage) }));
+      KONESHA_KEYS.forEach((k) => {
+        koneshaState.sessions[k] = koneshaPruneSessions(koneshaState.sessions[k]);
+        out[k] = koneshaState.sessions[k].map((s) => ({ id: s.id, t: s.t, level: s.level, turns: s.turns.map((u) => ({ q: u.q, a: u.a, t: u.t, hadImage: !!(u.thumb || u.hadImage) })) }));
       });
-      localStorage.setItem(koneshaStoreKey(), JSON.stringify({ v: 1, chats: out }));
+      localStorage.setItem(koneshaStoreKey(), JSON.stringify({ v: 2, sessions: out }));
     } catch (e) {}
   }
-  // 画面に出している会話も、保存と同じ件数におさえる(同じ配列のまま減らす)
-  function koneshaTrimInPlace() {
-    ["hint", "explain", "study"].forEach((k) => {
-      const list = koneshaState.chats[k];
-      while (list.length > KONESHA_KEEP_COUNT) list.shift();
-      while (list.length && list[0].role !== "user") list.shift();
-    });
-  }
 
-  // いまのチャット欄(ヒントと解説は別々に記録する)
+  // いまの欄(ヒントと解説は別々に記録する)
   function koneshaKey() { return koneshaState.category === "subject" ? koneshaState.mode : "study"; }
+  function koneshaCurSession() {
+    const k = koneshaKey(), id = koneshaState.cur[k];
+    return id ? koneshaState.sessions[k].find((s) => s.id === id) || null : null;
+  }
 
   function koneshaRerender() {
     const el = koneshaState.el;
@@ -973,13 +1052,31 @@
   }
 
   function koneshaStart(category) {
-    Object.assign(koneshaState, { category, error: "", draft: "", image: null });
+    Object.assign(koneshaState, { category, view: "board", error: "", draft: "", image: null, page: null });
     koneshaRerender();
   }
   function koneshaBack() {
     if (koneshaState.busy) return;
-    Object.assign(koneshaState, { category: null, error: "", draft: "", image: null });
+    Object.assign(koneshaState, { category: null, view: "board", error: "", draft: "", image: null, page: null, full: false });
     koneshaRerender();
+  }
+  // 板書を消して、新しい質問を書けるようにする
+  function koneshaNewBoard() {
+    if (koneshaState.busy) return;
+    koneshaState.cur[koneshaKey()] = null;
+    Object.assign(koneshaState, { error: "", page: null, full: false });
+    koneshaRerender(); koneshaScrollTo("konesha-top");
+  }
+  // 過去の質問を開く
+  function koneshaOpenSession(key, id) {
+    const st = koneshaState;
+    st.category = key === "study" ? "study" : "subject";
+    if (key !== "study") st.mode = key;
+    const s = st.sessions[key].find((x) => x.id === id);
+    if (s && s.level) st.hintLevel = s.level;
+    st.cur[key] = id;
+    Object.assign(st, { view: "board", error: "", page: null });
+    koneshaRerender(); koneshaScrollTo("konesha-top");
   }
 
   // 選んだ写真を縮小して JPEG にする(通信量とAPI費用をおさえるため、長辺1600pxまで)
@@ -1024,32 +1121,95 @@
     const image = st.image;
     if (!text && !image) return;
     if (st.info && st.info.remaining <= 0) { st.error = "今月の質問回数の上限に達したみたいや。来月になったらまた質問できるで。急ぎのときは、教室のLINEで先生に聞いてみてな。"; koneshaRerender(); return; }
-    const chat = st.chats[koneshaKey()];
-    chat.push({ role: "user", content: text || KONESHA_NO_TEXT_LABEL, thumb: image ? image.dataUrl : null, t: Date.now() });
-    st.draft = ""; st.image = null; st.error = ""; st.busy = true;
-    koneshaRerender(); koneshaScrollEnd();
+    const key = koneshaKey(), list = st.sessions[key];
+    let session = koneshaCurSession();
+    const isNew = !session || session.turns.length >= KONESHA_MAX_TURNS;
+    if (isNew) {
+      session = { id: "s" + Date.now(), t: Date.now(), level: st.category === "subject" && st.mode === "hint" ? st.hintLevel : "", turns: [] };
+      list.push(session); st.cur[key] = session.id;
+    }
+    const turn = { q: text || KONESHA_NO_TEXT_LABEL, thumb: image ? image.dataUrl : null, a: null, t: Date.now() };
+    session.turns.push(turn);
+    st.draft = ""; st.image = null; st.error = ""; st.busy = true; st.page = null; st.fresh = false;
+    koneshaRerender(); koneshaScrollTo("konesha-top");
+    const undo = () => {
+      session.turns.pop();
+      if (isNew) { list.splice(list.indexOf(session), 1); st.cur[key] = null; }
+      st.draft = text; st.image = image; // 送れなかった質問は入力欄にもどす
+    };
     try {
-      const payload = { action: "askKonesha", studentId, category: st.category, mode: st.mode, hintLevel: st.hintLevel, messages: chat.map((m) => ({ role: m.role, content: m.content })) };
+      // 続けて聞くときは、この板書のやり取りだけを送る(関係のない昔の会話は送らない)
+      const messages = [];
+      session.turns.forEach((u) => { messages.push({ role: "user", content: u.q }); if (u.a) messages.push({ role: "assistant", content: u.a }); });
+      const payload = { action: "askKonesha", studentId, category: st.category, mode: st.mode, hintLevel: st.hintLevel, messages };
       if (image) payload.image = { mediaType: image.mediaType, data: image.base64 };
       const r = await koneshaPost(payload);
       if (r && r.ok) {
-        chat.push({ role: "assistant", content: r.reply, t: Date.now() });
+        turn.a = r.reply; turn.t = Date.now(); session.t = turn.t; st.fresh = true;
       } else {
-        chat.pop(); st.draft = text; st.image = image; // 送れなかった質問は入力欄にもどす
-        st.error = (r && r.error) || "うまく答えられへんかったわ。もう一回聞いてな。";
+        undo(); st.error = (r && r.error) || "うまく答えられへんかったわ。もう一回聞いてな。";
       }
       if (r && typeof r.remaining === "number" && st.info) { st.info.remaining = r.remaining; st.info.used = r.used; st.info.limit = r.limit; }
     } catch (e) {
-      chat.pop(); st.draft = text; st.image = image;
-      st.error = "通信できへんかったわ。電波のええとこで、もう一回試してな。(回数は減ってへんで)";
+      undo(); st.error = "通信できへんかったわ。電波のええとこで、もう一回試してな。(回数は減ってへんで)";
     }
     st.busy = false;
-    koneshaSaveChats(); koneshaTrimInPlace();
-    koneshaRerender(); koneshaScrollEnd();
+    koneshaSaveChats();
+    koneshaRerender(); koneshaScrollTo("konesha-top");
   }
 
-  function koneshaScrollEnd() {
-    setTimeout(() => { const t = document.getElementById("konesha-end"); if (t && t.scrollIntoView) t.scrollIntoView({ block: "end", behavior: "smooth" }); }, 60);
+  function koneshaScrollTo(id) {
+    setTimeout(() => { const t = document.getElementById(id); if (t && t.scrollIntoView) t.scrollIntoView({ block: "start", behavior: "smooth" }); }, 60);
+  }
+  function koneshaDateLabel(t) {
+    const d = new Date(t);
+    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+
+  // ホワイトボード(枠・方眼・マーカー置き場)
+  function koneshaBoardHtml(inner, opts) {
+    opts = opts || {};
+    return `<div class="wb${opts.full ? " wb-full-board" : ""}">
+        <div class="wb-surface${opts.fresh ? " wb-write" : ""}${opts.short ? " wb-short" : ""}">${inner}</div>
+        <div class="wb-tray"><span class="wb-eraser"></span><span class="wb-marker wb-mk-k"></span><span class="wb-marker wb-mk-r"></span><span class="wb-marker wb-mk-b"></span></div>
+      </div>`;
+  }
+
+  // 過去の質問内容(すべての欄をまとめて、新しい順)
+  function renderKoneshaHistory(el) {
+    const st = koneshaState;
+    const all = [];
+    KONESHA_KEYS.forEach((k) => st.sessions[k].forEach((s) => all.push({ k, s })));
+    all.sort((a, b) => b.s.t - a.s.t);
+    const rows = all.map(({ k, s }) => {
+      const first = s.turns[0];
+      const photo = first.thumb || first.hadImage;
+      const q = first.q === KONESHA_NO_TEXT_LABEL && photo ? "(写真で質問)" : first.q;
+      const lv = k === "hint" ? (s.level === "strong" ? "がっつり" : "ちょっとだけ") : "";
+      return `<button class="kh-item kh-${k}" data-k="${k}" data-id="${escapeHtml(s.id)}">
+          <div class="kh-meta"><span class="kh-tag">${KONESHA_KEY_LABEL[k]}${lv ? "・" + lv : ""}</span><span>${koneshaDateLabel(s.t)}</span>${photo ? "<span>📷</span>" : ""}${s.turns.length > 1 ? `<span>続けて${s.turns.length - 1}回</span>` : ""}</div>
+          <div class="kh-q">${escapeHtml(q.length > 60 ? q.slice(0, 60) + "…" : q)}</div>
+        </button>`;
+    }).join("");
+    el.innerHTML = `
+      <div class="card konesha-hist" id="konesha-top-any">
+        <div class="konesha-bar">
+          <button class="konesha-link" id="konesha-hist-back">← ${st.category ? "ホワイトボードにもどる" : "もどる"}</button>
+          ${koneshaRemainHtml(st.info, true)}
+        </div>
+        <p class="kh-title">過去の質問内容</p>
+        <p class="konesha-modehelp">押すと、そのときの板書が開きます。${KONESHA_KEEP_DAYS}日たつと自動で消えます。</p>
+        ${rows || `<p class="konesha-sub" style="text-align:center;margin:24px 0;">まだ質問はありません</p>`}
+        ${all.length ? `<div style="text-align:right;margin-top:12px;"><button class="konesha-link" id="konesha-hist-clear" style="font-size:12px;color:var(--muted);">過去の質問をすべて消す</button></div>` : ""}
+      </div>`;
+    document.getElementById("konesha-hist-back").onclick = () => { st.view = "board"; koneshaRerender(); };
+    el.querySelectorAll(".kh-item").forEach((b) => { b.onclick = () => koneshaOpenSession(b.dataset.k, b.dataset.id); });
+    const clr = document.getElementById("konesha-hist-clear");
+    if (clr) clr.onclick = () => {
+      if (!window.confirm("過去の質問をすべて消しますか?")) return;
+      KONESHA_KEYS.forEach((k) => { st.sessions[k] = []; st.cur[k] = null; });
+      koneshaSaveChats(); koneshaRerender();
+    };
   }
 
   function renderKonesha(el) {
@@ -1067,6 +1227,9 @@
       document.getElementById("konesha-retry").onclick = () => { st.infoError = ""; renderKonesha(el); };
       return;
     }
+    if (st.view === "history") { renderKoneshaHistory(el); return; }
+    const histCount = KONESHA_KEYS.reduce((n, k) => n + st.sessions[k].length, 0);
+    const histBtn = `<button class="konesha-histbtn" id="konesha-hist"><span>📋 過去の質問内容</span><b>${histCount}件</b></button>`;
     if (!st.category) {
       el.innerHTML = `
         <div class="card konesha-card">
@@ -1077,13 +1240,16 @@
           ${koneshaRemainHtml(st.info)}
           <button class="konesha-entry" id="konesha-e-subject"><div class="ke-text"><b>勉強のわからないところ</b><span>英語・数学・国語・理科・社会の質問。問題の写真も送れます。ヒントか解説を選べます</span></div><div class="ke-go">›</div></button>
           <button class="konesha-entry green" id="konesha-e-study"><div class="ke-text"><b>勉強法・教材の相談</b><span>テスト勉強の進め方、ワークの使い方など</span></div><div class="ke-go">›</div></button>
+          ${histCount ? histBtn : ""}
           <p class="konesha-note">AIが答えるので間違うこともあります。大事なところは先生にも確認してね。質問内容はコネクトの先生も見ることがあります。</p>
         </div>`;
       document.getElementById("konesha-e-subject").onclick = () => koneshaStart("subject");
       document.getElementById("konesha-e-study").onclick = () => koneshaStart("study");
+      const hb = document.getElementById("konesha-hist");
+      if (hb) hb.onclick = () => { st.view = "history"; koneshaRerender(); koneshaScrollTo("konesha-top-any"); };
       return;
     }
-    // チャット画面
+    // ホワイトボード画面
     const isSubject = st.category === "subject";
     const key = koneshaKey();
     const dis = st.busy ? "disabled" : "";
@@ -1104,49 +1270,81 @@
       </div>` : ""}
       <p class="konesha-modehelp">${HELP[helpKey]}</p>` : "";
     const INTRO = {
-      light: "どの問題がわからんの?問題文を書くか、写真を送ってや。まずは取っかかりだけ、ちょっとだけ教えるで。",
-      strong: "どの問題がわからんの?問題文を書くか、写真を送ってや。道すじまで、がっつりヒント出すで。",
-      explain: "どの問題がわからんの?問題文を書くか、写真を送ってや。できる限り詳しく解説するで。",
-      study: "勉強の進め方でも、教材のことでも、なんでもたずねるがよい。",
+      light: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\nまずは[赤]取っかかりだけ[/赤]、ちょっとだけ教えるで。",
+      strong: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\n[赤]答えの手前[/赤]まで、がっつりヒント出すで。",
+      explain: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\n[赤]最初から最後まで[/赤]、できる限り詳しく解説するで。",
+      study: "勉強の進め方でも、教材のことでも、\nなんでもたずねるがよい。\n\n[青]⇒ テストまでの計画づくりも手伝うで。[/青]",
     };
     const intro = isSubject ? (st.mode === "explain" ? INTRO.explain : INTRO[st.hintLevel]) : INTRO.study;
-    const avatar = `<div class="konesha-avatar">${koneshaIconHtml()}</div>`;
-    let msgs = `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">${escapeHtml(intro)}</div></div>`;
-    st.chats[key].forEach((m) => {
-      if (m.role === "user") {
-        const thumb = m.thumb ? `<img class="konesha-thumb" src="${m.thumb}" alt="送った写真" />` : (m.hadImage ? `<div class="konesha-photo-note">(写真つきの質問)</div>` : "");
-        const showText = !((m.thumb || m.hadImage) && m.content === KONESHA_NO_TEXT_LABEL);
-        msgs += `<div class="konesha-row me"><div class="konesha-bubble">${thumb}${showText ? koneshaBubbleHtml(m.content) : ""}</div></div>`;
-      } else {
-        msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">${koneshaRichHtml(m.content)}</div></div>`;
-      }
-    });
-    if (st.busy) msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice">ふむ…考え中やで…</div></div>`;
-    if (st.error) msgs += `<div class="konesha-row bot">${avatar}<div class="konesha-bubble konesha-voice err">${koneshaBubbleHtml(st.error)}</div></div>`;
+    const session = koneshaCurSession();
+    const turns = session ? session.turns : [];
+    const page = st.page === null || st.page >= turns.length ? turns.length - 1 : st.page;
+    const turn = turns[page] || null;
+    // 板書の中身
+    let board;
+    if (!turn) board = `<div class="wb-intro">${koneshaInkHtml(intro)}</div>`;
+    else if (turn.a === null) board = `<div class="wb-thinking">ふむ…考え中やで…<span class="wb-dots"><i></i><i></i><i></i></span></div>`;
+    else board = koneshaRichHtml(turn.a);
+    // 質問のメモ(ボードに貼った付せん)
+    let note = "";
+    if (turn) {
+      const thumb = turn.thumb ? `<img class="konesha-thumb" src="${turn.thumb}" alt="送った写真" />` : (turn.hadImage ? `<div class="konesha-photo-note">(写真つきの質問)</div>` : "");
+      const showText = !((turn.thumb || turn.hadImage) && turn.q === KONESHA_NO_TEXT_LABEL);
+      note = `<div class="wb-note"><div class="wb-note-label">${page === 0 ? "質問" : "続けて質問"}・${koneshaDateLabel(turn.t)}</div>${thumb}${showText ? koneshaBubbleHtml(turn.q) : ""}</div>`;
+    }
+    const pager = turns.length > 1 ? `<div class="wb-pager">
+        <button id="konesha-prev" ${page <= 0 || st.busy ? "disabled" : ""}>‹ 前の板書</button>
+        <span>${page + 1} / ${turns.length}</span>
+        <button id="konesha-next" ${page >= turns.length - 1 || st.busy ? "disabled" : ""}>次の板書 ›</button>
+      </div>` : "";
+    const errHtml = st.error ? `<div class="konesha-board-err">${koneshaBubbleHtml(st.error)}</div>` : "";
+    const canFollow = session && turns.length < KONESHA_MAX_TURNS && !st.busy;
     const previewHtml = st.imageBusy ? `<div class="konesha-preview">写真を読み込み中…</div>`
       : st.image ? `<div class="konesha-preview"><img src="${st.image.dataUrl}" alt="選んだ写真" /><span>この写真を送ります</span><button class="konesha-link" id="konesha-img-remove">✕ とりやめ</button></div>` : "";
+    const inputLabel = !session ? "質問を書く" : canFollow ? "この板書について、続けて質問する" : "続けて聞けるのは" + KONESHA_MAX_TURNS + "回までや。送ると新しい板書になるで";
+    const ph = !session ? "質問を書くか、左のボタンで写真を送ってね" : "例: 2行目の式がわからへん";
     el.innerHTML = `
-      <div class="card konesha-chat m-${key}">
+      <div class="card konesha-chat m-${key}" id="konesha-top">
         <div class="konesha-bar">
           <button class="konesha-link" id="konesha-back">← 最初にもどる</button>
           ${koneshaRemainHtml(st.info, true)}
         </div>
         ${modeHtml}
-        <div class="konesha-msgs">${msgs}</div>
-        ${st.chats[key].length ? `<div style="text-align:right;margin:-4px 0 10px;"><button class="konesha-link" id="konesha-clear" style="font-size:12px;color:var(--muted);" ${dis}>このチャットの履歴を消す</button></div>` : ""}
+        <div class="konesha-tools">
+          <button class="konesha-histbtn" id="konesha-hist" ${dis}><span>📋 過去の質問内容</span><b>${histCount}件</b></button>
+          ${session ? `<button class="konesha-newbtn" id="konesha-new" ${dis}>＋ 新しい質問</button>` : ""}
+        </div>
+        ${note}
+        ${pager}
+        ${koneshaBoardHtml(board, { fresh: st.fresh && turn && turn.a !== null && page === turns.length - 1, short: !turn || turn.a === null })}
+        ${turn && turn.a !== null ? `<div class="wb-under"><button class="konesha-link" id="konesha-full">⤢ 大きく見る</button></div>` : ""}
+        ${errHtml}
+        <p class="konesha-input-label">${inputLabel}</p>
         ${previewHtml}
         <div class="konesha-input">
           <label class="konesha-attach" title="写真を送る"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D9720B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><line x1="10.5" y1="18.5" x2="13.5" y2="18.5"/></svg><input type="file" accept="image/*" id="konesha-file" hidden /></label>
-          <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="質問を書くか、左のボタンで写真を送ってね">${escapeHtml(st.draft)}</textarea>
+          <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="${ph}">${escapeHtml(st.draft)}</textarea>
           <button class="konesha-send" id="konesha-send" ${st.busy || st.imageBusy ? "disabled" : ""}>送る</button>
         </div>
-        <p class="konesha-note" style="margin-top:8px;">※文字が見えやすいように写真はきれいに撮ってや<br />※写真の中のどの問題がわからへんのか教えてや<br />※写真に名前や住所が写らんようにしてや<br />※質問内容は${KONESHA_KEEP_DAYS}日後に自動で消えるで</p>
-        <div id="konesha-end"></div>
-      </div>`;
+        <p class="konesha-note" style="margin-top:8px;">※文字が見えやすいように写真はきれいに撮ってや<br />※写真の中のどの問題がわからへんのか教えてや<br />※写真に名前や住所が写らんようにしてや<br />※ちがう問題を聞くときは「＋ 新しい質問」を押してな<br />※質問内容は${KONESHA_KEEP_DAYS}日後に自動で消えるで</p>
+      </div>
+      ${st.full && turn && turn.a !== null ? `<div class="wb-full" id="konesha-fullview">
+        <div class="wb-full-bar"><span>${escapeHtml(KONESHA_KEY_LABEL[key])}${turns.length > 1 ? `(${page + 1} / ${turns.length})` : ""}</span><button id="konesha-full-close">✕ 閉じる</button></div>
+        ${koneshaBoardHtml(board, { full: true })}
+      </div>` : ""}`;
+    st.fresh = false;
     document.getElementById("konesha-back").onclick = koneshaBack;
-    const clr = document.getElementById("konesha-clear");
-    if (clr) clr.onclick = () => { if (window.confirm("このチャット欄の会話の履歴を消しますか?")) { st.chats[key].length = 0; koneshaSaveChats(); koneshaRerender(); } };
-    el.querySelectorAll(".konesha-mode button").forEach((b) => { b.onclick = () => { st.mode = b.dataset.mode; st.error = ""; koneshaRerender(); }; });
+    document.getElementById("konesha-hist").onclick = () => { st.view = "history"; st.full = false; koneshaRerender(); koneshaScrollTo("konesha-top-any"); };
+    const nb = document.getElementById("konesha-new");
+    if (nb) nb.onclick = koneshaNewBoard;
+    const pv = document.getElementById("konesha-prev"), nx = document.getElementById("konesha-next");
+    if (pv) pv.onclick = () => { st.page = page - 1; koneshaRerender(); };
+    if (nx) nx.onclick = () => { st.page = page + 1; koneshaRerender(); };
+    const fb = document.getElementById("konesha-full");
+    if (fb) fb.onclick = () => { st.full = true; koneshaRerender(); };
+    const fc = document.getElementById("konesha-full-close");
+    if (fc) fc.onclick = () => { st.full = false; koneshaRerender(); };
+    el.querySelectorAll(".konesha-mode button").forEach((b) => { b.onclick = () => { st.mode = b.dataset.mode; st.error = ""; st.page = null; koneshaRerender(); }; });
     el.querySelectorAll(".konesha-level button").forEach((b) => { b.onclick = () => { st.hintLevel = b.dataset.level; koneshaRerender(); }; });
     const ta = document.getElementById("konesha-text");
     ta.oninput = () => { st.draft = ta.value; };
