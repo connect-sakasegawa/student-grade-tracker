@@ -346,6 +346,7 @@
   .konesha-preview span { flex: 1; }
   /* ---- コネーシャのホワイトボード ---- */
   .konesha-tools { display: flex; gap: 8px; margin: 0 0 12px; }
+  .konesha-tools + .wb { margin-top: 40px; }
   .konesha-histbtn { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 6px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
   .konesha-histbtn b { font-size: 12px; color: var(--muted); font-weight: 500; }
   .konesha-card .konesha-histbtn { width: 100%; margin: 0 0 4px; }
@@ -360,6 +361,14 @@
   .wb-mk-k { left: 10%; } .wb-mk-k::after { background: #222; }
   .wb-mk-r { left: calc(10% + 52px); } .wb-mk-r::after { background: #D0263A; }
   .wb-mk-b { left: calc(10% + 104px); } .wb-mk-b::after { background: #1F3F9E; }
+  .wb-konesha { position: absolute; z-index: 2; top: -34px; right: 2px; width: 74px; height: 80px; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.18)); }
+  .wb-konesha img, .wb-konesha svg { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; display: block; }
+  .wb-konesha-think { animation: wbBob 1.4s ease-in-out infinite; }
+  @keyframes wbBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  .wb .wb-surface { padding-top: 46px; }
+  .wb-full-board .wb-konesha { top: 12px; right: 14px; width: 64px; height: 70px; }
+  .wb-full-board .wb-surface { padding-top: 72px; }
+  @media (prefers-reduced-motion: reduce) { .wb-konesha-think { animation: none; } }
   .wb-red { color: #D0263A; }
   .wb-blue { color: #1F3F9E; }
   .wb-wave { text-decoration: underline wavy #D0263A; text-decoration-thickness: 1.5px; text-underline-offset: 5px; }
@@ -377,10 +386,10 @@
   .wb-write > * { animation: wbWrite .9s ease-out both; }
   @keyframes wbWrite { from { opacity: 0; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
   @media (prefers-reduced-motion: reduce) { .wb-write > *, .wb-dots i { animation: none; } }
-  .wb-note { position: relative; margin: 4px 6px 14px; padding: 12px 14px 10px; background: #FFF5B5; border-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,.16); transform: rotate(-.6deg); font-size: 14px; line-height: 1.7; color: #3A3320; text-align: left; word-break: break-word; }
+  .wb-note { position: relative; margin: 4px 6px 34px; padding: 12px 14px 10px; background: #FFF5B5; border-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,.16); transform: rotate(-.6deg); font-size: 14px; line-height: 1.7; color: #3A3320; text-align: left; word-break: break-word; }
   .wb-note::before { content: ""; position: absolute; top: -8px; left: 50%; width: 70px; height: 16px; margin-left: -35px; background: rgba(215,220,226,.75); transform: rotate(1.5deg); }
   .wb-note-label { font-size: 11px; color: #8A7A3A; margin-bottom: 4px; font-weight: 700; }
-  .wb-pager { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: -4px 0 10px; font-size: 12.5px; color: var(--muted); }
+  .wb-pager { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: -20px 0 34px; font-size: 12.5px; color: var(--muted); }
   .wb-pager button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-family: inherit; font-size: 12.5px; cursor: pointer; }
   .wb-pager button:disabled { opacity: .4; cursor: default; }
   .wb-under { text-align: right; margin: 6px 0 2px; }
@@ -1170,6 +1179,7 @@
   function koneshaBoardHtml(inner, opts) {
     opts = opts || {};
     return `<div class="wb${opts.full ? " wb-full-board" : ""}">
+        <div class="wb-konesha${opts.busy ? " wb-konesha-think" : ""}" aria-hidden="true">${koneshaHeroHtml()}</div>
         <div class="wb-surface${opts.fresh ? " wb-write" : ""}${opts.short ? " wb-short" : ""}">${inner}</div>
         <div class="wb-tray"><span class="wb-eraser"></span><span class="wb-marker wb-mk-k"></span><span class="wb-marker wb-mk-r"></span><span class="wb-marker wb-mk-b"></span></div>
       </div>`;
@@ -1316,7 +1326,7 @@
         </div>
         ${note}
         ${pager}
-        ${koneshaBoardHtml(board, { fresh: st.fresh && turn && turn.a !== null && page === turns.length - 1, short: !turn || turn.a === null })}
+        ${koneshaBoardHtml(board, { fresh: st.fresh && turn && turn.a !== null && page === turns.length - 1, short: !turn || turn.a === null, busy: !!(turn && turn.a === null) })}
         ${turn && turn.a !== null ? `<div class="wb-under"><button class="konesha-link" id="konesha-full">⤢ 大きく見る</button></div>` : ""}
         ${errHtml}
         <p class="konesha-input-label">${inputLabel}</p>
