@@ -897,7 +897,7 @@
   const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", hintLevel: "light", chats: { hint: [], explain: [], study: [] }, loaded: false, busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
 
   function koneshaGreeting(info) {
-    let t = `${escapeHtml(info.studentName)}さん<br />よう来たな。`;
+    let t = `${escapeHtml(info.callName || (info.studentName + "さん"))}<br />よう来たな。`;
     if (info.nextTest) {
       if (info.nextTest.daysUntil === 0) t += `今日は${escapeHtml(info.nextTest.testName)}やな。落ち着いて、力出してきいや。`;
       else t += `${escapeHtml(info.nextTest.testName)}まで、あと${info.nextTest.daysUntil}日やな。`;
