@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>タイムカード | 個別指導塾コネクト</title>
+<style>
+  :root {
+    --bg1: #1f7a93;
+    --bg2: #3aa6c0;
+    --panel: rgba(255, 255, 255, 0.14);
+    --clock: #1e2b45;
+    --in: #1aa37a;
+    --in-dark: #12805f;
+    --out: #e0743a;
+    --out-dark: #bf5a24;
+    --text: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Yu Gothic", sans-serif;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 860px;
+    background: var(--panel);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  }
+  h1 {
+    margin: 0 0 18px;
+    font-size: clamp(22px, 3.6vw, 34px);
+    letter-spacing: 0.06em;
+  }
+  .clock {
+    background: var(--clock);
+    border-radius: 14px;
+    padding: 22px 16px 26px;
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .clock .date {
+    font-size: clamp(26px, 5.4vw, 52px);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .clock .time {
+    font-size: clamp(64px, 15vw, 140px);
+    font-weight: 700;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  .clock .time .sec { font-size: 0.4em; opacity: 0.6; margin-left: 0.1em; }
+  select {
+    width: 100%;
+    font-size: clamp(22px, 3.6vw, 32px);
+    padding: 16px 18px;
+    border-radius: 10px;
+    border: none;
+    background: #fff;
+    color: #222;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .status {
+    min-height: 1.6em;
+    font-size: clamp(16px, 2.4vw, 20px);
+    margin: 0 4px 14px;
+    opacity: 0.95;
+  }
+  .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  button.punch {
+    font-size: clamp(32px, 6vw, 54px);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    padding: 30px 0;
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.05s, filter 0.15s, opacity 0.15s;
+  }
+  button.punch.in { background: var(--in); box-shadow: 0 6px 0 var(--in-dark); }
+  button.punch.out { background: var(--out); box-shadow: 0 6px 0 var(--out-dark); }
+  button.punch:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+  button.punch:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* 打刻完了の表示 */
+  .overlay {
+    position: fixed; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(10, 25, 40, 0.72);
+    padding: 16px;
+    z-index: 10;
+  }
+  .overlay.show { display: flex; }
+  .result {
+    background: #fff; color: #1e2b45;
+    border-radius: 18px;
+    padding: 34px 28px;
+    width: 100%; max-width: 560px;
+    text-align: center;
+  }
+  .result .badge {
+    display: inline-block;
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 700;
+    color: #fff;
+    padding: 6px 28px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .result .badge.in { background: var(--in); }
+  .result .badge.out { background: var(--out); }
+  .result .badge.err { background: #c0392b; }
+  .result .name { font-size: clamp(24px, 4.4vw, 36px); font-weight: 700; }
+  .result .when { font-size: clamp(36px, 7vw, 60px); font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .result .note { font-size: 16px; margin-top: 12px; color: #555; }
+  .result button {
+    margin-top: 20px; font-size: 18px; padding: 10px 36px;
+    border-radius: 10px; border: none; background: #1e2b45; color: #fff; cursor: pointer;
+  }
+  .error-line { color: #ffe2a8; }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>個別指導塾コネクト</h1>
+
+    <section class="clock" aria-live="off">
+      <div class="date" id="date">----/--/--</div>
+      <div class="time" id="time">--:--</div>
+    </section>
+
+    <select id="teacher" aria-label="名前を選択">
+      <option value="">名前を選択してください</option>
+    </select>
+    <div class="status" id="status">講師一覧を読み込み中…</div>
+
+    <div class="buttons">
+      <button class="punch in" id="btnIn" disabled>出勤</button>
+      <button class="punch out" id="btnOut" disabled>退勤</button>
+    </div>
+  </main>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="result">
+      <div class="badge" id="resBadge"></div>
+      <div class="name" id="resName"></div>
+      <div class="when" id="resWhen"></div>
+      <div class="note" id="resNote"></div>
+      <button id="resClose">閉じる</button>
+    </div>
+  </div>
+
+<script>
+  // ▼ 成績トラッカーで使っている GAS の「ウェブアプリURL」(https://script.google.com/macros/s/.../exec)を貼り付けてください
+  const GAS_URL = "ここにGASのウェブアプリURLを貼り付け";
+
+  const DOW = ["日", "月", "火", "水", "木", "金", "土"];
+  const $ = (id) => document.getElementById(id);
+  let teachers = [];
+  let busy = false;
+  let closeTimer = null;
+
+  // ---- 時計 ----
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function tick() {
+    const d = new Date();
+    $("date").textContent = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${DOW[d.getDay()]}）`;
+    $("time").innerHTML = `${pad(d.getHours())}:${pad(d.getMinutes())}<span class="sec">${pad(d.getSeconds())}</span>`;
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // ---- 講師一覧の読み込み ----
+  async function loadTeachers() {
+    try {
+      const res = await fetch(`${GAS_URL}?timecard=1&t=${Date.now()}`);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "読み込みに失敗しました");
+      teachers = data.teachers || [];
+      renderSelect();
+      updateStatus();
+    } catch (err) {
+      $("status").innerHTML = `<span class="error-line">講師一覧を読み込めませんでした。インターネット接続とGAS_URLを確認してください。</span>`;
+    }
+  }
+
+  function renderSelect() {
+    const sel = $("teacher");
+    const keep = sel.value;
+    sel.innerHTML = '<option value="">名前を選択してください</option>';
+    teachers.forEach((t) => {
+      const op = document.createElement("option");
+      op.value = t.id;
+      op.textContent = t.name;
+      sel.appendChild(op);
+    });
+    if (keep && teachers.some((t) => t.id === keep)) sel.value = keep;
+  }
+
+  function selectedTeacher() {
+    return teachers.find((t) => t.id === $("teacher").value) || null;
+  }
+
+  function updateStatus() {
+    const t = selectedTeacher();
+    $("btnIn").disabled = !t || busy;
+    $("btnOut").disabled = !t || busy;
+    if (!t) { $("status").textContent = teachers.length ? "名前を選んで「出勤」か「退勤」を押してください" : ""; return; }
+    const parts = [];
+    parts.push(t.inTime ? `出勤 ${t.inTime}` : "出勤 未打刻");
+    parts.push(t.outTime ? `退勤 ${t.outTime}` : "退勤 未打刻");
+    $("status").textContent = `本日の記録：${parts.join(" ／ ")}`;
+  }
+
+  // ---- 打刻 ----
+  async function punch(type) {
+    const t = selectedTeacher();
+    if (!t || busy) return;
+    busy = true;
+    updateStatus();
+    try {
+      // text/plain で送ると GAS でも追加の確認通信(CORS)が発生せずに送信できる
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "punchTimecard", teacherId: t.id, type }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "打刻に失敗しました");
+      if (type === "出勤") t.inTime = data.time; else t.outTime = data.time;
+      showResult({
+        cls: type === "出勤" ? "in" : "out",
+        badge: type,
+        name: `${data.teacherName} さん`,
+        when: `${data.date} ${data.time}`,
+        note: data.duplicate ? "少し前に同じ打刻があるため、その記録を表示しています。" : (type === "出勤" ? "今日もよろしくお願いします！" : "お疲れさまでした！"),
+      });
+      $("teacher").value = ""; // 次の講師がすぐ選べるよう、選択を戻す
+    } catch (err) {
+      showResult({ cls: "err", badge: "エラー", name: "打刻できませんでした", when: "", note: String(err.message || err) + " もう一度押してください。" });
+    } finally {
+      busy = false;
+      updateStatus();
+    }
+  }
+
+  function showResult({ cls, badge, name, when, note }) {
+    $("resBadge").className = `badge ${cls}`;
+    $("resBadge").textContent = badge;
+    $("resName").textContent = name;
+    $("resWhen").textContent = when;
+    $("resNote").textContent = note;
+    $("overlay").classList.add("show");
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeResult, cls === "err" ? 8000 : 4000);
+  }
+  function closeResult() { $("overlay").classList.remove("show"); }
+
+  $("teacher").addEventListener("change", updateStatus);
+  $("btnIn").addEventListener("click", () => punch("出勤"));
+  $("btnOut").addEventListener("click", () => punch("退勤"));
+  $("resClose").addEventListener("click", closeResult);
+  $("overlay").addEventListener("click", (e) => { if (e.target.id === "overlay") closeResult(); });
+
+  loadTeachers();
+  // 講師名簿の更新や日付の切り替わりを反映するため、10分ごとに読み直す
+  setInterval(() => { if (!busy && !$("teacher").value) loadTeachers(); }, 10 * 60 * 1000);
+</script>
+</body>
+</html>
