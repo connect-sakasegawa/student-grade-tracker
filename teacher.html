@@ -1047,7 +1047,7 @@
   const UC_UM = Object.fromEntries(UC_U.map((u) => [u.key, u]));
   const UC_R = UC_DATA.r.map(([k, fac, method, ex, res, note, chk, ct]) => ({ k, fac, method, ex, res, note, chk, ct }));
   const UC_HOL = { "1/1": "元日", "1/11": "成人の日", "2/11": "建国記念の日", "2/23": "天皇誕生日", "3/21": "春分の日", "3/22": "振替休日" };
-  const UC_SPECIAL = { "1/16": "共テ本試", "1/17": "共テ本試", "1/23": "共テ追試", "1/24": "共テ追試" };
+  const UC_SPECIAL = { "1/16": "共テ本試", "1/17": "共テ本試" };
   const UC_SUBJ = ["英語", "現代文", "古文", "漢文", "数学ⅠA", "数学ⅡBC", "数学Ⅲ", "物理", "化学", "生物", "地学", "日本史", "世界史", "地理", "政治・経済", "情報", "小論文", "面接"];
   // 共通テスト（2025年度からの新課程の科目名）
   const UC_CT_TAKE = [["yes", "受ける"], ["no", "受けない"], ["undecided", "未定"]];
@@ -1213,7 +1213,7 @@
     }
     const [mm, dd] = key.split("/");
     let html = `<h3>${mm}月${dd}日（${ucWd(key)}）${UC_HOL[key] ? ` <span class="uc-sub">${UC_HOL[key]}</span>` : ""}</h3>`;
-    if (UC_SPECIAL[key]) html += `<p class="uc-sub">${UC_SPECIAL[key] === "共テ本試" ? "大学入学共通テスト 本試験（1/16・1/17）" : "共通テスト 追試験（1/23・1/24）"}</p>`;
+    if (UC_SPECIAL[key]) html += `<p class="uc-sub">大学入学共通テスト 本試験（1/16・1/17）</p>`;
     const mine = personal.filter((e) => e.d === key);
     if (mine.length) {
       html += `<p class="uc-sec-h">${ucEsc(opts.personalTab || "受験予定")}</p>` + mine.map((e) => `<div class="uc-item ${e.t === "rs" ? "uc-red" : ""}">${opts.showNames ? `<b>${ucEsc(e.who)}</b> ` : "★ "}${ucEsc(e.txt)}${e.rank ? `<span class="uc-fac">${ucEsc(e.rank)}志望</span>` : ""}</div>`).join("");
