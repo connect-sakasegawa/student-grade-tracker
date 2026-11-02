@@ -940,7 +940,7 @@
       <p class="eyebrow">個別指導塾コネクト</p>
       <h1>CONNEC＋</h1>
       <p class="student-name">${data.studentName} さん${rank ? `<span class="header-rank-badge">${medalIcon(rank.className, 18)}${escapeHtml(rank.rankName)}</span>` : ""}</p>
-      ${currentTab === "grades" ? ucEntryButtonsHtml("grades") : ""}${currentTab === "schedule" ? ucEntryButtonsHtml("schedule") : ""}
+      ${currentTab === "grades" ? ucEntryButtonsHtml("grades") : ""}
       ${currentTab === "grades" ? `
       <div class="card grades-guide-card">
         <p class="grades-guide-title">成績表の入力のしかた</p>
@@ -2622,6 +2622,8 @@
     ["外国語", ["英語（リーディング）", "英語（リスニング）"]],
     ["情報", ["情報Ⅰ"]],
   ];
+  const UC_CT_DAY1 = ["地理歴史・公民", "国語", "外国語"];
+  const UC_CT_DAY2 = ["理科", "数学", "情報"];
   const UC_OTHER = "__other";
   const UC_DOW = "日月火水木金土";
   const UC_MAX_CARDS = 10;
@@ -2656,8 +2658,13 @@
     const ev = [];
     const cards = (data && data.cards) || [];
     if (data && data.ct && data.ct.take === "yes") {
-      ev.push({ d: "1/16", t: "ex", who, univ: "共テ", txt: "共通テスト 1日目", rank: "" });
-      ev.push({ d: "1/17", t: "ex", who, univ: "共テ", txt: "共通テスト 2日目", rank: "" });
+      // 共通テストの時間割：1日目＝地理歴史・公民／国語／外国語、2日目＝理科／数学／情報
+      const subj = data.ct.subj || [];
+      const inGroups = (groups) => UC_CT_SUBJ.filter(([g]) => groups.includes(g)).some(([, list]) => list.some((x) => subj.includes(x)));
+      const d1 = inGroups(UC_CT_DAY1), d2 = inGroups(UC_CT_DAY2);
+      const pick = (groups) => subj.filter((x) => UC_CT_SUBJ.some(([g, list]) => groups.includes(g) && list.includes(x))).join("・");
+      if (d1 || !subj.length) ev.push({ d: "1/16", t: "ex", who, univ: "共テ", txt: `共通テスト 1日目${d1 ? `（${pick(UC_CT_DAY1)}）` : "（科目未選択）"}`, rank: "" });
+      if (d2 || !subj.length) ev.push({ d: "1/17", t: "ex", who, univ: "共テ", txt: `共通テスト 2日目${d2 ? `（${pick(UC_CT_DAY2)}）` : "（科目未選択）"}`, rank: "" });
     }
     cards.forEach((c, ci) => {
       const rank = `第${ci + 1}`;
@@ -2789,20 +2796,23 @@
 
   // ---------- 生徒アプリ（高校生）：志望校入力・大学入試カレンダー ----------
   let ucShibo = null; // { latest: {savedAt, data}, history: [...] }
-  function ucOpenOverlay(title, backLabel) {
+  function ucOpenOverlay(title, backLabel, onBack) {
     ucCloseOverlay();
     const ov = document.createElement("div");
     ov.id = "uc-overlay"; ov.className = "uc-overlay";
     ov.innerHTML = `<div class="uc-topbar"><button type="button" class="uc-back" id="uc-back">← ${ucEsc(backLabel)}</button></div><div class="uc-title">${ucEsc(title)}</div><div id="uc-body"><p class="empty">読み込み中...</p></div>`;
     document.body.appendChild(ov);
     document.body.style.overflow = "hidden";
-    document.getElementById("uc-back").addEventListener("click", ucCloseOverlay);
+    document.getElementById("uc-back").addEventListener("click", onBack || ucCloseOverlay);
+    // 保存した・失敗したのお知らせが、この画面の上に出るようにする
+    const tc = document.getElementById("toast-container"); if (tc) tc.style.zIndex = "70";
     return document.getElementById("uc-body");
   }
   function ucCloseOverlay() {
     const ov = document.getElementById("uc-overlay");
     if (ov) ov.remove();
     document.body.style.overflow = "";
+    const tc = document.getElementById("toast-container"); if (tc) tc.style.zIndex = "";
   }
   async function ucLoadShibo(force) {
     if (ucShibo && !force) return ucShibo;
@@ -2814,26 +2824,23 @@
   function ucEntryButtonsHtml(where) {
     if (!(currentData && currentData.isHighSchool)) return "";
     if (where === "grades") return `<button type="button" class="uc-entry-btn" id="uc-open-shibo"><span>🎓 志望校入力<small>大学・学部・学科と受験する方式・科目を登録します</small></span><span class="uc-arrow">›</span></button>`;
-    if (where === "schedule") return `<button type="button" class="uc-entry-btn" id="uc-open-cal"><span>🗓 大学入試カレンダー<small>2027年1〜3月の入試日（黒）と合格発表日（赤）</small></span><span class="uc-arrow">›</span></button>`;
     return "";
   }
   function ucBindEntryButtons() {
     const a = document.getElementById("uc-open-shibo");
     if (a) a.addEventListener("click", ucOpenShiboForm);
-    const b = document.getElementById("uc-open-cal");
-    if (b) b.addEventListener("click", ucOpenCalendarStudent);
   }
 
+  // 志望校入力の画面から開く（戻るときは入力途中の内容のまま志望校入力に戻る）
   async function ucOpenCalendarStudent() {
-    const body = ucOpenOverlay("大学入試カレンダー", "スケジュールに戻る");
+    const body = ucOpenOverlay("大学入試カレンダー", "志望校入力に戻る", () => { ucOpenOverlay("志望校入力", "私の成績表に戻る"); ucRenderForm(); });
     ucCal.day = null; ucCal.view = null; ucCal.month = null;
-    let personal = [];
-    try { const s = await ucLoadShibo(); personal = ucEventsFromShibo(s.latest && s.latest.data, ""); } catch (err) { /* 志望校が読めなくてもカレンダーは出す */ }
+    const personal = ucForm ? ucEventsFromShibo({ cards: ucCleanCards(ucForm.cards), ct: ucForm.ct }, "") : [];
     ucRenderCalendar(body, {
       personal, personalTab: "自分の受験予定",
-      headHtml: `<p class="uc-sub">近畿圏25大学の一般選抜の日程です。★は「志望校入力」で登録したあなたの受験予定です。</p>${personal.length ? "" : `<button type="button" class="uc-entry-btn" id="uc-cal-to-form"><span>🎓 志望校を登録する<small>登録すると、あなたの受験日がカレンダーに★で出ます</small></span><span class="uc-arrow">›</span></button>`}`,
-      afterRender: () => { const b = document.getElementById("uc-cal-to-form"); if (b) b.addEventListener("click", ucOpenShiboForm); },
+      headHtml: `<p class="uc-sub">近畿圏25大学の一般選抜の日程です。★は「志望校入力」で選んだあなたの受験予定です。</p>`,
     });
+    const ov = document.getElementById("uc-overlay"); if (ov) ov.scrollTop = 0;
   }
 
   // ---------- 志望校入力フォーム ----------
@@ -2862,16 +2869,21 @@
     const saved = ucShibo && ucShibo.latest;
     let html = `<div class="card grades-guide-card">
         <p class="grades-guide-title">志望校の入力のしかた</p>
-        <p class="grades-guide-item"><strong>登録</strong>共通テストを受けるかどうかを選んでから、第1志望から順に大学→学部→学科→方式を選び、受験科目をタップして「保存する」を押します。一覧にない大学は、大学の欄のいちばん下「一覧にない大学（自由に書く）」を選んでください。</p>
+        <p class="grades-guide-item"><strong>登録</strong>共通テストを受けるかどうかを選んでから、第1志望から順に大学→学部→学科→方式を選び、受験科目をタップして「保存する」を押します。「保存する」ボタンは各枠の下にあり、どれを押しても全部の内容が保存されます。一覧にない大学は、大学の欄のいちばん下「一覧にない大学（自由に書く）」を選んでください。</p>
         <p class="grades-guide-item"><strong>修正</strong>この画面を開くと、前に保存した内容が入った状態で出ます。変えたいところを選び直して、もう一度「保存する」を押してください。最後に保存した内容が、先生と保護者の方のアプリに表示されます。</p>
         <p class="grades-guide-item"><strong>やめる・入れかえる</strong>受けなくなった志望校は「削除」、順番を入れかえたいときは「↑ 上へ」を押してから「保存する」を押します。前の内容は下の「変更履歴」に残ります。</p>
         ${saved && saved.savedAtLabel ? `<p class="grades-guide-item" style="font-weight:700;">最後に保存した日時：${ucEsc(saved.savedAtLabel)}</p>` : ""}
+      </div>
+      <div class="card" style="padding:14px 16px;">
+        <p style="margin:0 0 8px;font-size:13.5px;line-height:1.6;">📅 選んだ大学の<b>受験日</b>と<b>合格発表日</b>は、カレンダーで確認できるよ。ほかの大学の日程も見られます。</p>
+        <button type="button" class="uc-entry-btn" id="uc-open-cal" style="margin:0;"><span>🗓 大学入試カレンダーを見る<small>2027年1〜3月の入試日（黒）と合格発表日（赤）</small></span><span class="uc-arrow">›</span></button>
       </div>`;
     html += `<div class="card"><p class="section-title" style="margin-top:0;">あなたの受験予定</p>${events.length ? events.map((e) => `<div class="uc-plan-row ${e.t === "rs" ? "rs" : ""}"><span class="d">${e.d}（${ucWd(e.d)}）</span><span>${ucEsc(e.txt)}</span></div>`).join("") : `<p class="uc-sub" style="margin:0;">方式と受験日を選ぶと、ここに日付順で出ます。</p>`}${Object.entries(exCount).filter(([, n]) => n > 1).map(([d, n]) => `<div class="uc-warn">⚠ ${d}（${ucWd(d)}）に試験が${n}つ重なっています</div>`).join("")}</div>`;
     const ct = ucForm.ct || (ucForm.ct = { take: "", subj: [] });
     html += `<div class="card"><div class="uc-card-head"><span class="uc-rank">共通テスト</span><span class="uc-sub" style="margin:0;">1/16（土）・1/17（日）</span></div>
       <div class="uc-field"><label>共通テストを受けますか？</label><div class="uc-seg" style="margin:0;">${UC_CT_TAKE.map(([v, t]) => `<button type="button" data-ucct="${v}" class="${ct.take === v ? "on" : ""}" aria-pressed="${ct.take === v}">${t}</button>`).join("")}</div></div>
-      ${ct.take === "yes" ? `<div class="uc-field" style="margin-top:10px;"><label>受験科目（タップで選ぶ）</label>${UC_CT_SUBJ.map(([g, list]) => `<p class="uc-sub" style="margin:6px 0 3px;font-weight:700;">${g}</p><div class="uc-subj">${list.map((sj) => `<button type="button" data-ucctsubj="${ucEsc(sj)}" class="${(ct.subj || []).includes(sj) ? "on" : ""}" aria-pressed="${(ct.subj || []).includes(sj)}">${ucEsc(sj)}</button>`).join("")}</div>`).join("")}</div>` : ""}
+      ${ct.take === "yes" ? `<div class="uc-field" style="margin-top:10px;"><label>受験科目（タップで選ぶ）</label>${UC_CT_SUBJ.map(([g, list]) => `<p class="uc-sub" style="margin:6px 0 3px;font-weight:700;">${g}<span style="font-weight:400;">（${UC_CT_DAY1.includes(g) ? "1日目" : "2日目"}）</span></p><div class="uc-subj">${list.map((sj) => `<button type="button" data-ucctsubj="${ucEsc(sj)}" class="${(ct.subj || []).includes(sj) ? "on" : ""}" aria-pressed="${(ct.subj || []).includes(sj)}">${ucEsc(sj)}</button>`).join("")}</div>`).join("")}</div>` : ""}
+      <button type="button" class="uc-save" data-ucsave="1" style="margin-top:12px;">保存する</button>
     </div>`;
     cards.forEach((c, ci) => {
       html += `<div class="card"><div class="uc-card-head"><span class="uc-rank">第${ci + 1}志望</span><span>${ci > 0 ? `<button type="button" class="uc-mini" data-ucup="${ci}">↑ 上へ</button>` : ""}<button type="button" class="uc-mini" data-ucdel="${ci}">削除</button></span></div>`;
@@ -2908,10 +2920,9 @@
       if (c.u) {
         html += `<div class="uc-field" style="margin-top:10px;"><label>受験科目（タップで選ぶ）</label><div class="uc-subj">${UC_SUBJ.map((s) => `<button type="button" data-ucsubj="${ci}" data-s="${s}" class="${(c.subj || []).includes(s) ? "on" : ""}" aria-pressed="${(c.subj || []).includes(s)}">${s}</button>`).join("")}</div></div>`;
       }
-      html += `</div>`;
+      html += `<button type="button" class="uc-save" data-ucsave="1" style="margin-top:12px;">保存する</button></div>`;
     });
     if (cards.length < UC_MAX_CARDS) html += `<button type="button" class="uc-add" id="uc-add-card">＋ 志望校を追加</button><div style="height:12px"></div>`;
-    html += `<button type="button" class="uc-save" id="uc-save">保存する</button>`;
     const hist = (ucShibo && ucShibo.history) || [];
     html += `<div class="card" style="margin-top:14px;"><p class="section-title" style="margin-top:0;">変更履歴</p>${hist.length ? hist.map((h) => `<div class="uc-hist"><b>${ucEsc(h.savedAtLabel || "")}</b><div>${ucEsc(h.summary || "")}</div></div>`).join("") : `<p class="uc-sub" style="margin:0;">保存すると、ここに記録が残ります。</p>`}</div>`;
     body.innerHTML = html;
@@ -2942,8 +2953,9 @@
     on("[data-ucctsubj]", "click", (e) => { const ct = ucForm.ct, sj = e.currentTarget.dataset.ucctsubj; ct.subj = (ct.subj || []).includes(sj) ? ct.subj.filter((x) => x !== sj) : [...(ct.subj || []), sj]; e.currentTarget.classList.toggle("on"); e.currentTarget.setAttribute("aria-pressed", String(ct.subj.includes(sj))); });
     const add = document.getElementById("uc-add-card");
     if (add) add.addEventListener("click", () => { cards.push(ucNewCard()); ucRenderForm(); });
-    const save = document.getElementById("uc-save");
-    if (save) save.addEventListener("click", ucSaveShibo);
+    on("[data-ucsave]", "click", ucSaveShibo);
+    const calBtn = document.getElementById("uc-open-cal");
+    if (calBtn) calBtn.addEventListener("click", ucOpenCalendarStudent);
   }
   function ucCleanCards(cards) {
     return cards.filter((c) => c.u && (c.u !== UC_OTHER || (c.free && c.free.name))).map((c) => {
@@ -2954,11 +2966,11 @@
     });
   }
   async function ucSaveShibo() {
-    const btn = document.getElementById("uc-save");
+    const btns = document.querySelectorAll("[data-ucsave]");
     const cards = ucCleanCards(ucForm.cards);
     const missingDate = cards.some((c) => (c.meths || []).some((m) => { const r = ucFindMethod(c.u, m.m, c.fac); return r && r.ex.length > 1 && !m.date; }));
     if (missingDate) { showToast("受験日を選んでいない方式があります", "error"); return; }
-    btn.disabled = true; btn.textContent = "保存中...";
+    btns.forEach((b) => { b.disabled = true; b.textContent = "保存中..."; });
     try {
       const ct = { take: ucForm.ct.take || "", subj: ucForm.ct.take === "yes" ? (ucForm.ct.subj || []).slice(0, 20) : [] };
       const data = await ucPost({ action: "saveShibo", studentId, data: { ct, cards } });
@@ -2968,7 +2980,7 @@
       ucRenderForm();
       showToast("志望校を保存しました");
     } catch (err) {
-      btn.disabled = false; btn.textContent = "保存する";
+      btns.forEach((b) => { b.disabled = false; b.textContent = "保存する"; });
       showToast("保存に失敗しました。もう一度お試しください", "error");
     }
   }
