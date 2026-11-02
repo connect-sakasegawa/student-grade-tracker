@@ -1083,6 +1083,8 @@
     ["外国語", ["英語（リーディング）", "英語（リスニング）"]],
     ["情報", ["情報Ⅰ"]],
   ];
+  const UC_CT_DAY1 = ["地理歴史・公民", "国語", "外国語"];
+  const UC_CT_DAY2 = ["理科", "数学", "情報"];
   const UC_OTHER = "__other";
   const UC_DOW = "日月火水木金土";
   const UC_MAX_CARDS = 10;
@@ -1117,8 +1119,13 @@
     const ev = [];
     const cards = (data && data.cards) || [];
     if (data && data.ct && data.ct.take === "yes") {
-      ev.push({ d: "1/16", t: "ex", who, univ: "共テ", txt: "共通テスト 1日目", rank: "" });
-      ev.push({ d: "1/17", t: "ex", who, univ: "共テ", txt: "共通テスト 2日目", rank: "" });
+      // 共通テストの時間割：1日目＝地理歴史・公民／国語／外国語、2日目＝理科／数学／情報
+      const subj = data.ct.subj || [];
+      const inGroups = (groups) => UC_CT_SUBJ.filter(([g]) => groups.includes(g)).some(([, list]) => list.some((x) => subj.includes(x)));
+      const d1 = inGroups(UC_CT_DAY1), d2 = inGroups(UC_CT_DAY2);
+      const pick = (groups) => subj.filter((x) => UC_CT_SUBJ.some(([g, list]) => groups.includes(g) && list.includes(x))).join("・");
+      if (d1 || !subj.length) ev.push({ d: "1/16", t: "ex", who, univ: "共テ", txt: `共通テスト 1日目${d1 ? `（${pick(UC_CT_DAY1)}）` : "（科目未選択）"}`, rank: "" });
+      if (d2 || !subj.length) ev.push({ d: "1/17", t: "ex", who, univ: "共テ", txt: `共通テスト 2日目${d2 ? `（${pick(UC_CT_DAY2)}）` : "（科目未選択）"}`, rank: "" });
     }
     cards.forEach((c, ci) => {
       const rank = `第${ci + 1}`;
