@@ -471,6 +471,13 @@
   .uc-entry-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0 0 12px; padding: 13px 16px; border: 1.5px solid var(--brand); border-radius: 12px; background: var(--card); color: var(--brand); font-size: 15px; font-weight: 700; font-family: inherit; text-align: left; cursor: pointer; }
   .uc-entry-btn small { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 2px; }
   .uc-entry-btn .uc-arrow { font-size: 18px; flex: none; }
+  .uc-calcard { margin: 0 0 14px; padding: 14px 16px 16px; border: 2px solid var(--brand); border-radius: 14px; background: var(--brand-soft); }
+  .uc-calcard-title { margin: 0 0 6px; font-size: 16px; font-weight: 800; color: var(--brand); }
+  .uc-calcard-text { margin: 0 0 12px; font-size: 13.5px; line-height: 1.65; color: var(--ink); }
+  .uc-calcard-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0; padding: 14px 16px; border: 0; border-radius: 12px; background: var(--brand); color: #fff; font-size: 15.5px; font-weight: 800; font-family: inherit; text-align: left; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,.15); }
+  .uc-calcard-btn small { display: block; font-size: 11.5px; font-weight: 500; color: rgba(255,255,255,.9); margin-top: 3px; }
+  .uc-calcard-btn .uc-arrow { font-size: 22px; flex: none; }
+  .uc-calcard-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.15); }
   .uc-overlay { position: fixed; inset: 0; z-index: 60; background: var(--paper); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 28px); }
   .uc-topbar { position: sticky; top: calc(-1 * (env(safe-area-inset-top) + 8px)); z-index: 2; margin: -8px -16px 10px; padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: var(--paper); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
   .uc-back { background: none; border: none; color: var(--brand); font-size: 14.5px; font-weight: 700; font-family: inherit; padding: 6px 0; cursor: pointer; white-space: nowrap; }
@@ -889,6 +896,7 @@
     if (!selectedWeekStart) selectedWeekStart = data.weekStart;
     if (data.isElementary && currentTab === "grades") currentTab = NOTEBOOK_ENABLED ? "notebook" : "schedule";
     renderShell();
+    ucPrefetchShibo();
   }
 
   function checkRankChange(newRank) {
@@ -2610,7 +2618,7 @@
   const UC_UM = Object.fromEntries(UC_U.map((u) => [u.key, u]));
   const UC_R = UC_DATA.r.map(([k, fac, method, ex, res, note, chk, ct]) => ({ k, fac, method, ex, res, note, chk, ct }));
   const UC_HOL = { "1/1": "元日", "1/11": "成人の日", "2/11": "建国記念の日", "2/23": "天皇誕生日", "3/21": "春分の日", "3/22": "振替休日" };
-  const UC_SPECIAL = { "1/16": "共テ本試", "1/17": "共テ本試", "1/23": "共テ追試", "1/24": "共テ追試" };
+  const UC_SPECIAL = { "1/16": "共テ本試", "1/17": "共テ本試" };
   const UC_SUBJ = ["英語", "現代文", "古文", "漢文", "数学ⅠA", "数学ⅡBC", "数学Ⅲ", "物理", "化学", "生物", "地学", "日本史", "世界史", "地理", "政治・経済", "情報", "小論文", "面接"];
   // 共通テスト（2025年度からの新課程の科目名）
   const UC_CT_TAKE = [["yes", "受ける"], ["no", "受けない"], ["undecided", "未定"]];
@@ -2776,7 +2784,7 @@
     }
     const [mm, dd] = key.split("/");
     let html = `<h3>${mm}月${dd}日（${ucWd(key)}）${UC_HOL[key] ? ` <span class="uc-sub">${UC_HOL[key]}</span>` : ""}</h3>`;
-    if (UC_SPECIAL[key]) html += `<p class="uc-sub">${UC_SPECIAL[key] === "共テ本試" ? "大学入学共通テスト 本試験（1/16・1/17）" : "共通テスト 追試験（1/23・1/24）"}</p>`;
+    if (UC_SPECIAL[key]) html += `<p class="uc-sub">大学入学共通テスト 本試験（1/16・1/17）</p>`;
     const mine = personal.filter((e) => e.d === key);
     if (mine.length) {
       html += `<p class="uc-sec-h">${ucEsc(opts.personalTab || "受験予定")}</p>` + mine.map((e) => `<div class="uc-item ${e.t === "rs" ? "uc-red" : ""}">${opts.showNames ? `<b>${ucEsc(e.who)}</b> ` : "★ "}${ucEsc(e.txt)}${e.rank ? `<span class="uc-fac">${ucEsc(e.rank)}志望</span>` : ""}</div>`).join("");
@@ -2814,12 +2822,34 @@
     document.body.style.overflow = "";
     const tc = document.getElementById("toast-container"); if (tc) tc.style.zIndex = "";
   }
+  // 読み込みを速くする工夫：
+  //  ・アプリを開いた時点で、裏で志望校データを先に取りに行っておく
+  //  ・前回の内容をこの端末に覚えておき、画面はすぐ出して、最新の内容は裏で確認する
+  const UC_CACHE_KEY = "uc_shibo_cache_v1_";
+  let ucShiboFresh = false;   // サーバーから取った最新データかどうか
+  let ucShiboPromise = null;  // 取りに行っている途中なら同じものを使う
+  let ucSaveCount = 0;
+  function ucReadCache() { try { const s = localStorage.getItem(UC_CACHE_KEY + studentId); return s ? JSON.parse(s) : null; } catch (err) { return null; } }
+  function ucWriteCache(d) { try { localStorage.setItem(UC_CACHE_KEY + studentId, JSON.stringify(d)); } catch (err) {} }
+  function ucFetchShibo() {
+    if (ucShiboPromise) return ucShiboPromise;
+    const startSave = ucSaveCount;
+    ucShiboPromise = ucPost({ action: "getShibo", studentId }).then((data) => {
+      ucShiboPromise = null;
+      if (!data.ok) throw new Error(data.error || "load failed");
+      if (ucSaveCount !== startSave) return ucShibo; // 取りに行っている間に保存した場合は保存結果を優先
+      ucShibo = data; ucShiboFresh = true; ucWriteCache(data);
+      return data;
+    }, (err) => { ucShiboPromise = null; throw err; });
+    return ucShiboPromise;
+  }
   async function ucLoadShibo(force) {
-    if (ucShibo && !force) return ucShibo;
-    const data = await ucPost({ action: "getShibo", studentId });
-    if (!data.ok) throw new Error(data.error || "load failed");
-    ucShibo = data;
-    return data;
+    if (ucShibo && ucShiboFresh && !force) return ucShibo;
+    return ucFetchShibo();
+  }
+  function ucPrefetchShibo() {
+    if (!(currentData && currentData.isHighSchool) || ucShiboFresh || ucShiboPromise) return;
+    ucFetchShibo().catch(() => {});
   }
   function ucEntryButtonsHtml(where) {
     if (!(currentData && currentData.isHighSchool)) return "";
@@ -2846,12 +2876,29 @@
   // ---------- 志望校入力フォーム ----------
   let ucForm = null; // { cards: [...] }
   function ucNewCard() { return { u: "", fac: "", facFree: "", dept: "", deptFree: "", meths: [], subj: [], free: {} }; }
+  function ucFormFromShibo(sh) {
+    const saved = sh && sh.latest && sh.latest.data;
+    return { ct: saved && saved.ct ? JSON.parse(JSON.stringify(saved.ct)) : { take: "", subj: [] }, cards: saved && saved.cards && saved.cards.length ? JSON.parse(JSON.stringify(saved.cards)) : [ucNewCard()] };
+  }
   async function ucOpenShiboForm() {
     const body = ucOpenOverlay("志望校入力", "私の成績表に戻る");
+    if (ucShibo && ucShiboFresh) { ucForm = ucFormFromShibo(ucShibo); ucRenderForm(); return; }
+    const cached = ucShibo || ucReadCache();
+    if (cached) {
+      // 前回の内容ですぐ表示 → 最新を裏で確認し、まだ何も触っていなければ差しかえる
+      ucShibo = cached;
+      ucForm = ucFormFromShibo(cached); ucRenderForm();
+      const snap = JSON.stringify(ucForm);
+      ucFetchShibo().then((fresh) => {
+        const formOpen = document.querySelector("#uc-body [data-ucsave]");
+        if (!formOpen || JSON.stringify(ucForm) !== snap) return;
+        ucForm = ucFormFromShibo(fresh); ucRenderForm();
+      }).catch(() => {});
+      return;
+    }
     try { await ucLoadShibo(); }
     catch (err) { body.innerHTML = `<p class="empty">通信に失敗しました。電波の良い場所でもう一度お試しください。</p>`; return; }
-    const saved = ucShibo.latest && ucShibo.latest.data;
-    ucForm = { ct: saved && saved.ct ? JSON.parse(JSON.stringify(saved.ct)) : { take: "", subj: [] }, cards: saved && saved.cards && saved.cards.length ? JSON.parse(JSON.stringify(saved.cards)) : [ucNewCard()] };
+    ucForm = ucFormFromShibo(ucShibo);
     ucRenderForm();
   }
   function ucSelect(id, label, opts, val, disabled) {
@@ -2874,9 +2921,10 @@
         <p class="grades-guide-item"><strong>やめる・入れかえる</strong>受けなくなった志望校は「削除」、順番を入れかえたいときは「↑ 上へ」を押してから「保存する」を押します。前の内容は下の「変更履歴」に残ります。</p>
         ${saved && saved.savedAtLabel ? `<p class="grades-guide-item" style="font-weight:700;">最後に保存した日時：${ucEsc(saved.savedAtLabel)}</p>` : ""}
       </div>
-      <div class="card" style="padding:14px 16px;">
-        <p style="margin:0 0 8px;font-size:13.5px;line-height:1.6;">📅 選んだ大学の<b>受験日</b>と<b>合格発表日</b>は、カレンダーで確認できるよ。ほかの大学の日程も見られます。</p>
-        <button type="button" class="uc-entry-btn" id="uc-open-cal" style="margin:0;"><span>🗓 大学入試カレンダーを見る<small>2027年1〜3月の入試日（黒）と合格発表日（赤）</small></span><span class="uc-arrow">›</span></button>
+      <div class="uc-calcard">
+        <p class="uc-calcard-title">大学入試カレンダー</p>
+        <p class="uc-calcard-text">選んだ大学の<b>受験日</b>と<b>合格発表日</b>は、カレンダーで確認できるよ。ほかの大学の日程も見られます。</p>
+        <button type="button" class="uc-calcard-btn" id="uc-open-cal"><span>大学入試カレンダーを見る<small>2027年1〜3月の入試日（黒）と合格発表日（赤）</small></span><span class="uc-arrow">›</span></button>
       </div>`;
     html += `<div class="card"><p class="section-title" style="margin-top:0;">あなたの受験予定</p>${events.length ? events.map((e) => `<div class="uc-plan-row ${e.t === "rs" ? "rs" : ""}"><span class="d">${e.d}（${ucWd(e.d)}）</span><span>${ucEsc(e.txt)}</span></div>`).join("") : `<p class="uc-sub" style="margin:0;">方式と受験日を選ぶと、ここに日付順で出ます。</p>`}${Object.entries(exCount).filter(([, n]) => n > 1).map(([d, n]) => `<div class="uc-warn">⚠ ${d}（${ucWd(d)}）に試験が${n}つ重なっています</div>`).join("")}</div>`;
     const ct = ucForm.ct || (ucForm.ct = { take: "", subj: [] });
@@ -2975,7 +3023,8 @@
       const ct = { take: ucForm.ct.take || "", subj: ucForm.ct.take === "yes" ? (ucForm.ct.subj || []).slice(0, 20) : [] };
       const data = await ucPost({ action: "saveShibo", studentId, data: { ct, cards } });
       if (!data.ok) throw new Error(data.error);
-      ucShibo = data;
+      ucSaveCount++;
+      ucShibo = data; ucShiboFresh = true; ucWriteCache(data);
       ucForm = { ct: JSON.parse(JSON.stringify(ct)), cards: cards.length ? JSON.parse(JSON.stringify(cards)) : [ucNewCard()] };
       ucRenderForm();
       showToast("志望校を保存しました");
