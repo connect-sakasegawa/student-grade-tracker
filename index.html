@@ -467,6 +467,73 @@
   .advice-item-text { font-size: 13.5px; line-height: 1.5; }
   .advice-item-material { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
   .advice-close-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--growth); color: #fff; font-size: 14px; font-weight: 600; margin-top: 12px; }
+  /* ===== 大学入試カレンダー・志望校（高校生向け, v33で追加） ===== */
+  .uc-entry-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0 0 12px; padding: 13px 16px; border: 1.5px solid var(--brand); border-radius: 12px; background: var(--card); color: var(--brand); font-size: 15px; font-weight: 700; font-family: inherit; text-align: left; cursor: pointer; }
+  .uc-entry-btn small { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 2px; }
+  .uc-entry-btn .uc-arrow { font-size: 18px; flex: none; }
+  .uc-overlay { position: fixed; inset: 0; z-index: 60; background: var(--paper); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 28px); }
+  .uc-topbar { position: sticky; top: calc(-1 * (env(safe-area-inset-top) + 8px)); z-index: 2; margin: -8px -16px 10px; padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: var(--paper); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  .uc-back { background: none; border: none; color: var(--brand); font-size: 14.5px; font-weight: 700; font-family: inherit; padding: 6px 0; cursor: pointer; white-space: nowrap; }
+  .uc-title { font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: var(--brand); margin: 2px 0 2px; }
+  .uc-sub { font-size: 12px; color: var(--muted); margin: 0 0 10px; line-height: 1.6; }
+  .uc-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; margin: 0 0 8px; }
+  .uc-legend .rs, .uc-red { color: #C0392B; }
+  .uc-seg { display: flex; gap: 6px; margin: 0 0 10px; }
+  .uc-seg button { flex: 1; border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 999px; padding: 8px 4px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .uc-seg button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .uc-filter { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
+  .uc-filter select { flex: 1; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); }
+  .uc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--card); }
+  .uc-dow { font-size: 11px; text-align: center; padding: 3px 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--muted); background: var(--paper); }
+  .uc-day { min-height: 64px; border: none; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 2px 2px 4px; text-align: left; background: var(--card); font-family: inherit; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .uc-day.empty { background: var(--paper); cursor: default; }
+  .uc-day.wk { background: var(--paper); }
+  .uc-day.sel { box-shadow: inset 0 0 0 2px var(--brand); }
+  .uc-day.today .uc-dn { background: var(--brand); color: #fff; border-radius: 4px; padding: 0 3px; }
+  .uc-dn { font-size: 11.5px; font-weight: 700; align-self: flex-start; font-variant-numeric: tabular-nums; }
+  .uc-l { font-size: 10px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.02em; }
+  .uc-l.rs { color: #C0392B; }
+  .uc-l.ct { color: var(--brand); font-weight: 700; }
+  .uc-l.me { font-weight: 700; }
+  .uc-l.me::before { content: "★"; color: var(--gold); }
+  .uc-l.more { color: var(--muted); }
+  .uc-detail { margin-top: 12px; }
+  .uc-detail h3 { font-size: 16px; margin: 0 0 6px; }
+  .uc-sec-h { font-size: 12px; font-weight: 700; color: var(--muted); margin: 10px 0 2px; }
+  .uc-sec-h.rs { color: #C0392B; }
+  .uc-item { border-top: 1px dashed var(--line); padding: 6px 0; font-size: 13px; line-height: 1.5; }
+  .uc-item b { font-weight: 700; }
+  .uc-item .uc-fac { display: block; font-size: 11.5px; color: var(--muted); }
+  .uc-note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 12px; }
+  .uc-plan-row { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 6px; font-size: 12.5px; padding: 4px 0; border-top: 1px dashed var(--line); }
+  .uc-plan-row:first-of-type { border-top: none; }
+  .uc-plan-row .d { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .uc-plan-row.rs { color: #C0392B; }
+  .uc-warn { background: #FDECEA; color: #C0392B; border-radius: 8px; padding: 6px 9px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+  .uc-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .uc-rank { font-family: 'Zilla Slab', serif; font-size: 17px; font-weight: 700; color: var(--brand); }
+  .uc-mini { border: none; background: none; color: var(--muted); font-family: inherit; font-size: 12px; padding: 4px 2px; cursor: pointer; }
+  .uc-field { margin-bottom: 9px; }
+  .uc-field label { display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
+  .uc-field select, .uc-field input { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-family: inherit; background: #fff; color: var(--ink); box-sizing: border-box; }
+  .uc-field select:disabled { background: #F6F1EA; color: #B4A898; }
+  .uc-free { background: var(--brand-soft); border-radius: 10px; padding: 10px; margin-bottom: 9px; }
+  .uc-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .uc-meth { border: 1px solid var(--line); border-radius: 10px; padding: 8px; margin-bottom: 6px; background: #FFFCF8; }
+  .uc-meth .uc-two { grid-template-columns: minmax(0, 1fr) 108px; }
+  .uc-mres { font-size: 11.5px; color: #C0392B; margin-top: 2px; }
+  .uc-add { width: 100%; border: 1.5px dashed var(--brand); background: transparent; color: var(--brand); border-radius: 10px; padding: 9px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .uc-subj { display: flex; flex-wrap: wrap; gap: 5px; }
+  .uc-subj button { border: 1px solid var(--line); background: #fff; color: var(--muted); border-radius: 999px; padding: 5px 10px; font-family: inherit; font-size: 12.5px; cursor: pointer; }
+  .uc-subj button.on { background: #2A5FB4; border-color: #2A5FB4; color: #fff; }
+  .uc-save { width: 100%; border: none; background: var(--brand); color: #fff; border-radius: 12px; padding: 14px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+  .uc-save:disabled { opacity: .6; }
+  .uc-hist { font-size: 12px; border-top: 1px dashed var(--line); padding: 6px 0; line-height: 1.5; }
+  .uc-hist b { font-variant-numeric: tabular-nums; }
+  .uc-st { border-top: 1px dashed var(--line); padding: 8px 0; font-size: 13px; }
+  .uc-st-name { font-weight: 700; }
+  .uc-st ul { margin: 2px 0 0; padding-left: 1.1em; }
+  .uc-st li { font-size: 12.5px; line-height: 1.55; }
 </style>
 </head>
 <body>
@@ -873,6 +940,7 @@
       <p class="eyebrow">個別指導塾コネクト</p>
       <h1>CONNEC＋</h1>
       <p class="student-name">${data.studentName} さん${rank ? `<span class="header-rank-badge">${medalIcon(rank.className, 18)}${escapeHtml(rank.rankName)}</span>` : ""}</p>
+      ${currentTab === "grades" ? ucEntryButtonsHtml("grades") : ""}${currentTab === "schedule" ? ucEntryButtonsHtml("schedule") : ""}
       ${currentTab === "grades" ? `
       <div class="card grades-guide-card">
         <p class="grades-guide-title">成績表の入力のしかた</p>
@@ -898,6 +966,7 @@
     else if (currentTab === "garden") renderGarden(contentEl);
     else if (currentTab === "konesha") renderKonesha(contentEl);
     else if (currentTab === "schedule") renderSchedule(contentEl);
+    ucBindEntryButtons();
   }
 
   // ---------- コネーシャタブ(今は準備中の画面) ----------
@@ -2529,6 +2598,348 @@
   }
 
   init();
+
+  // =====================================================================
+  // 大学入試カレンダー・志望校（v33で追加。高校生と、その保護者・講師向け）
+  // 入試日程データ(UC_DATA)と学部・学科データ(UC_FAC)は年度ごとに作り直す
+  // =====================================================================
+  const UC_DATA = {"u":[["kobe","神戸大学","神戸大","国公立","https://www.office.kobe-u.ac.jp/stdnt-examinavi/juken/nittei/index.html"],["omu","大阪公立大学","大公大","国公立","https://passnavi.obunsha.co.jp/univ/1205/schedule/"],["hyogo","兵庫県立大学","県立大","国公立","https://www.u-hyogo.ac.jp/hyogoon/admissions/examschedule/"],["doshisha","同志社大学","同志社","関関同立","https://manabi.benesse.ne.jp/daigaku/school/3602/nyushi/gokaku-happyo/index.html"],["ritsumei","立命館大学","立命館","関関同立","https://manabi.benesse.ne.jp/daigaku/school/3608/nyushi/gokaku-happyo/index.html"],["kwansei","関西学院大学","関学","関関同立","https://www.kwansei.ac.jp/admissions/assets/kwansei_general_admission_exam_guide_202603.pdf"],["kansai","関西大学","関大","関関同立","https://manabi.benesse.ne.jp/daigaku/school/3644/nyushi/gokaku-happyo/index.html"],["kindai","近畿大学","近大","産近甲龍","https://manabi.benesse.ne.jp/daigaku/school/3647/nyushi/gokaku-happyo/index.html"],["konan","甲南大学","甲南","産近甲龍","https://manabi.benesse.ne.jp/daigaku/school/3696/nyushi/gokaku-happyo/index.html"],["ryukoku","龍谷大学","龍谷","産近甲龍","https://manabi.benesse.ne.jp/daigaku/school/3609/nyushi/gokaku-happyo/index.html"],["kyosan","京都産業大学","京産","産近甲龍","https://manabi.benesse.ne.jp/daigaku/school/3594/nyushi/gokaku-happyo/index.html"],["setsunan","摂南大学","摂南","摂神追桃","https://manabi.benesse.ne.jp/daigaku/school/3649/nyushi/gokaku-happyo/index.html"],["otemon","追手門学院大学","追手門","摂神追桃","https://manabi.benesse.ne.jp/daigaku/school/3626/nyushi/gokaku-happyo/index.html"],["kobegakuin","神戸学院大学","神院","摂神追桃","https://manabi.benesse.ne.jp/daigaku/school/3699/nyushi/gokaku-happyo/index.html"],["momoyama","桃山学院大学","桃山","摂神追桃","https://manabi.benesse.ne.jp/daigaku/school/3654/nyushi/gokaku-happyo/index.html"],["oit","大阪工業大学","大工大","その他","https://manabi.benesse.ne.jp/daigaku/school/3633/nyushi/gokaku-happyo/index.html"],["oue","大阪経済大学","大経大","その他","https://manabi.benesse.ne.jp/daigaku/school/3630/nyushi/gokaku-happyo/index.html"],["kansaigaidai","関西外国語大学","関外大","その他","https://manabi.benesse.ne.jp/daigaku/school/3646/nyushi/gokaku-happyo/index.html"],["seikei","大阪成蹊大学","成蹊","その他","https://manabi.benesse.ne.jp/daigaku/school/3662/nyushi/gokaku-happyo/index.html"],["mukogawa","武庫川大学","武庫川","女子大ほか","https://manabi.benesse.ne.jp/daigaku/school/3713/nyushi/gokaku-happyo/index.html"],["konanwomen","甲南女子大学","甲女","女子大ほか","https://manabi.benesse.ne.jp/daigaku/school/3697/nyushi/gokaku-happyo/index.html"],["yamato","大和大学","大和","その他","https://manabi.benesse.ne.jp/daigaku/school/3677/nyushi/gokaku-happyo/index.html"],["osakac","大阪電気通信大学","電通大","その他","https://manabi.benesse.ne.jp/daigaku/school/3641/nyushi/gokaku-happyo/index.html"],["dwc","同志社女子大学","同女","女子大ほか","https://manabi.benesse.ne.jp/daigaku/school/3603/nyushi/gokaku-happyo/index.html"],["kwu","京都女子大学","京女","女子大ほか","https://manabi.benesse.ne.jp/daigaku/school/3595/nyushi/gokaku-happyo/index.html"]],"r":[["kobe","全学部","前期日程",["2/25"],"3/10","医学科・医療創成工学科・保健学科看護学専攻は2/26も試験",false,false],["kobe","文・国際人間科学・法・理・工・システム情報・農・海洋政策科学・医（保健の一部）","後期日程",["3/12"],"3/23","経済・経営は後期なし",false,false],["omu","全学部","前期日程",["2/25"],"3/9","医学部医学科は2/26も試験",false,false],["omu","工学部","中期日程",["3/8"],"3/23","",false,false],["omu","現代システム科学域・文・法・理・農（一部）・医（リハ）・看護","後期日程",["3/12"],"3/22","経済・商・農（緑地環境）の後期は共テのみ",false,false],["hyogo","国際商経・社会情報科学・工・環境人間・看護","前期日程",["2/25"],"3/7","",false,false],["hyogo","社会情報科学・理","中期日程",["3/8"],"3/20","",false,false],["hyogo","国際商経・工・環境人間・看護","後期日程",["3/12"],"3/20","工・環境人間・看護の発表日は要項で確認",true,false],["doshisha","理工・生命医科・文化情報・スポーツ健康科学・心理","全学部日程（理系）",["2/4"],"","発表日は学部により2/15〜2/19（各学部の学部個別日程と同じ日。理工は2/15）",false,false],["doshisha","文系の全学部","全学部日程（文系）",["2/5"],"","発表日は学部により2/15〜2/19（各学部の学部個別日程と同じ日。理工は2/15）",false,false],["doshisha","文・経済","学部個別日程",["2/6"],"2/15","",false,false],["doshisha","政策・文化情報・生命医科・スポーツ健康科学","学部個別日程",["2/7"],"2/16","",false,false],["doshisha","法・グローバル・コミュニケーション","学部個別日程",["2/8"],"2/17","",false,false],["doshisha","神・商・心理・グローバル地域文化","学部個別日程",["2/9"],"2/18","",false,false],["doshisha","社会・理工","学部個別日程",["2/10"],"2/19","理工の全学部日程（理系）の発表は2/15",false,false],["doshisha","理工","全学部日程（理系）の合格発表",[],"2/15","",false,false],["ritsumei","文・法・経済・経営・産業社会・国際関係・政策科学・総合心理・映像ほか文系","全学統一方式（文系）",["2/1","2/2","2/3","2/4"],"2/17","4日間から受験日を選択",false,false],["ritsumei","情報理工・理工・生命科学（薬は2/3のみ）","全学統一方式（理系）",["2/2","2/3"],"","発表日は未確認",true,false],["ritsumei","総合心理・食マネジメント・スポーツ健康科学／薬","理系3教科型／薬学方式",["2/2"],"","発表日は未確認",true,false],["ritsumei","ほぼ全学部","学部個別配点方式",["2/7"],"2/20","",false,false],["ritsumei","ほぼ全学部","共通テスト併用方式",["2/8","2/9"],"2/20","学部により2/8のみ",false,false],["ritsumei","国際関係","IR方式（英語資格型）",["2/9"],"2/20","",false,false],["ritsumei","多くの学部","後期分割方式・共テ後期併用",["3/7"],"3/17","",false,false],["ritsumei","全学部","共通テスト方式（前期）",[],"2/17","",false,true],["ritsumei","全学部","共通テスト方式（後期）",[],"3/17","",false,true],["kwansei","全学部","全学部日程",["2/1","2/2"],"2/15","2日間から選択（国際学部1科目型は2/1のみ）",false,false],["kwansei","文・法・商・人間福祉・総合政策","学部個別日程（傾斜配点型）",["2/3"],"2/20","",false,false],["kwansei","神・社会・経済・教育・国際","学部個別日程（傾斜配点型）",["2/4"],"2/20","",false,false],["kwansei","社会・法・経済・商・人間福祉・国際・教育・総合政策・理・工・生命環境・建築","英数日程・共テ併用日程（数学）",["2/5"],"2/20","",false,false],["kwansei","文・法・商・人間福祉・総合政策","学部個別日程（均等配点型）・共テ併用日程（英語）",["2/6"],"2/20","",false,false],["kwansei","神・社会・経済・教育・国際","学部個別日程（均等配点型）・共テ併用日程（英語）",["2/7"],"2/20","",false,false],["kwansei","全学部","共通テスト利用（1月出願）",[],"2/15","",false,true],["kwansei","全学部","共通テスト利用（3月出願）",[],"3/14","",false,true],["kansai","ほぼ全学部","全学日程Ⅰ",["2/1","2/2","2/3"],"2/16","学部・型により実施日が異なる（選択制あり）",false,false],["kansai","ほぼ全学部","全学日程Ⅱ",["2/5","2/6","2/7"],"2/16","学部・型により実施日が異なる（選択制あり）",false,false],["kansai","学部により異なる","共通テスト併用方式",["2/1","2/4","2/5","2/6","2/7"],"2/16","学部ごとに指定日",false,false],["kansai","全学部","共通テスト利用（前期）",[],"2/16","",false,true],["kansai","ほぼ全学部","共通テスト利用（後期）",[],"3/17","個別試験のある後期日程は未確認",true,true],["kindai","全学部","一般 前期A日程",["1/30","1/31"],"2/10","2日間から選択",false,false],["kindai","全学部","共テ併用方式 A日程",[],"2/17","試験日は前期Aと同じ（1/30・1/31）",false,false],["kindai","情報・法・経営ほか","一般 前期B日程・共テ併用B日程",["2/13","2/14"],"2/24","",false,false],["kindai","経済・理工ほか","一般 前期B日程・共テ併用B日程",["2/11","2/12"],"2/24","他学部はどちらの日程か要確認",true,false],["kindai","全学部","一般 後期・併用後期",["3/8","3/9"],"3/19","",false,false],["kindai","全学部","共通テスト利用（前期）",[],"2/17","",false,true],["kindai","全学部","共通テスト利用（中期）",[],"2/24","",false,true],["kindai","全学部","共通テスト利用（後期）",[],"3/19","",false,true],["konan","文・経済・法・経営・マネジメント創造","前期日程（一般・外部英語活用・共テ併用）",["1/30","1/31","2/1","2/4","2/5"],"2/15","5日間から選択",false,false],["konan","理工・知能情報・フロンティアサイエンス","前期日程（一般・外部英語活用・共テ併用）",["1/30","1/31","2/1"],"2/15","グローバル教養学環は1/30のみ",false,false],["konan","全学部","中期日程（一般・外部英語活用・共テ併用）",["2/17","2/18"],"2/28","",false,false],["konan","全学部","共通テスト利用（前期）",[],"2/15","",false,true],["konan","経済・法・経営・理工・知能情報","共通テスト利用（後期）",[],"3/15","",false,true],["ryukoku","全学部","前期日程（一般・共テ併用）",["1/29","1/30","1/31"],"2/12","心理・文で確認。3日間から選択",true,false],["ryukoku","全学部","中期日程（一般・共テ併用）",["2/14","2/15"],"2/26","",false,false],["ryukoku","全学部","後期日程（一般・併用）",["3/10"],"3/18","",false,false],["kyosan","全学部","前期日程3科目型・共テ前期プラス",["1/26","1/27","1/28"],"2/11","3日間から選択",false,false],["kyosan","全学部","前期日程2科目型",["1/29"],"2/11","",false,false],["kyosan","全学部","中期日程3科目型・共テ中期プラス",["2/16"],"2/25","",false,false],["kyosan","全学部","後期日程2科目型",["3/10"],"3/18","",false,false],["kyosan","全学部","共通テスト利用（前期）",[],"2/11","",false,true],["kyosan","全学部","共通テスト利用（後期）",[],"3/18","",false,true],["setsunan","全学部","前期日程",["1/24","1/25","1/26"],"2/8","3日間から選択",false,false],["setsunan","全学部","共テ併用 前期",[],"2/25","試験日は前期日程と同じ",false,false],["setsunan","全学部","中期A日程（一般・共テ併用）",["2/9"],"2/25","",false,false],["setsunan","全学部","中期B日程（一般・共テ併用）",["2/10"],"2/25","",false,false],["setsunan","全学部","後期日程（一般・共テ併用）",["3/7"],"3/17","",false,false],["setsunan","全学部","共通テスト利用（前期・中期）",[],"2/25","",false,true],["setsunan","全学部","共通テスト利用（後期Ⅰ）",[],"3/17","",false,true],["setsunan","全学部","共通テスト利用（後期Ⅱ）",[],"3/25","",false,true],["otemon","全学部","前期日程（一般・共テ併用）",["1/26","1/27","1/28","2/5","2/6"],"2/18","型により受験できる日が異なる。文・理工で確認",true,false],["otemon","全学部","後期日程（一般・併用）",["3/2"],"3/11","",false,false],["otemon","一部学部","最終日程",["3/20"],"3/23","",false,false],["kobegakuin","全学部","前期日程",["2/1","2/2"],"2/19","2日間から選択",false,false],["kobegakuin","全学部","中期日程",["2/7","2/8"],"2/19","2日間から選択",false,false],["kobegakuin","全学部","後期日程",["3/9"],"3/16","",false,false],["momoyama","全学部","前期1月（2教科・3教科型）",["1/19","1/20"],"2/18","2日間から選択",false,false],["momoyama","全学部","前期2月（2教科・3教科型）",["2/9","2/10"],"2/18","2日間から選択",false,false],["momoyama","全学部","後期2教科型",["3/11"],"3/18","",false,false],["momoyama","全学部","共通テスト利用（前期）",[],"2/18","",false,true],["momoyama","全学部","共通テスト利用（後期）",[],"3/18","",false,true],["momoyama","全学部","共通テスト利用（最終）",[],"3/27","",false,true],["oit","全学部","前期A日程（均等配点型・共テ併用）",["1/28","1/29"],"2/17","2日間から選択",false,false],["oit","全学部","前期B日程（均等配点型・共テ併用）",["2/4"],"2/17","",false,false],["oit","工・ロボティクス＆デザイン工・情報科学","後期D日程（高得点2教科型・併用）",["3/6"],"3/18","",false,false],["oit","工・ロボティクス＆デザイン工・情報科学","共通テスト利用（前期）",[],"2/17","",false,true],["oit","工・ロボティクス＆デザイン工・情報科学","共通テスト利用（後期）",[],"3/18","",false,true],["oue","全学部","前期A方式",["1/27","1/28","1/29"],"2/15","3日間から選択",false,false],["oue","全学部","前期B方式",["2/3","2/4"],"2/15","2日間から選択",false,false],["oue","全学部","後期D方式",["3/5"],"3/13","",false,false],["oue","全学部","共通テスト利用（前期C方式）",[],"2/15","",false,true],["kansaigaidai","全学部","前期日程1科目S方式",["1/26"],"2/13","",false,false],["kansaigaidai","全学部","前期日程2科目A・B／3科目C方式・共テプラス",["1/27","1/28"],"2/13","学部・学科で1/27か1/28（英米語は選択）",false,false],["kansaigaidai","全学部","後期日程",["3/7"],"3/17","",false,false],["kansaigaidai","全学部","共通テスト利用（前期）",[],"2/13","",false,true],["kansaigaidai","全学部","共通テスト利用（後期）",[],"3/17","",false,true],["seikei","全学部","一般 A-Ⅰ日程",["1/25"],"2/12","経済・経営で確認",true,false],["seikei","全学部","一般 A-Ⅱ日程",["1/28"],"2/12","",false,false],["seikei","全学部","一般 A-Ⅲ日程",["1/31"],"2/12","",false,false],["seikei","全学部","共テプラス方式（A日程）",[],"2/19","試験日は各A日程と同じ",false,false],["seikei","全学部","一般 B日程・共テプラス",["2/9"],"2/19","",false,false],["seikei","全学部","一般 中期日程",["2/27"],"3/9","",false,false],["seikei","全学部","一般 後期日程",["3/25"],"3/27","",false,false],["seikei","全学部","共通テスト利用（前期）",[],"2/19","",false,true],["mukogawa","全学部","前期（2科目型・3科目型）",["1/24","1/25"],"2/6","2027年4月に武庫川女子大学から改称・共学化",false,false],["mukogawa","全学部","後期",["3/2"],"3/11","",false,false],["mukogawa","音楽以外の全学部","共通テスト利用（前期）",[],"2/13","",false,true],["mukogawa","音楽以外の全学部","共通テスト利用（後期）",[],"3/18","",false,true],["konanwomen","全学部","一般 Ⅰ・Ⅱ日程",["1/20","1/21"],"1/29","",false,false],["konanwomen","全学部","一般 Ⅲ日程",["2/14"],"2/19","",false,false],["konanwomen","全学部","一般 Ⅳ日程",["3/6"],"3/12","",false,false],["konanwomen","全学部","共通テスト利用（Ⅰ日程）",[],"2/15","",false,true],["yamato","全学部","前期A",["1/25","1/26","1/27"],"2/5","3日間から選択",false,false],["yamato","全学部","前期B（共テプラス第1回を含む）",["2/15","2/16"],"2/24","",false,false],["yamato","全学部","後期（共テプラス第2回を含む）",["3/3"],"3/9","",false,false],["yamato","全学部","共通テスト利用（前期）",[],"2/16","",false,true],["yamato","全学部","共通テスト利用（後期）",[],"3/16","",false,true],["osakac","全学部","前期（理系型・文系型）",["1/31","2/1"],"2/8","2日間から選択",false,false],["osakac","全学部","中期",["2/20"],"3/1","",false,false],["osakac","全学部","後期",["3/8"],"3/16","",false,false],["dwc","全学部","前期日程3教科・共テプラス",["1/26","1/28"],"2/10","2日間から選択",false,false],["dwc","全学部","前期日程2教科",["1/27","1/29"],"2/10","学科により1/27のみ",false,false],["dwc","全学部","後期日程",["3/9"],"3/16","",false,false],["dwc","全学部","共通テスト利用（前期）",[],"2/10","",false,true],["dwc","一部学部","共通テスト利用（後期）",[],"3/16","",false,true],["kwu","全学部","前期3科目型（共テ併用を含む）",["1/29","1/30"],"2/15","2日間から選択",false,false],["kwu","全学部","前期2科目型（共テ併用を含む）",["1/31"],"2/15","",false,false],["kwu","全学部","後期",["3/3"],"3/12","",false,false],["kwu","全学部","共通テスト利用（前期）",[],"2/19","",false,true],["kwu","全学部","共通テスト利用（後期）",[],"3/12","",false,true]]};
+  const UC_FAC = {"kwansei":{"神学部":["神学科"],"文学部":["文化歴史学科","総合心理科学科","文学言語学科"],"社会学部":["社会学科"],"法学部":["法律学科","政治学科"],"経済学部":["経済学科"],"商学部":["商学科"],"人間福祉学部":["社会福祉学科","社会起業学科","人間科学科"],"国際学部":["国際学科"],"教育学部":["教育学科"],"総合政策学部":["総合政策学科","メディア情報学科","都市政策学科","国際政策学科"],"理学部":["数理科学科","物理・宇宙学科","化学科"],"工学部":["物質工学課程","電気電子応用工学課程","情報工学課程","知能・機械工学課程"],"生命環境学部":["生物科学科","生命医科学科","環境応用化学科"],"建築学部":["建築学科"]},"kansai":{"法学部":["法学政治学科"],"文学部":["総合人文学科"],"経済学部":["経済学科"],"商学部":["商学科"],"社会学部":["社会学科"],"政策創造学部":["政策学科","国際アジア学科"],"外国語学部":["外国語学科"],"人間健康学部":["人間健康学科"],"総合情報学部":["総合情報学科"],"社会安全学部":["安全マネジメント学科"],"ビジネスデータサイエンス学部":["ビジネスデータサイエンス学科"],"システム理工学部":["数学科","物理・応用物理学科","機械工学科","電気電子情報工学科","グリーンエレクトロニクス工学科"],"環境都市工学部":["建築学科","都市システム工学科","エネルギー環境・化学工学科"],"化学生命工学部":["化学・物質工学科","生命・生物工学科"]},"kobe":{"文学部":["人文学科"],"国際人間科学部":["グローバル文化学科","発達コミュニティ学科","環境共生学科","子ども教育学科"],"法学部":["法律学科"],"経済学部":["経済学科"],"経営学部":["経営学科"],"理学部":["数学科","物理学科","化学科","生物学科","惑星学科"],"医学部":["医学科","保健学科","医療創成工学科"],"工学部":["建築学科","市民工学科","電気電子工学科","機械工学科","応用化学科"],"システム情報学部":["システム情報学科"],"農学部":["食料環境システム学科","資源生命科学科","生命機能科学科"],"海洋政策科学部":["海洋政策科学科"]},"konan":{"文学部":["日本語日本文学科","英語英米文学科","社会学科","人間科学科","歴史文化学科"],"経済学部":["経済学科"],"法学部":["法学科"],"経営学部":["経営学科"],"マネジメント創造学部":["マネジメント創造学科"],"理工学部":["宇宙理学・量子物理工学科","物質化学科","生物学科"],"知能情報学部":["知能情報学科"],"フロンティアサイエンス学部":["生命化学科"]},"omu":{"現代システム科学域":["現代システム科学類","心理学類"],"文学部":["哲学歴史学科","人間行動学科","言語文化学科","文化構想学科"],"法学部":["法学科"],"経済学部":["経済学科"],"商学部":["商学科","公共経営学科"],"理学部":["数学科","物理学科","化学科","生物学科","地球学科","生物化学科"],"工学部":["航空宇宙工学科","海洋システム工学科","機械工学科","建築学科","都市学科","電子物理工学科","電気電子システム工学科","応用化学科","化学工学科","マテリアル工学科","化学バイオ工学科","情報工学科"],"農学部":["応用生物科学科","生命機能化学科","緑地環境科学科"],"獣医学部":["獣医学科"],"医学部":["医学科","リハビリテーション学科"],"看護学部":["看護学科"],"生活科学部":["食栄養学科","居住環境学科","人間福祉学科"]},"hyogo":{"国際商経学部":["国際商経学科"],"社会情報科学部":["社会情報科学科"],"工学部":["電気電子情報工学科","機械・材料工学科","応用化学工学科"],"理学部":["物質科学科","生命科学科"],"環境人間学部":["環境人間学科"],"看護学部":["看護学科"]},"doshisha":{"神学部":["神学科"],"文学部":["英文学科","哲学科","美学芸術学科","文化史学科","国文学科"],"社会学部":["社会学科","社会福祉学科","メディア学科","産業関係学科","教育文化学科"],"法学部":["法律学科","政治学科"],"経済学部":["経済学科"],"商学部":["商学科"],"政策学部":["政策学科"],"文化情報学部":["文化情報学科"],"理工学部":["インテリジェント情報工学科","情報システムデザイン学科","電気工学科","電子工学科","機械システム工学科","機械理工学科","機能分子・生命化学科","化学システム創成工学科","環境システム学科","数理システム学科"],"生命医科学部":["医工学科","医情報学科","医生命システム学科"],"スポーツ健康科学部":["スポーツ健康科学科"],"心理学部":["心理学科"],"グローバル・コミュニケーション学部":["グローバル・コミュニケーション学科"],"グローバル地域文化学部":["グローバル地域文化学科"]},"ritsumei":{"法学部":["法学科"],"産業社会学部":["現代社会学科"],"国際関係学部":["国際関係学科","アメリカン大学・立命館大学国際連携学科"],"文学部":["人文学科"],"映像学部":["映像学科"],"経営学部":["経営学科","国際経営学科"],"政策科学部":["政策科学科"],"総合心理学部":["総合心理学科"],"グローバル教養学部":["グローバル教養学科"],"経済学部":["経済学科"],"スポーツ健康科学部":["スポーツ健康科学科"],"食マネジメント学部":["食マネジメント学科"],"デザイン・アート学部":["デザイン・アート学科"],"理工学部":["数理科学科","物理科学科","電気電子工学科","電子情報工学科","機械工学科","ロボティクス学科","環境都市工学科","建築都市デザイン学科"],"情報理工学部":["情報理工学科"],"生命科学部":["応用化学科","生物工学科","生命情報学科","生命医科学科"],"薬学部":["薬学科","創薬科学科"]},"kindai":{"情報学部":["情報学科"],"法学部":["法律学科"],"経済学部":["経済学科","国際経済学科","総合経済政策学科"],"経営学部":["経営学科","商学科","会計学科","キャリア・マネジメント学科"],"理工学部":["理学科","生命科学科","応用化学科","機械工学科","電気電子通信工学科","社会環境工学科","エネルギー物質学科"],"建築学部":["建築学科"],"薬学部":["医療薬学科","創薬科学科"],"文芸学部":["文学科","芸術学科","文化デザイン学科","文化・歴史学科"],"総合社会学部":["総合社会学科"],"国際学部":["国際学科"],"農学部":["農業生産科学科","水産学科","応用生命化学科","食品栄養学科","環境管理学科","生物機能科学科"],"医学部":["医学科"],"生物理工学部":["生物工学科","遺伝子工学科","食品安全工学科","生命情報工学科","人間環境デザイン工学科","医用工学科"],"工学部":["化学生命工学科","機械工学科","ロボティクス学科","電子情報工学科","情報学科","建築学科"],"産業理工学部":["生物環境化学科","電気電子工学科","建築・デザイン学科","情報学科","経営ビジネス学科"],"看護学部":["看護学科"]},"ryukoku":{"文学部":["真宗学科","仏教学科","哲学科","歴史学科","日本語日本文学科","英語英米文学科"],"心理学部":["心理学科"],"経済学部":["現代経済学科","国際経済学科"],"経営学部":["経営学科"],"法学部":["法律学科"],"政策学部":["政策学科"],"国際学部":["国際文化学科","グローバルスタディーズ学科"],"社会学部":["総合社会学科","現代福祉学科"],"先端理工学部":["数理・情報科学課程","知能情報メディア課程","電子情報通信課程","機械工学・ロボティクス課程","応用化学課程","環境生態工学課程"],"農学部":["生命科学科","農学科","食品栄養学科","食料農業システム学科"]},"kyosan":{"経済学部":["経済学科"],"経営学部":["マネジメント学科"],"法学部":["法律学科","法政策学科"],"現代社会学部":["現代社会学科","健康スポーツ社会学科","心理学科"],"国際関係学部":["国際関係学科"],"外国語学部":["英語学科","ヨーロッパ言語学科","アジア言語学科"],"文化学部":["文化構想学科","文化観光学科","京都文化学科"],"理学部":["数理科学科","物理科学科","宇宙物理・気象学科"],"情報理工学部":["情報理工学科"],"生命科学部":["先端生命科学科","産業生命科学科"]},"setsunan":{"法学部":["法律学科"],"国際学部":["国際学科"],"経済学部":["経済学科"],"経営学部":["経営学科"],"現代社会学部":["現代社会学科"],"理工学部":["生命科学科","住環境デザイン学科","建築学科","都市環境工学科","機械工学科","電気電子情報工学科"],"薬学部":["薬学科"],"看護学部":["看護学科"],"農学部":["農業生産学科","応用生物科学科","食品栄養学科","食農ビジネス学科"]},"otemon":{"文学部":["人文学科"],"国際学部":["国際学科"],"心理学部":["心理学科"],"社会学部":["社会学科"],"法学部":["法律学科"],"経済学部":["経済学科"],"経営学部":["経営学科"],"地域創造学部":["地域創造学科"],"理工学部":["数理・データサイエンス学科","機械工学科","電気電子工学科","情報工学科"]},"kobegakuin":{"法学部":["法律学科"],"経済学部":["経済学科"],"経営学部":["経営学科"],"人文学部":["人文学科"],"心理学部":["心理学科"],"現代社会学部":["現代社会学科","社会防災学科"],"グローバル・コミュニケーション学部":["グローバル・コミュニケーション学科"],"総合リハビリテーション学部":["理学療法学科","作業療法学科","社会リハビリテーション学科"],"栄養学部":["栄養学科"],"薬学部":["薬学科"]},"momoyama":{"経済学部":["経済学科"],"経営学部":["経営学科"],"ビジネスデザイン学部":["ビジネスデザイン学科"],"社会学部":["社会学科","社会福祉学科"],"法学部":["法律学科"],"国際教養学部":["英語・国際文化学科"],"人間教育学部":["人間教育学科"],"工学部":["工学科"]},"oit":{"工学部":["都市デザイン工学科","建築学科","機械工学科","電気電子システム工学科","電子情報システム工学科","応用化学科","環境工学科","生命工学科"],"ロボティクス＆デザイン工学部":["ロボット工学科","システムデザイン工学科","空間デザイン学科"],"情報科学部":["データサイエンス学科","実世界情報学科","情報知能学科","情報システム学科","情報メディア学科"],"知的財産学部":["知的財産学科"]},"oue":{"経済学部":["経済学科"],"経営学部":["経営学科","ビジネス法学科"],"情報社会学部":["情報社会学科"],"人間科学部":["人間科学科"],"国際共創学部":["国際共創学科"]},"kansaigaidai":{"外国語学部":["英米語学科","英語・デジタルコミュニケーション学科","国際日本学科","スペイン語学科"],"英語キャリア学部":["英語キャリア学科"],"英語国際学部":["英語国際学科"],"国際共生学部":["国際共生学科"],"アジア共創学部":["アジア共創学科"]},"seikei":{"経済学部":["経済学科"],"経営学部":["経営学科","スポーツマネジメント学科"],"国際観光学部":["国際観光学科"],"データサイエンス学部":["データサイエンス学科"],"芸術学部":["造形芸術学科"],"教育学部":["教育学科"],"看護学部":["看護学科"]},"mukogawa":{"文学部":["日本語日本文学科","英語グローバル学科"],"教育学部":["教育学科"],"心理・社会福祉学部":["心理学科","社会福祉学科"],"健康・スポーツ科学部":["健康・スポーツ科学科","スポーツマネジメント学科"],"生活環境学部":["生活環境学科"],"社会情報学部":["社会情報学科"],"食物栄養科学部":["食物栄養学科","食創造科学科"],"建築学部":["建築学科","景観建築学科"],"音楽学部":["演奏学科","応用音楽学科"],"薬学部":["薬学科","健康生命薬科学科"],"看護学部":["看護学科"],"経営学部":["経営学科"],"環境共生学部":["環境共生学科"]},"konanwomen":{"文学部":["日本語日本文化学科","メディア表現学科"],"国際学部":["国際英語学科","多文化コミュニケーション学科"],"心理学部":["心理学科"],"教育学部":["教育学科"],"社会学部":["社会学科"],"看護リハビリテーション学部":["看護学科","理学療法学科"],"医療栄養学部":["医療栄養学科"]},"yamato":{"教育学部":["教育学科"],"保健医療学部":["看護学科","総合リハビリテーション学科"],"政治経済学部":["政治行政学科","経済経営学科"],"理工学部":["理工学科"],"情報学部":["情報学科"],"社会学部":["社会学科"]},"osakac":{"工学部":["電気電子工学科","電子機械工学科","機械工学科","基礎理工学科","環境科学科"],"情報通信工学部":["情報工学科","通信工学科"],"建築・デザイン学部":["建築・デザイン学科"],"健康情報学部":["医療健康科学科","理学療法学科","健康スポーツ科学科"],"総合情報学部":["デジタルゲーム学科","ゲーム＆メディア学科","情報学科"]},"dwc":{"学芸学部":["音楽学科","メディア創造学科","国際教養学科"],"現代社会学部":["社会システム学科","現代こども学科"],"薬学部":["医療薬学科"],"看護学部":["看護学科"],"表象文化学部":["英語英文学科","日本語日本文学科"],"生活科学部":["人間生活学科","食物栄養科学科"]},"kwu":{"文学部":["国文学科","英文学科","史学科"],"発達教育学部":["教育学科","心理学科"],"家政学部":["食物栄養学科","生活造形学科"],"現代社会学部":["現代社会学科"],"法学部":["法学科"],"データサイエンス学部":["データサイエンス学科"],"食科学部（仮称）":["食科学科（仮称）"]}};
+  const UC_YEAR = 2027;
+  const UC_U = UC_DATA.u.map(([key, name, short, group, src]) => ({ key, name, short, group, src }));
+  const UC_UM = Object.fromEntries(UC_U.map((u) => [u.key, u]));
+  const UC_R = UC_DATA.r.map(([k, fac, method, ex, res, note, chk, ct]) => ({ k, fac, method, ex, res, note, chk, ct }));
+  const UC_HOL = { "1/1": "元日", "1/11": "成人の日", "2/11": "建国記念の日", "2/23": "天皇誕生日", "3/21": "春分の日", "3/22": "振替休日" };
+  const UC_SPECIAL = { "1/16": "共テ本試", "1/17": "共テ本試", "1/23": "共テ追試", "1/24": "共テ追試" };
+  const UC_SUBJ = ["英語", "国語", "古文・漢文", "数学ⅠA", "数学ⅡBC", "数学Ⅲ", "物理", "化学", "生物", "地学", "日本史", "世界史", "地理", "政治・経済", "情報", "小論文", "面接"];
+  const UC_OTHER = "__other";
+  const UC_DOW = "日月火水木金土";
+  const UC_MAX_CARDS = 10;
+  function ucWd(md) { const [m, d] = md.split("/").map(Number); return UC_DOW[new Date(UC_YEAR, m - 1, d).getDay()]; }
+  function ucNum(md) { const [m, d] = String(md).split("/").map(Number); return m * 100 + d; }
+  function ucYmdToMd(s) { if (!s) return ""; const p = String(s).split("-").map(Number); return p.length === 3 ? `${p[1]}/${p[2]}` : ""; }
+  function ucEsc(s) { return escapeHtml(s == null ? "" : s); }
+  async function ucPost(payload) {
+    const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+    return res.json();
+  }
+
+  // その大学・学部で受けられる方式（入試日程データの「学部」欄から判定）
+  function ucMethodsFor(k, fac) {
+    if (!k || !UC_UM[k]) return [];
+    const rows = UC_R.filter((r) => r.k === k && r.method.indexOf("合格発表") === -1);
+    if (!fac || fac === UC_OTHER) return rows;
+    const short = fac.replace(/（.*?）/g, "").replace(/学部$|学域$/, "");
+    return rows.filter((r) => {
+      if (/全学部|多くの学部|学部により異なる|一部学部|以外の/.test(r.fac)) return true;
+      const tokens = r.fac.split(/[・／（）、\s]/).map((t) => t.replace(/ほか$|など$|学部$/, "")).filter(Boolean);
+      return tokens.some((t) => t === short || t === fac);
+    });
+  }
+  // 同じ方式名でも学部によって日程が違う大学がある（例：関学の学部個別日程）ので、学部でしぼってから探す
+  function ucFindMethod(k, name, fac) {
+    return ucMethodsFor(k, fac).find((r) => r.method === name) || UC_R.find((r) => r.k === k && r.method === name) || null;
+  }
+
+  // 保存された志望校データ → カレンダー用の予定 [{d, t:"ex"|"rs", txt, who}]
+  function ucEventsFromShibo(data, who) {
+    const ev = [];
+    const cards = (data && data.cards) || [];
+    cards.forEach((c, ci) => {
+      const rank = `第${ci + 1}`;
+      if (c.u === UC_OTHER) {
+        const f = c.free || {};
+        const name = f.name || "自由入力の大学";
+        const d1 = ucYmdToMd(f.date), d2 = ucYmdToMd(f.res);
+        if (d1) ev.push({ d: d1, t: "ex", who, univ: name, txt: `${name} ${f.fac || ""}`.trim(), rank });
+        if (d2) ev.push({ d: d2, t: "rs", who, univ: name, txt: `${name} 合格発表`, rank });
+        return;
+      }
+      const u = UC_UM[c.u]; if (!u) return;
+      const facName = c.fac === UC_OTHER ? (c.facFree || "") : (c.fac || "");
+      (c.meths || []).forEach((mm) => {
+        const r = ucFindMethod(c.u, mm.m, c.fac); if (!r) return;
+        const date = mm.date || (r.ex.length === 1 ? r.ex[0] : "");
+        if (date) ev.push({ d: date, t: "ex", who, univ: u.short, txt: `${u.short} ${facName.replace(/学部$/, "")} ${r.method}`.replace(/\s+/g, " "), rank });
+        if (r.res) ev.push({ d: r.res, t: "rs", who, univ: u.short, txt: `${u.short} ${facName.replace(/学部$/, "")} 合格発表`.replace(/\s+/g, " "), rank });
+      });
+    });
+    const seen = new Set();
+    return ev.filter((e) => { const key = `${e.d}|${e.t}|${e.who || ""}|${e.txt}`; if (seen.has(key)) return false; seen.add(key); return true; })
+      .sort((a, b) => ucNum(a.d) - ucNum(b.d) || (a.t === "ex" ? -1 : 1));
+  }
+  function ucShiboSummaryHtml(data) {
+    const cards = (data && data.cards) || [];
+    if (!cards.length) return `<p class="uc-sub">まだ登録されていません。</p>`;
+    return `<ul style="margin:2px 0 0;padding-left:1.1em;">${cards.map((c, ci) => {
+      let head;
+      if (c.u === UC_OTHER) { const f = c.free || {}; head = [f.name, f.fac, f.dept].filter(Boolean).join(" "); }
+      else { const u = UC_UM[c.u]; head = [u ? u.name : "", c.fac === UC_OTHER ? c.facFree : c.fac, c.dept === UC_OTHER ? c.deptFree : c.dept].filter(Boolean).join(" "); }
+      const meths = (c.meths || []).map((mm) => { const r = ucFindMethod(c.u, mm.m, c.fac); if (!r) return ""; const date = mm.date || (r.ex.length === 1 ? r.ex[0] : (r.ex.length ? "日程未選択" : "共テのみ")); return `${mm.m}（${date}${r.res ? `／発表 ${r.res}` : ""}）`; }).filter(Boolean);
+      if (c.u === UC_OTHER) { const f = c.free || {}; if (f.date || f.res) meths.push(`試験 ${ucYmdToMd(f.date) || "未定"}／発表 ${ucYmdToMd(f.res) || "未定"}`); }
+      return `<li><b>第${ci + 1}志望</b> ${ucEsc(head)}${meths.length ? `<span class="uc-fac" style="display:block;color:var(--muted);font-size:11.5px;">${ucEsc(meths.join("、"))}</span>` : ""}${(c.subj || []).length ? `<span style="display:block;color:var(--muted);font-size:11.5px;">科目：${ucEsc(c.subj.join("・"))}</span>` : ""}</li>`;
+    }).join("")}</ul>`;
+  }
+
+  // ---------- カレンダー表示（生徒・保護者・講師で共通） ----------
+  // opts: { personal: 予定の配列, personalTab: "自分の受験予定" など, showNames: 講師用に生徒名を出す }
+  const ucCal = { month: null, day: null, univ: "all", view: null };
+  function ucDefaultMonth(personal) {
+    const t = new Date();
+    if (t.getFullYear() === UC_YEAR && t.getMonth() <= 2) return t.getMonth() + 1;
+    if (personal && personal.length) return Number(personal[0].d.split("/")[0]);
+    return 1;
+  }
+  function ucRenderCalendar(el, opts) {
+    const personal = opts.personal || [];
+    if (ucCal.month == null) ucCal.month = ucDefaultMonth(personal);
+    if (ucCal.view == null) ucCal.view = (opts.personalTab && personal.length) ? "mine" : "univ";
+    if (!opts.personalTab) ucCal.view = "univ";
+    const showUniv = ucCal.view === "univ";
+    const m = ucCal.month;
+    const first = new Date(UC_YEAR, m - 1, 1), days = new Date(UC_YEAR, m, 0).getDate();
+    const t = new Date(); const todayMd = t.getFullYear() === UC_YEAR ? `${t.getMonth() + 1}/${t.getDate()}` : "";
+    const univIdx = {};
+    if (showUniv) {
+      UC_R.forEach((r) => {
+        if (ucCal.univ !== "all" && r.k !== ucCal.univ) return;
+        r.ex.forEach((d) => { (univIdx[d] ||= { ex: new Set(), rs: new Set() }).ex.add(r.k); });
+        if (r.res) (univIdx[r.res] ||= { ex: new Set(), rs: new Set() }).rs.add(r.k);
+      });
+    }
+    const label = (e) => opts.showNames ? String(e.who || "").split(/[\s　]+/)[0] : e.univ; // 講師用は名字だけ（くわしくは下の一覧）
+    let cells = "";
+    for (let i = 0; i < first.getDay(); i++) cells += `<div class="uc-day empty" aria-hidden="true"></div>`;
+    for (let d = 1; d <= days; d++) {
+      const key = `${m}/${d}`, w = new Date(UC_YEAR, m - 1, d).getDay();
+      const lines = [];
+      if (UC_SPECIAL[key]) lines.push(`<span class="uc-l ct">${UC_SPECIAL[key]}</span>`);
+      personal.filter((e) => e.d === key).forEach((e) => lines.push(`<span class="uc-l me ${e.t === "rs" ? "rs" : ""}">${ucEsc(label(e))}</span>`));
+      if (showUniv && univIdx[key]) {
+        UC_U.forEach((u) => { if (univIdx[key].ex.has(u.key)) lines.push(`<span class="uc-l">${u.short}</span>`); });
+        UC_U.forEach((u) => { if (univIdx[key].rs.has(u.key)) lines.push(`<span class="uc-l rs">${u.short}</span>`); });
+      }
+      const MAX = 6;
+      const shown = lines.length > MAX ? lines.slice(0, MAX - 1).concat(`<span class="uc-l more">ほか${lines.length - MAX + 1}</span>`) : lines;
+      cells += `<button type="button" class="uc-day${(w === 0 || w === 6 || UC_HOL[key]) ? " wk" : ""}${ucCal.day === key ? " sel" : ""}${todayMd === key ? " today" : ""}" data-ucday="${key}" aria-label="${m}月${d}日"><span class="uc-dn">${d}</span>${shown.join("")}</button>`;
+    }
+    el.innerHTML = `
+      ${opts.headHtml || ""}
+      <div class="uc-legend"><span><b>黒字</b>＝入試日</span><span class="rs"><b>赤字</b>＝合格発表日</span>${opts.personalTab ? `<span>★＝${ucEsc(opts.personalTab.replace(/の受験予定$/, ""))}</span>` : ""}<span>※＝要項で確認</span></div>
+      ${opts.personalTab ? `<div class="uc-seg"><button type="button" data-ucview="mine" class="${ucCal.view === "mine" ? "on" : ""}">${ucEsc(opts.personalTab)}</button><button type="button" data-ucview="univ" class="${ucCal.view === "univ" ? "on" : ""}">大学の日程も表示</button></div>` : ""}
+      <div class="uc-seg">${[1, 2, 3].map((mm) => `<button type="button" data-ucmonth="${mm}" class="${mm === m ? "on" : ""}">${UC_YEAR}年${mm}月</button>`).join("")}</div>
+      ${showUniv ? `<div class="uc-filter"><select id="uc-univ-filter" aria-label="大学で絞り込む"><option value="all">すべての大学（${UC_U.length}校）</option>${UC_U.map((u) => `<option value="${u.key}" ${ucCal.univ === u.key ? "selected" : ""}>${u.name}</option>`).join("")}</select></div>` : ""}
+      <div class="uc-grid">${UC_DOW.split("").map((w) => `<div class="uc-dow">${w}</div>`).join("")}${cells}</div>
+      <div class="card uc-detail" id="uc-detail">${ucDetailHtml(personal, opts, showUniv)}</div>
+      <p class="uc-note">出典：各大学の入試ガイド・学生募集要項、ベネッセ「マナビジョン」、旺文社「パスナビ」（2026年11月時点）。日程は変更されることがあります。出願前に必ず各大学の募集要項で確認してください。</p>
+    `;
+    const rerender = () => ucRenderCalendar(el, opts);
+    el.querySelectorAll("[data-ucday]").forEach((b) => b.addEventListener("click", () => { ucCal.day = b.dataset.ucday; rerender(); const det = document.getElementById("uc-detail"); if (det) det.scrollIntoView({ behavior: "smooth", block: "start" }); }));
+    el.querySelectorAll("[data-ucmonth]").forEach((b) => b.addEventListener("click", () => { ucCal.month = Number(b.dataset.ucmonth); ucCal.day = null; rerender(); }));
+    el.querySelectorAll("[data-ucview]").forEach((b) => b.addEventListener("click", () => { ucCal.view = b.dataset.ucview; rerender(); }));
+    const f = document.getElementById("uc-univ-filter");
+    if (f) f.addEventListener("change", (e) => { ucCal.univ = e.target.value; rerender(); });
+    if (opts.afterRender) opts.afterRender(el);
+  }
+  function ucDetailHtml(personal, opts, showUniv) {
+    const key = ucCal.day;
+    if (!key) {
+      if (opts.personalTab && personal.length) {
+        const rows = personal.filter((e) => Number(e.d.split("/")[0]) === ucCal.month);
+        return `<h3>${ucCal.month}月の${ucEsc(opts.personalTab)}</h3>${rows.length ? rows.map((e) => `<div class="uc-plan-row ${e.t === "rs" ? "rs" : ""}"><span class="d">${e.d}（${ucWd(e.d)}）</span><span>${opts.showNames ? `<b>${ucEsc(e.who)}</b> ` : ""}${ucEsc(e.txt)}</span></div>`).join("") : `<p class="uc-sub">この月の予定はありません。</p>`}<p class="uc-sub" style="margin-top:8px;">日付をタップすると、その日の詳しい内容が出ます。</p>`;
+      }
+      return `<h3>日付をタップしてください</h3><p class="uc-sub">その日に入試や合格発表がある大学・学部・方式が出ます。</p>`;
+    }
+    const [mm, dd] = key.split("/");
+    let html = `<h3>${mm}月${dd}日（${ucWd(key)}）${UC_HOL[key] ? ` <span class="uc-sub">${UC_HOL[key]}</span>` : ""}</h3>`;
+    if (UC_SPECIAL[key]) html += `<p class="uc-sub">${UC_SPECIAL[key] === "共テ本試" ? "大学入学共通テスト 本試験（1/16・1/17）" : "共通テスト 追試験（1/23・1/24）"}</p>`;
+    const mine = personal.filter((e) => e.d === key);
+    if (mine.length) {
+      html += `<p class="uc-sec-h">${ucEsc(opts.personalTab || "受験予定")}</p>` + mine.map((e) => `<div class="uc-item ${e.t === "rs" ? "uc-red" : ""}">${opts.showNames ? `<b>${ucEsc(e.who)}</b> ` : "★ "}${ucEsc(e.txt)}${e.rank ? `<span class="uc-fac">${ucEsc(e.rank)}志望</span>` : ""}</div>`).join("");
+    }
+    if (showUniv) {
+      const pick = (fn) => UC_R.filter((r) => (ucCal.univ === "all" || r.k === ucCal.univ) && fn(r));
+      const ex = pick((r) => r.ex.includes(key)), rs = pick((r) => r.res === key);
+      const block = (rows, isRs) => UC_U.filter((u) => rows.some((r) => r.k === u.key)).map((u) => `<div class="uc-item"><b class="${isRs ? "uc-red" : ""}">${u.name}</b>${rows.filter((r) => r.k === u.key).map((r) => `<div>${ucEsc(r.method)}${r.chk ? " ※" : ""}${isRs ? (r.ex.length ? `（試験日 ${r.ex.join("・")}）` : "") : (r.res ? `（発表 ${r.res}）` : "")}<span class="uc-fac">${ucEsc(r.fac)}${r.note ? "｜" + ucEsc(r.note) : ""}</span></div>`).join("")}</div>`).join("");
+      if (ex.length) html += `<p class="uc-sec-h">入試</p>${block(ex, false)}`;
+      if (rs.length) html += `<p class="uc-sec-h rs">合格発表</p>${block(rs, true)}`;
+      if (!ex.length && !rs.length && !mine.length && !UC_SPECIAL[key]) html += `<p class="uc-sub">この日の入試・合格発表はありません。</p>`;
+    } else if (!mine.length && !UC_SPECIAL[key]) {
+      html += `<p class="uc-sub">この日の予定はありません。「大学の日程も表示」に切り替えると、全大学の日程が見られます。</p>`;
+    }
+    return html;
+  }
+
+  // ---------- 生徒アプリ（高校生）：志望校入力・大学入試カレンダー ----------
+  let ucShibo = null; // { latest: {savedAt, data}, history: [...] }
+  function ucOpenOverlay(title, backLabel) {
+    ucCloseOverlay();
+    const ov = document.createElement("div");
+    ov.id = "uc-overlay"; ov.className = "uc-overlay";
+    ov.innerHTML = `<div class="uc-topbar"><button type="button" class="uc-back" id="uc-back">← ${ucEsc(backLabel)}</button></div><div class="uc-title">${ucEsc(title)}</div><div id="uc-body"><p class="empty">読み込み中...</p></div>`;
+    document.body.appendChild(ov);
+    document.body.style.overflow = "hidden";
+    document.getElementById("uc-back").addEventListener("click", ucCloseOverlay);
+    return document.getElementById("uc-body");
+  }
+  function ucCloseOverlay() {
+    const ov = document.getElementById("uc-overlay");
+    if (ov) ov.remove();
+    document.body.style.overflow = "";
+  }
+  async function ucLoadShibo(force) {
+    if (ucShibo && !force) return ucShibo;
+    const data = await ucPost({ action: "getShibo", studentId });
+    if (!data.ok) throw new Error(data.error || "load failed");
+    ucShibo = data;
+    return data;
+  }
+  function ucEntryButtonsHtml(where) {
+    if (!(currentData && currentData.isHighSchool)) return "";
+    if (where === "grades") return `<button type="button" class="uc-entry-btn" id="uc-open-shibo"><span>🎓 志望校入力<small>大学・学部・学科と受験する方式・科目を登録します</small></span><span class="uc-arrow">›</span></button>`;
+    if (where === "schedule") return `<button type="button" class="uc-entry-btn" id="uc-open-cal"><span>🗓 大学入試カレンダー<small>2027年1〜3月の入試日（黒）と合格発表日（赤）</small></span><span class="uc-arrow">›</span></button>`;
+    return "";
+  }
+  function ucBindEntryButtons() {
+    const a = document.getElementById("uc-open-shibo");
+    if (a) a.addEventListener("click", ucOpenShiboForm);
+    const b = document.getElementById("uc-open-cal");
+    if (b) b.addEventListener("click", ucOpenCalendarStudent);
+  }
+
+  async function ucOpenCalendarStudent() {
+    const body = ucOpenOverlay("大学入試カレンダー", "スケジュールに戻る");
+    ucCal.day = null; ucCal.view = null; ucCal.month = null;
+    let personal = [];
+    try { const s = await ucLoadShibo(); personal = ucEventsFromShibo(s.latest && s.latest.data, ""); } catch (err) { /* 志望校が読めなくてもカレンダーは出す */ }
+    ucRenderCalendar(body, {
+      personal, personalTab: "自分の受験予定",
+      headHtml: `<p class="uc-sub">近畿圏25大学の一般選抜の日程です。★は「志望校入力」で登録したあなたの受験予定です。</p>${personal.length ? "" : `<button type="button" class="uc-entry-btn" id="uc-cal-to-form"><span>🎓 志望校を登録する<small>登録すると、あなたの受験日がカレンダーに★で出ます</small></span><span class="uc-arrow">›</span></button>`}`,
+      afterRender: () => { const b = document.getElementById("uc-cal-to-form"); if (b) b.addEventListener("click", ucOpenShiboForm); },
+    });
+  }
+
+  // ---------- 志望校入力フォーム ----------
+  let ucForm = null; // { cards: [...] }
+  function ucNewCard() { return { u: "", fac: "", facFree: "", dept: "", deptFree: "", meths: [], subj: [], free: {} }; }
+  async function ucOpenShiboForm() {
+    const body = ucOpenOverlay("志望校入力", "私の成績表に戻る");
+    try { await ucLoadShibo(); }
+    catch (err) { body.innerHTML = `<p class="empty">通信に失敗しました。電波の良い場所でもう一度お試しください。</p>`; return; }
+    const saved = ucShibo.latest && ucShibo.latest.data;
+    ucForm = { cards: saved && saved.cards && saved.cards.length ? JSON.parse(JSON.stringify(saved.cards)) : [ucNewCard()] };
+    ucRenderForm();
+  }
+  function ucSelect(id, label, opts, val, disabled) {
+    return `<div class="uc-field"><label for="${id}">${label}</label><select id="${id}" ${disabled ? "disabled" : ""}>${opts.map(([v, t]) => `<option value="${ucEsc(v)}" ${String(v) === String(val) ? "selected" : ""}>${ucEsc(t)}</option>`).join("")}</select></div>`;
+  }
+  function ucInput(id, label, val, type, ph) {
+    return `<div class="uc-field"><label for="${id}">${label}</label><input id="${id}" type="${type || "text"}" value="${ucEsc(val || "")}" placeholder="${ucEsc(ph || "")}" maxlength="60"></div>`;
+  }
+  function ucRenderForm() {
+    const body = document.getElementById("uc-body");
+    if (!body || !ucForm) return;
+    const cards = ucForm.cards;
+    const events = ucEventsFromShibo({ cards }, "");
+    const exCount = {}; events.filter((e) => e.t === "ex").forEach((e) => { exCount[e.d] = (exCount[e.d] || 0) + 1; });
+    let html = `<p class="uc-sub">第1志望から順に登録してください。大学→学部→学科の順に選ぶと、受けられる方式が出ます。一覧にない大学は、大学の欄のいちばん下「一覧にない大学（自由に書く）」を選んでください。</p>`;
+    html += `<div class="card"><p class="section-title" style="margin-top:0;">あなたの受験予定</p>${events.length ? events.map((e) => `<div class="uc-plan-row ${e.t === "rs" ? "rs" : ""}"><span class="d">${e.d}（${ucWd(e.d)}）</span><span>${ucEsc(e.txt)}</span></div>`).join("") : `<p class="uc-sub" style="margin:0;">方式と受験日を選ぶと、ここに日付順で出ます。</p>`}${Object.entries(exCount).filter(([, n]) => n > 1).map(([d, n]) => `<div class="uc-warn">⚠ ${d}（${ucWd(d)}）に試験が${n}つ重なっています</div>`).join("")}</div>`;
+    cards.forEach((c, ci) => {
+      html += `<div class="card"><div class="uc-card-head"><span class="uc-rank">第${ci + 1}志望</span><span>${ci > 0 ? `<button type="button" class="uc-mini" data-ucup="${ci}">↑ 上へ</button>` : ""}<button type="button" class="uc-mini" data-ucdel="${ci}">削除</button></span></div>`;
+      html += ucSelect(`uc-u-${ci}`, "大学", [["", "選んでください"], ...UC_U.map((u) => [u.key, u.name]), [UC_OTHER, "一覧にない大学（自由に書く）"]], c.u);
+      if (c.u === UC_OTHER) {
+        const f = c.free || {};
+        html += `<div class="uc-free"><p class="uc-sub" style="margin:0 0 6px;color:var(--ink);">一覧にない大学は、自分で入力してください。</p>${ucInput(`uc-fn-${ci}`, "大学名", f.name, "text", "例：明治大学")}${ucInput(`uc-ff-${ci}`, "学部", f.fac, "text", "例：政治経済学部")}${ucInput(`uc-fd-${ci}`, "学科", f.dept, "text", "例：経済学科")}${ucInput(`uc-fm-${ci}`, "方式（わかれば）", f.method, "text", "例：学部別入試")}<div class="uc-two">${ucInput(`uc-fx-${ci}`, "試験日", f.date, "date")}${ucInput(`uc-fr-${ci}`, "合格発表日", f.res, "date")}</div></div>`;
+      } else if (c.u) {
+        const facs = Object.keys(UC_FAC[c.u] || {});
+        html += ucSelect(`uc-f-${ci}`, "学部", [["", "選んでください"], ...facs.map((f) => [f, f]), [UC_OTHER, "一覧にない学部（自由に書く）"]], c.fac);
+        if (c.fac === UC_OTHER) html += ucInput(`uc-ff2-${ci}`, "学部名", c.facFree, "text", "例：〇〇学部");
+        const depts = c.fac && c.fac !== UC_OTHER ? ((UC_FAC[c.u] || {})[c.fac] || []) : [];
+        if (c.fac === UC_OTHER) html += ucInput(`uc-df2-${ci}`, "学科名", c.deptFree, "text", "例：〇〇学科");
+        else {
+          html += ucSelect(`uc-d-${ci}`, "学科", [["", "選んでください"], ...depts.map((d) => [d, d]), [UC_OTHER, "一覧にない学科（自由に書く）"]], c.dept, !c.fac);
+          if (c.dept === UC_OTHER) html += ucInput(`uc-df-${ci}`, "学科名", c.deptFree, "text", "例：〇〇学科");
+        }
+        if (c.fac) {
+          const list = ucMethodsFor(c.u, c.fac);
+          html += `<div class="uc-field"><label>受験する方式と日程</label></div>`;
+          if (!c.meths.length) c.meths.push({ m: "", date: "" });
+          c.meths.forEach((mm, mi) => {
+            const r = list.find((x) => x.method === mm.m) || null;
+            if (r && r.ex.length === 1) mm.date = r.ex[0];
+            if (r && !r.ex.length) mm.date = "";
+            const dateSel = r && r.ex.length > 1
+              ? ucSelect(`uc-md-${ci}-${mi}`, "受験日を選ぶ", [["", "選ぶ"], ...r.ex.map((d) => [d, `${d}（${ucWd(d)}）`])], mm.date)
+              : ucSelect(`uc-md-${ci}-${mi}`, "試験日", [[mm.date || "", r ? (r.ex.length ? `${r.ex[0]}（${ucWd(r.ex[0])}）` : "共テのみ") : "―"]], mm.date || "", true);
+            html += `<div class="uc-meth"><div class="uc-two">${ucSelect(`uc-m-${ci}-${mi}`, "方式", [["", "選んでください"], ...list.map((x) => [x.method, x.method + (x.ct ? "（共テのみ）" : "")])], mm.m)}${dateSel}</div>${r ? `<div class="uc-mres">合格発表 ${r.res ? `${r.res}（${ucWd(r.res)}）` : "未定"}${r.chk ? " ※要項で確認" : ""}</div>${r.note ? `<div class="uc-sub" style="margin:2px 0 0;">${ucEsc(r.note)}</div>` : ""}` : ""}${c.meths.length > 1 ? `<button type="button" class="uc-mini" data-ucmdel="${ci}-${mi}">この方式を外す</button>` : ""}</div>`;
+          });
+          html += `<button type="button" class="uc-add" data-ucmadd="${ci}">＋ 方式を追加</button>`;
+        }
+      }
+      if (c.u) {
+        html += `<div class="uc-field" style="margin-top:10px;"><label>受験科目（タップで選ぶ）</label><div class="uc-subj">${UC_SUBJ.map((s) => `<button type="button" data-ucsubj="${ci}" data-s="${s}" class="${(c.subj || []).includes(s) ? "on" : ""}" aria-pressed="${(c.subj || []).includes(s)}">${s}</button>`).join("")}</div></div>`;
+      }
+      html += `</div>`;
+    });
+    if (cards.length < UC_MAX_CARDS) html += `<button type="button" class="uc-add" id="uc-add-card">＋ 志望校を追加</button><div style="height:12px"></div>`;
+    html += `<button type="button" class="uc-save" id="uc-save">保存する</button>`;
+    const hist = (ucShibo && ucShibo.history) || [];
+    html += `<div class="card" style="margin-top:14px;"><p class="section-title" style="margin-top:0;">変更履歴</p>${hist.length ? hist.map((h) => `<div class="uc-hist"><b>${ucEsc(h.savedAtLabel || "")}</b><div>${ucEsc(h.summary || "")}</div></div>`).join("") : `<p class="uc-sub" style="margin:0;">保存すると、ここに記録が残ります。</p>`}</div>`;
+    body.innerHTML = html;
+    ucBindForm();
+  }
+  function ucBindForm() {
+    const cards = ucForm.cards;
+    const on = (sel, ev, fn) => document.querySelectorAll(sel).forEach((el) => el.addEventListener(ev, fn));
+    cards.forEach((c, ci) => {
+      const g = (id) => document.getElementById(id);
+      if (g(`uc-u-${ci}`)) g(`uc-u-${ci}`).addEventListener("change", (e) => { const keepSubj = c.subj; Object.assign(c, ucNewCard(), { u: e.target.value, subj: keepSubj }); ucRenderForm(); });
+      if (g(`uc-f-${ci}`)) g(`uc-f-${ci}`).addEventListener("change", (e) => { c.fac = e.target.value; c.dept = ""; c.deptFree = ""; c.meths = []; ucRenderForm(); });
+      if (g(`uc-d-${ci}`)) g(`uc-d-${ci}`).addEventListener("change", (e) => { c.dept = e.target.value; ucRenderForm(); });
+      [["uc-ff2-", "facFree"], ["uc-df2-", "deptFree"], ["uc-df-", "deptFree"]].forEach(([p, k]) => { if (g(p + ci)) g(p + ci).addEventListener("input", (e) => { c[k] = e.target.value; }); });
+      [["uc-fn-", "name"], ["uc-ff-", "fac"], ["uc-fd-", "dept"], ["uc-fm-", "method"]].forEach(([p, k]) => { if (g(p + ci)) g(p + ci).addEventListener("input", (e) => { c.free[k] = e.target.value; }); });
+      [["uc-fx-", "date"], ["uc-fr-", "res"]].forEach(([p, k]) => { if (g(p + ci)) g(p + ci).addEventListener("change", (e) => { c.free[k] = e.target.value; ucRenderForm(); }); });
+      (c.meths || []).forEach((mm, mi) => {
+        if (g(`uc-m-${ci}-${mi}`)) g(`uc-m-${ci}-${mi}`).addEventListener("change", (e) => { mm.m = e.target.value; mm.date = ""; ucRenderForm(); });
+        if (g(`uc-md-${ci}-${mi}`)) g(`uc-md-${ci}-${mi}`).addEventListener("change", (e) => { mm.date = e.target.value; ucRenderForm(); });
+      });
+    });
+    on("[data-ucup]", "click", (e) => { const i = Number(e.currentTarget.dataset.ucup); [cards[i - 1], cards[i]] = [cards[i], cards[i - 1]]; ucRenderForm(); });
+    on("[data-ucdel]", "click", (e) => { cards.splice(Number(e.currentTarget.dataset.ucdel), 1); if (!cards.length) cards.push(ucNewCard()); ucRenderForm(); });
+    on("[data-ucmadd]", "click", (e) => { cards[Number(e.currentTarget.dataset.ucmadd)].meths.push({ m: "", date: "" }); ucRenderForm(); });
+    on("[data-ucmdel]", "click", (e) => { const [ci, mi] = e.currentTarget.dataset.ucmdel.split("-").map(Number); cards[ci].meths.splice(mi, 1); ucRenderForm(); });
+    on("[data-ucsubj]", "click", (e) => { const c = cards[Number(e.currentTarget.dataset.ucsubj)], s = e.currentTarget.dataset.s; c.subj = (c.subj || []).includes(s) ? c.subj.filter((x) => x !== s) : [...(c.subj || []), s]; e.currentTarget.classList.toggle("on"); e.currentTarget.setAttribute("aria-pressed", String(c.subj.includes(s))); });
+    const add = document.getElementById("uc-add-card");
+    if (add) add.addEventListener("click", () => { cards.push(ucNewCard()); ucRenderForm(); });
+    const save = document.getElementById("uc-save");
+    if (save) save.addEventListener("click", ucSaveShibo);
+  }
+  function ucCleanCards(cards) {
+    return cards.filter((c) => c.u && (c.u !== UC_OTHER || (c.free && c.free.name))).map((c) => {
+      const out = { u: c.u, subj: (c.subj || []).slice(0, 20) };
+      if (c.u === UC_OTHER) { const f = c.free || {}; out.free = { name: f.name || "", fac: f.fac || "", dept: f.dept || "", method: f.method || "", date: f.date || "", res: f.res || "" }; }
+      else { out.fac = c.fac || ""; out.facFree = c.fac === UC_OTHER ? (c.facFree || "") : ""; out.dept = c.dept || ""; out.deptFree = (c.fac === UC_OTHER || c.dept === UC_OTHER) ? (c.deptFree || "") : ""; out.meths = (c.meths || []).filter((m) => m.m).map((m) => ({ m: m.m, date: m.date || "" })); }
+      return out;
+    });
+  }
+  async function ucSaveShibo() {
+    const btn = document.getElementById("uc-save");
+    const cards = ucCleanCards(ucForm.cards);
+    const missingDate = cards.some((c) => (c.meths || []).some((m) => { const r = ucFindMethod(c.u, m.m, c.fac); return r && r.ex.length > 1 && !m.date; }));
+    if (missingDate) { showToast("受験日を選んでいない方式があります", "error"); return; }
+    btn.disabled = true; btn.textContent = "保存中...";
+    try {
+      const data = await ucPost({ action: "saveShibo", studentId, data: { cards } });
+      if (!data.ok) throw new Error(data.error);
+      ucShibo = data;
+      ucForm = { cards: cards.length ? JSON.parse(JSON.stringify(cards)) : [ucNewCard()] };
+      ucRenderForm();
+      showToast("志望校を保存しました");
+    } catch (err) {
+      btn.disabled = false; btn.textContent = "保存する";
+      showToast("保存に失敗しました。もう一度お試しください", "error");
+    }
+  }
 </script>
 </body>
 </html>
