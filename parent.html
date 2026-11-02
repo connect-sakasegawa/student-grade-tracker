@@ -1072,7 +1072,17 @@
   const UC_R = UC_DATA.r.map(([k, fac, method, ex, res, note, chk, ct]) => ({ k, fac, method, ex, res, note, chk, ct }));
   const UC_HOL = { "1/1": "元日", "1/11": "成人の日", "2/11": "建国記念の日", "2/23": "天皇誕生日", "3/21": "春分の日", "3/22": "振替休日" };
   const UC_SPECIAL = { "1/16": "共テ本試", "1/17": "共テ本試", "1/23": "共テ追試", "1/24": "共テ追試" };
-  const UC_SUBJ = ["英語", "国語", "古文・漢文", "数学ⅠA", "数学ⅡBC", "数学Ⅲ", "物理", "化学", "生物", "地学", "日本史", "世界史", "地理", "政治・経済", "情報", "小論文", "面接"];
+  const UC_SUBJ = ["英語", "現代文", "古文", "漢文", "数学ⅠA", "数学ⅡBC", "数学Ⅲ", "物理", "化学", "生物", "地学", "日本史", "世界史", "地理", "政治・経済", "情報", "小論文", "面接"];
+  // 共通テスト（2025年度からの新課程の科目名）
+  const UC_CT_TAKE = [["yes", "受ける"], ["no", "受けない"], ["undecided", "未定"]];
+  const UC_CT_SUBJ = [
+    ["国語", ["国語"]],
+    ["地理歴史・公民", ["地理総合／地理探究", "歴史総合／日本史探究", "歴史総合／世界史探究", "公共／倫理", "公共／政治・経済", "地理総合／歴史総合／公共"]],
+    ["数学", ["数学Ⅰ／数学A", "数学Ⅰ", "数学Ⅱ／数学B／数学C"]],
+    ["理科", ["物理基礎／化学基礎／生物基礎／地学基礎", "物理", "化学", "生物", "地学"]],
+    ["外国語", ["英語（リーディング）", "英語（リスニング）"]],
+    ["情報", ["情報Ⅰ"]],
+  ];
   const UC_OTHER = "__other";
   const UC_DOW = "日月火水木金土";
   const UC_MAX_CARDS = 10;
@@ -1106,6 +1116,10 @@
   function ucEventsFromShibo(data, who) {
     const ev = [];
     const cards = (data && data.cards) || [];
+    if (data && data.ct && data.ct.take === "yes") {
+      ev.push({ d: "1/16", t: "ex", who, univ: "共テ", txt: "共通テスト 1日目", rank: "" });
+      ev.push({ d: "1/17", t: "ex", who, univ: "共テ", txt: "共通テスト 2日目", rank: "" });
+    }
     cards.forEach((c, ci) => {
       const rank = `第${ci + 1}`;
       if (c.u === UC_OTHER) {
@@ -1131,8 +1145,11 @@
   }
   function ucShiboSummaryHtml(data) {
     const cards = (data && data.cards) || [];
-    if (!cards.length) return `<p class="uc-sub">まだ登録されていません。</p>`;
-    return `<ul style="margin:2px 0 0;padding-left:1.1em;">${cards.map((c, ci) => {
+    const ct = data && data.ct;
+    if (!cards.length && !(ct && ct.take)) return `<p class="uc-sub">まだ登録されていません。</p>`;
+    const ctLabel = ct && ct.take ? (UC_CT_TAKE.find((x) => x[0] === ct.take) || ["", ""])[1] : "";
+    const ctHtml = ctLabel ? `<li><b>共通テスト</b> ${ucEsc(ctLabel)}${ct.take === "yes" && (ct.subj || []).length ? `<span style="display:block;color:var(--muted);font-size:11.5px;">科目：${ucEsc(ct.subj.join("・"))}</span>` : ""}</li>` : "";
+    return `<ul style="margin:2px 0 0;padding-left:1.1em;">${ctHtml}${cards.map((c, ci) => {
       let head;
       if (c.u === UC_OTHER) { const f = c.free || {}; head = [f.name, f.fac, f.dept].filter(Boolean).join(" "); }
       else { const u = UC_UM[c.u]; head = [u ? u.name : "", c.fac === UC_OTHER ? c.facFree : c.fac, c.dept === UC_OTHER ? c.deptFree : c.dept].filter(Boolean).join(" "); }
