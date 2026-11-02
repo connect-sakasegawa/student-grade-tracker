@@ -2611,7 +2611,17 @@
   const UC_R = UC_DATA.r.map(([k, fac, method, ex, res, note, chk, ct]) => ({ k, fac, method, ex, res, note, chk, ct }));
   const UC_HOL = { "1/1": "元日", "1/11": "成人の日", "2/11": "建国記念の日", "2/23": "天皇誕生日", "3/21": "春分の日", "3/22": "振替休日" };
   const UC_SPECIAL = { "1/16": "共テ本試", "1/17": "共テ本試", "1/23": "共テ追試", "1/24": "共テ追試" };
-  const UC_SUBJ = ["英語", "国語", "古文・漢文", "数学ⅠA", "数学ⅡBC", "数学Ⅲ", "物理", "化学", "生物", "地学", "日本史", "世界史", "地理", "政治・経済", "情報", "小論文", "面接"];
+  const UC_SUBJ = ["英語", "現代文", "古文", "漢文", "数学ⅠA", "数学ⅡBC", "数学Ⅲ", "物理", "化学", "生物", "地学", "日本史", "世界史", "地理", "政治・経済", "情報", "小論文", "面接"];
+  // 共通テスト（2025年度からの新課程の科目名）
+  const UC_CT_TAKE = [["yes", "受ける"], ["no", "受けない"], ["undecided", "未定"]];
+  const UC_CT_SUBJ = [
+    ["国語", ["国語"]],
+    ["地理歴史・公民", ["地理総合／地理探究", "歴史総合／日本史探究", "歴史総合／世界史探究", "公共／倫理", "公共／政治・経済", "地理総合／歴史総合／公共"]],
+    ["数学", ["数学Ⅰ／数学A", "数学Ⅰ", "数学Ⅱ／数学B／数学C"]],
+    ["理科", ["物理基礎／化学基礎／生物基礎／地学基礎", "物理", "化学", "生物", "地学"]],
+    ["外国語", ["英語（リーディング）", "英語（リスニング）"]],
+    ["情報", ["情報Ⅰ"]],
+  ];
   const UC_OTHER = "__other";
   const UC_DOW = "日月火水木金土";
   const UC_MAX_CARDS = 10;
@@ -2645,6 +2655,10 @@
   function ucEventsFromShibo(data, who) {
     const ev = [];
     const cards = (data && data.cards) || [];
+    if (data && data.ct && data.ct.take === "yes") {
+      ev.push({ d: "1/16", t: "ex", who, univ: "共テ", txt: "共通テスト 1日目", rank: "" });
+      ev.push({ d: "1/17", t: "ex", who, univ: "共テ", txt: "共通テスト 2日目", rank: "" });
+    }
     cards.forEach((c, ci) => {
       const rank = `第${ci + 1}`;
       if (c.u === UC_OTHER) {
@@ -2670,8 +2684,11 @@
   }
   function ucShiboSummaryHtml(data) {
     const cards = (data && data.cards) || [];
-    if (!cards.length) return `<p class="uc-sub">まだ登録されていません。</p>`;
-    return `<ul style="margin:2px 0 0;padding-left:1.1em;">${cards.map((c, ci) => {
+    const ct = data && data.ct;
+    if (!cards.length && !(ct && ct.take)) return `<p class="uc-sub">まだ登録されていません。</p>`;
+    const ctLabel = ct && ct.take ? (UC_CT_TAKE.find((x) => x[0] === ct.take) || ["", ""])[1] : "";
+    const ctHtml = ctLabel ? `<li><b>共通テスト</b> ${ucEsc(ctLabel)}${ct.take === "yes" && (ct.subj || []).length ? `<span style="display:block;color:var(--muted);font-size:11.5px;">科目：${ucEsc(ct.subj.join("・"))}</span>` : ""}</li>` : "";
+    return `<ul style="margin:2px 0 0;padding-left:1.1em;">${ctHtml}${cards.map((c, ci) => {
       let head;
       if (c.u === UC_OTHER) { const f = c.free || {}; head = [f.name, f.fac, f.dept].filter(Boolean).join(" "); }
       else { const u = UC_UM[c.u]; head = [u ? u.name : "", c.fac === UC_OTHER ? c.facFree : c.fac, c.dept === UC_OTHER ? c.deptFree : c.dept].filter(Boolean).join(" "); }
@@ -2827,7 +2844,7 @@
     try { await ucLoadShibo(); }
     catch (err) { body.innerHTML = `<p class="empty">通信に失敗しました。電波の良い場所でもう一度お試しください。</p>`; return; }
     const saved = ucShibo.latest && ucShibo.latest.data;
-    ucForm = { cards: saved && saved.cards && saved.cards.length ? JSON.parse(JSON.stringify(saved.cards)) : [ucNewCard()] };
+    ucForm = { ct: saved && saved.ct ? JSON.parse(JSON.stringify(saved.ct)) : { take: "", subj: [] }, cards: saved && saved.cards && saved.cards.length ? JSON.parse(JSON.stringify(saved.cards)) : [ucNewCard()] };
     ucRenderForm();
   }
   function ucSelect(id, label, opts, val, disabled) {
@@ -2840,10 +2857,22 @@
     const body = document.getElementById("uc-body");
     if (!body || !ucForm) return;
     const cards = ucForm.cards;
-    const events = ucEventsFromShibo({ cards }, "");
+    const events = ucEventsFromShibo({ cards, ct: ucForm.ct }, "");
     const exCount = {}; events.filter((e) => e.t === "ex").forEach((e) => { exCount[e.d] = (exCount[e.d] || 0) + 1; });
-    let html = `<p class="uc-sub">第1志望から順に登録してください。大学→学部→学科の順に選ぶと、受けられる方式が出ます。一覧にない大学は、大学の欄のいちばん下「一覧にない大学（自由に書く）」を選んでください。</p>`;
+    const saved = ucShibo && ucShibo.latest;
+    let html = `<div class="card grades-guide-card">
+        <p class="grades-guide-title">志望校の入力のしかた</p>
+        <p class="grades-guide-item"><strong>登録</strong>共通テストを受けるかどうかを選んでから、第1志望から順に大学→学部→学科→方式を選び、受験科目をタップして「保存する」を押します。一覧にない大学は、大学の欄のいちばん下「一覧にない大学（自由に書く）」を選んでください。</p>
+        <p class="grades-guide-item"><strong>修正</strong>この画面を開くと、前に保存した内容が入った状態で出ます。変えたいところを選び直して、もう一度「保存する」を押してください。最後に保存した内容が、先生と保護者の方のアプリに表示されます。</p>
+        <p class="grades-guide-item"><strong>やめる・入れかえる</strong>受けなくなった志望校は「削除」、順番を入れかえたいときは「↑ 上へ」を押してから「保存する」を押します。前の内容は下の「変更履歴」に残ります。</p>
+        ${saved && saved.savedAtLabel ? `<p class="grades-guide-item" style="font-weight:700;">最後に保存した日時：${ucEsc(saved.savedAtLabel)}</p>` : ""}
+      </div>`;
     html += `<div class="card"><p class="section-title" style="margin-top:0;">あなたの受験予定</p>${events.length ? events.map((e) => `<div class="uc-plan-row ${e.t === "rs" ? "rs" : ""}"><span class="d">${e.d}（${ucWd(e.d)}）</span><span>${ucEsc(e.txt)}</span></div>`).join("") : `<p class="uc-sub" style="margin:0;">方式と受験日を選ぶと、ここに日付順で出ます。</p>`}${Object.entries(exCount).filter(([, n]) => n > 1).map(([d, n]) => `<div class="uc-warn">⚠ ${d}（${ucWd(d)}）に試験が${n}つ重なっています</div>`).join("")}</div>`;
+    const ct = ucForm.ct || (ucForm.ct = { take: "", subj: [] });
+    html += `<div class="card"><div class="uc-card-head"><span class="uc-rank">共通テスト</span><span class="uc-sub" style="margin:0;">1/16（土）・1/17（日）</span></div>
+      <div class="uc-field"><label>共通テストを受けますか？</label><div class="uc-seg" style="margin:0;">${UC_CT_TAKE.map(([v, t]) => `<button type="button" data-ucct="${v}" class="${ct.take === v ? "on" : ""}" aria-pressed="${ct.take === v}">${t}</button>`).join("")}</div></div>
+      ${ct.take === "yes" ? `<div class="uc-field" style="margin-top:10px;"><label>受験科目（タップで選ぶ）</label>${UC_CT_SUBJ.map(([g, list]) => `<p class="uc-sub" style="margin:6px 0 3px;font-weight:700;">${g}</p><div class="uc-subj">${list.map((sj) => `<button type="button" data-ucctsubj="${ucEsc(sj)}" class="${(ct.subj || []).includes(sj) ? "on" : ""}" aria-pressed="${(ct.subj || []).includes(sj)}">${ucEsc(sj)}</button>`).join("")}</div>`).join("")}</div>` : ""}
+    </div>`;
     cards.forEach((c, ci) => {
       html += `<div class="card"><div class="uc-card-head"><span class="uc-rank">第${ci + 1}志望</span><span>${ci > 0 ? `<button type="button" class="uc-mini" data-ucup="${ci}">↑ 上へ</button>` : ""}<button type="button" class="uc-mini" data-ucdel="${ci}">削除</button></span></div>`;
       html += ucSelect(`uc-u-${ci}`, "大学", [["", "選んでください"], ...UC_U.map((u) => [u.key, u.name]), [UC_OTHER, "一覧にない大学（自由に書く）"]], c.u);
@@ -2909,6 +2938,8 @@
     on("[data-ucmadd]", "click", (e) => { cards[Number(e.currentTarget.dataset.ucmadd)].meths.push({ m: "", date: "" }); ucRenderForm(); });
     on("[data-ucmdel]", "click", (e) => { const [ci, mi] = e.currentTarget.dataset.ucmdel.split("-").map(Number); cards[ci].meths.splice(mi, 1); ucRenderForm(); });
     on("[data-ucsubj]", "click", (e) => { const c = cards[Number(e.currentTarget.dataset.ucsubj)], s = e.currentTarget.dataset.s; c.subj = (c.subj || []).includes(s) ? c.subj.filter((x) => x !== s) : [...(c.subj || []), s]; e.currentTarget.classList.toggle("on"); e.currentTarget.setAttribute("aria-pressed", String(c.subj.includes(s))); });
+    on("[data-ucct]", "click", (e) => { ucForm.ct.take = e.currentTarget.dataset.ucct; ucRenderForm(); });
+    on("[data-ucctsubj]", "click", (e) => { const ct = ucForm.ct, sj = e.currentTarget.dataset.ucctsubj; ct.subj = (ct.subj || []).includes(sj) ? ct.subj.filter((x) => x !== sj) : [...(ct.subj || []), sj]; e.currentTarget.classList.toggle("on"); e.currentTarget.setAttribute("aria-pressed", String(ct.subj.includes(sj))); });
     const add = document.getElementById("uc-add-card");
     if (add) add.addEventListener("click", () => { cards.push(ucNewCard()); ucRenderForm(); });
     const save = document.getElementById("uc-save");
@@ -2929,10 +2960,11 @@
     if (missingDate) { showToast("受験日を選んでいない方式があります", "error"); return; }
     btn.disabled = true; btn.textContent = "保存中...";
     try {
-      const data = await ucPost({ action: "saveShibo", studentId, data: { cards } });
+      const ct = { take: ucForm.ct.take || "", subj: ucForm.ct.take === "yes" ? (ucForm.ct.subj || []).slice(0, 20) : [] };
+      const data = await ucPost({ action: "saveShibo", studentId, data: { ct, cards } });
       if (!data.ok) throw new Error(data.error);
       ucShibo = data;
-      ucForm = { cards: cards.length ? JSON.parse(JSON.stringify(cards)) : [ucNewCard()] };
+      ucForm = { ct: JSON.parse(JSON.stringify(ct)), cards: cards.length ? JSON.parse(JSON.stringify(cards)) : [ucNewCard()] };
       ucRenderForm();
       showToast("志望校を保存しました");
     } catch (err) {
