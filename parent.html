@@ -975,12 +975,12 @@
     if (curIdx > 0) setTimeout(() => goto(curIdx), 0);
   }
 
-  // 講習カウンター（申込・設定・残りコマ数）。冬期=12〜2月、夏期=7〜9月、春期=3〜4月の間だけ表示する
+  // 講習カウンター（申込・設定・残りコマ数）。画面で選んでいる月が 冬期=12〜2月、夏期=7〜9月、春期=3〜4月 のときだけ表示する
   const KOSHU_SEASON_MONTHS = { "冬": [12, 1, 2], "夏": [7, 8, 9], "春": [3, 4] };
   const KOSHU_SUBJECT_NAMES = { "英": "英語", "数": "数学", "国": "国語", "理": "理科", "社": "社会" };
-  function koshuCounterHtml() {
+  function koshuCounterHtml(viewMonth) {
     const seasons = currentData.koshuCounter || [];
-    const nowMonth = new Date().getMonth() + 1;
+    const nowMonth = Number(viewMonth) || (new Date().getMonth() + 1);
     let html = "";
     seasons.forEach((s) => {
       const months = KOSHU_SEASON_MONTHS[s.season];
@@ -1076,7 +1076,7 @@
     html += `<p class="schedule-legend"><span class="schedule-legend-swatch"></span>前回から日時が変更になったコマ</p>`;
     html += `</div>`;
 
-    html += koshuCounterHtml();
+    html += koshuCounterHtml(monthNum);
 
     html += `<div class="card info-card">`;
     html += `<p class="info-title">注意</p>`;
