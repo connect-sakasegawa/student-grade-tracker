@@ -555,6 +555,101 @@
   .uc-st-name { font-weight: 700; }
   .uc-st ul { margin: 2px 0 0; padding-left: 1.1em; }
   .uc-st li { font-size: 12.5px; line-height: 1.55; }
+
+  /* ---------- スラッシュ音読ノート(中学生) ---------- */
+  .od { --od-s: #2A5FB4; --od-v: #C2410C; --od-ja: #2F6B4B; --od-slash: #A99A88; --od-t0: #FBE7D0; --od-t1: #E3EEE7; --od-t2: #E4EAF7; --od-hide: #DCCDBA; --od-ok: #2E7D4F; --od-en: 'Inter', system-ui, sans-serif; --od-jaf: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', sans-serif; }
+  .od-book { margin: 0 0 8px; font-size: 11.5px; color: var(--muted); font-family: var(--od-en); }
+  .od-unitbtn { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1.5px solid var(--brand); border-radius: 12px; background: var(--card); color: var(--ink); font-family: inherit; text-align: left; cursor: pointer; }
+  .od-unitbtn .od-ut { flex: 1; min-width: 0; }
+  .od-unitbtn b { display: block; font-family: var(--od-en); font-size: 15px; color: var(--brand); }
+  .od-unitbtn small { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .od-unitbtn .od-toc { flex: none; font-size: 12px; font-weight: 700; color: var(--brand); }
+  .od-parts { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-top: 10px; }
+  .od-part { border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 7px 4px; text-align: center; font-family: inherit; color: var(--ink); cursor: pointer; }
+  .od-part b { display: block; font-family: var(--od-en); font-size: 14px; font-weight: 600; }
+  .od-part small { display: block; font-size: 10.5px; color: var(--muted); }
+  .od-part.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .od-part.on small { color: #fff; opacity: .9; }
+  .od-overlay { position: fixed; inset: 0; z-index: 60; background: var(--paper); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 28px); }
+  .od-controls { position: sticky; top: calc(-1 * (env(safe-area-inset-top) + 8px)); z-index: 5; margin: -8px -16px 0; padding: calc(env(safe-area-inset-top) + 6px) 16px 10px; background: var(--paper); border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+  .od-toprow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .od-title { font-family: 'Zilla Slab', serif; font-size: 20px; font-weight: 700; color: var(--brand); margin: 12px 0 2px; }
+  .od-seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+  .od-seg button { border: 0; background: transparent; border-radius: 9px; padding: 9px 2px; font-weight: 700; font-size: 13.5px; font-family: inherit; color: var(--ink); cursor: pointer; }
+  .od-seg button.on { background: var(--brand); color: #fff; }
+  .od-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .od-chip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .od-chip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--muted); }
+  .od-chip.on { background: var(--brand-soft); border-color: var(--brand); }
+  .od-chip.on::before { background: var(--brand); border-color: var(--brand); }
+  .od-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11.5px; color: var(--muted); padding: 10px 0 2px; }
+  .od-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .od-sw { width: 14px; height: 11px; border-radius: 3px; display: inline-block; }
+  .od-head { padding: 10px 0 4px; display: grid; gap: 6px; }
+  .od-head h2 { margin: 0; font-size: 15.5px; font-weight: 700; font-family: var(--od-jaf); }
+  .od-head p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+  .od-prog { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .od-bar { flex: 1; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .od-bar i { display: block; height: 100%; background: var(--od-ok); width: 0; transition: width .25s; }
+  .od-prog b { font-variant-numeric: tabular-nums; color: var(--ink); }
+  .od-list { display: grid; gap: 10px; padding-top: 8px; }
+  .od-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px 10px; display: grid; gap: 8px; }
+  .od-card.done { border-color: var(--od-ok); box-shadow: inset 0 0 0 1px var(--od-ok); }
+  .od-top { display: flex; align-items: center; gap: 8px; min-height: 20px; }
+  .od-no { font-family: var(--od-en); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .od-who { font-family: var(--od-en); font-size: 11px; font-weight: 600; background: var(--brand-soft); border-radius: 6px; padding: 1px 8px; }
+  .od-chunks { display: flex; flex-wrap: wrap; gap: 6px 2px; }
+  .od-ch { position: relative; border: 0; text-align: left; border-radius: 9px; padding: 6px 18px 6px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0; color: var(--ink); font-family: inherit; cursor: pointer; }
+  .od-t0 { background: var(--od-t0); } .od-t1 { background: var(--od-t1); } .od-t2 { background: var(--od-t2); }
+  .od-ch::after { content: "/"; position: absolute; right: 6px; top: 5px; color: var(--od-slash); font-family: var(--od-en); font-size: 17px; line-height: 1.4; }
+  .od[data-sl="off"] .od-ch::after { content: none; }
+  .od[data-sl="off"] .od-ch { padding-right: 8px; }
+  .od-en { font-family: var(--od-en); font-size: 18px; line-height: 1.45; font-weight: 500; }
+  .od-ja { font-family: var(--od-jaf); font-size: 12.5px; line-height: 1.4; color: var(--od-ja); font-weight: 700; }
+  .od-r { font-weight: 700; text-decoration-line: underline; text-decoration-thickness: 3px; text-underline-offset: .2em; }
+  .od-ja .od-r { text-decoration-thickness: 2px; }
+  .od-rS { color: var(--od-s); text-decoration-style: solid; text-decoration-color: var(--od-s); }
+  .od-rV { color: var(--od-v); text-decoration-style: double; text-decoration-color: var(--od-v); }
+  .od[data-sv="off"] .od-r { color: inherit; text-decoration: none; font-weight: inherit; }
+  .od[data-mode="ja"] .od-ch:not(.open) .od-en, .od[data-mode="en"] .od-ch:not(.open) .od-ja { color: transparent; background: var(--od-hide); border-radius: 6px; user-select: none; -webkit-user-select: none; align-self: flex-start; }
+  .od[data-mode="ja"] .od-ch:not(.open) .od-en .od-r, .od[data-mode="en"] .od-ch:not(.open) .od-ja .od-r { color: transparent; text-decoration-color: transparent; }
+  .od-note { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.55; border-left: 3px solid var(--line); padding-left: 8px; }
+  .od[data-sv="off"] .od-note { display: none; }
+  .od-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .od-btn { border: 1px solid var(--line); background: transparent; border-radius: 9px; padding: 7px 12px; font-size: 12.5px; font-weight: 700; font-family: inherit; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; cursor: pointer; }
+  .od-btn.pri { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .od-btn.ok { margin-left: auto; }
+  .od-btn.ok.on { background: var(--od-ok); border-color: var(--od-ok); color: #fff; }
+  .od-foot { margin: 18px 0 0; font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+  .od-empty { text-align: center; color: var(--muted); font-size: 13px; line-height: 1.7; }
+  .od-backdrop { position: fixed; inset: 0; background: rgba(31,42,68,.5); z-index: 70; }
+  .od-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 71; background: var(--card); color: var(--ink); border-radius: 18px 18px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,.2); padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); max-height: 88%; overflow-y: auto; overscroll-behavior: contain; font-family: 'Inter', system-ui, sans-serif; }
+  .od-sheet-in { max-width: 640px; margin: 0 auto; display: grid; gap: 12px; }
+  .od-sheet-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .od-sheet-top h3 { margin: 0; font-size: 16px; }
+  .od-x { border: 1px solid var(--line); background: transparent; border-radius: 9px; width: 40px; height: 40px; font-size: 16px; color: var(--ink); cursor: pointer; }
+  .od-seg2 { display: grid; grid-template-columns: 1fr 1fr; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+  .od-seg2 button { border: 0; background: transparent; border-radius: 9px; padding: 8px 4px; font-weight: 700; font-size: 13px; font-family: inherit; color: var(--ink); cursor: pointer; }
+  .od-seg2 button.on { background: var(--brand); color: #fff; }
+  .od-stage { min-height: 120px; background: var(--paper); border-radius: 12px; padding: 12px; display: grid; gap: 10px; align-content: start; }
+  .od-step { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .od-step b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .od-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .od-dots i { width: 18px; height: 6px; border-radius: 99px; background: var(--line); }
+  .od-dots i.on { background: var(--brand); }
+  .od-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .od-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .od-nav .od-btn { min-height: 48px; font-size: 14px; }
+  .od-nav .od-btn:last-child { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .od-nav .od-btn:disabled { opacity: .4; }
+  .od-toc-list { display: grid; gap: 8px; }
+  .od-toc-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); text-align: left; font-family: inherit; color: var(--ink); cursor: pointer; }
+  .od-toc-item.on { border-color: var(--brand); background: var(--brand-soft); }
+  .od-toc-item .od-ut { flex: 1; min-width: 0; }
+  .od-toc-item b { display: block; font-family: var(--od-en); font-size: 14px; }
+  .od-toc-item small { display: block; font-size: 11.5px; color: var(--muted); }
+  .od-toc-item .od-cnt { flex: none; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .od-toc-item .od-cnt.all { color: var(--od-ok); }
 </style>
 </head>
 <body>
@@ -1023,7 +1118,270 @@
     else if (currentTab === "konesha") renderKonesha(contentEl);
     else if (currentTab === "schedule") renderSchedule(contentEl);
     ucBindEntryButtons();
+    odBindEntry();
   }
+
+
+  // ---------- 音読トレーニング（スラッシュ音読ノート・中学生だけ） ----------
+  // 本文は教科書の著作物なので、このファイルには入れない。GASの ?ondoku=1&id= から、その生徒の学年の分だけ受け取る。
+  // 「言えた」と開いていた場所は、この端末の中（localStorage）にだけ保存する。
+  const OD_DATA_KEY = "connect-ondoku-data-v1-";
+  const OD_DONE_KEY = "connect-ondoku-done-v1-";
+  const OD_POS_KEY = "connect-ondoku-pos-v1-";
+  const od = { data: null, loading: false, error: "", unit: 0, part: 0, mode: "both", sv: "on", sl: "on", done: {}, sheet: null };
+  function odIsJuniorHigh() { return !!currentData && !currentData.isHighSchool && !currentData.isElementary; }
+  function odGetLS(k) { try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : null; } catch (err) { return null; } }
+  function odSetLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (err) {} }
+  function odEntryHtml() {
+    if (!odIsJuniorHigh()) return "";
+    return `<button type="button" class="uc-entry-btn" id="od-open"><span>📖 音読トレーニング<small>教科書の英文を、和訳を見て言えるように練習します</small></span><span class="uc-arrow">›</span></button>`;
+  }
+  function odBindEntry() {
+    const b = document.getElementById("od-open");
+    if (b) b.addEventListener("click", odOpen);
+  }
+  // {S|...} を主語、{V|...} を述語の印にする（中身は文字としてそのまま表示）
+  function odMark(s) { return escapeHtml(s).replace(/\{([SV])\|([^}]*)\}/g, '<span class="od-r od-r$1">$2</span>'); }
+  function odUnits() { return (od.data && od.data.units) || []; }
+  function odKey(ui, pi, si) { const u = odUnits()[ui]; return od.data.grade + "-" + (u ? u.id : ui) + "-" + pi + "-" + si; }
+  function odDoneCount(ui, pi) {
+    const p = odUnits()[ui].parts[pi];
+    return p.s.reduce((n, _, si) => n + (od.done[odKey(ui, pi, si)] ? 1 : 0), 0);
+  }
+  function odUnitCount(ui) {
+    const u = odUnits()[ui]; let d = 0, n = 0;
+    u.parts.forEach((p, pi) => { n += p.s.length; d += odDoneCount(ui, pi); });
+    return { d, n };
+  }
+  function odSavePos() { const u = odUnits()[od.unit]; if (u) odSetLS(OD_POS_KEY + studentId, { unit: u.id, part: od.part }); }
+  function odRestorePos() {
+    const pos = odGetLS(OD_POS_KEY + studentId), us = odUnits();
+    od.unit = 0; od.part = 0;
+    if (pos) {
+      const i = us.findIndex((u) => u.id === pos.unit);
+      if (i !== -1) { od.unit = i; od.part = Math.min(Number(pos.part) || 0, us[i].parts.length - 1); }
+    }
+  }
+
+  async function odOpen() {
+    ucCloseOverlay(); odClose();
+    const ov = document.createElement("div");
+    ov.id = "od-overlay"; ov.className = "od-overlay";
+    document.body.appendChild(ov);
+    document.body.style.overflow = "hidden";
+    const tc = document.getElementById("toast-container"); if (tc) tc.style.zIndex = "70";
+    od.done = odGetLS(OD_DONE_KEY + studentId) || {};
+    if (!od.data) od.data = odGetLS(OD_DATA_KEY + studentId);
+    if (od.data) { odRestorePos(); odRender(); } else { odRenderLoading(); }
+    // 最新の本文を取りに行く（前回の内容があれば先に表示しておき、変わっていたら描き直す）
+    try {
+      const res = await fetch(`${GAS_URL}?ondoku=1&id=${encodeURIComponent(studentId)}`);
+      const d = await res.json();
+      if (!document.getElementById("od-overlay")) return;
+      if (!d.ok) { if (!od.data) { od.error = d.error || "読み込めませんでした"; odRenderLoading(); } return; }
+      const changed = JSON.stringify(d) !== JSON.stringify(od.data);
+      od.data = d; odSetLS(OD_DATA_KEY + studentId, d);
+      if (changed) { odRestorePos(); odRender(); }
+    } catch (err) {
+      if (!od.data && document.getElementById("od-overlay")) { od.error = "通信できませんでした。電波のよいところで、もう一度開いてください。"; odRenderLoading(); }
+    }
+  }
+  function odClose() {
+    odCloseSheet();
+    const ov = document.getElementById("od-overlay");
+    if (ov) ov.remove();
+    if (!document.getElementById("uc-overlay")) document.body.style.overflow = "";
+    const tc = document.getElementById("toast-container"); if (tc) tc.style.zIndex = "";
+  }
+  function odTopRowHtml() {
+    return `<div class="od-toprow"><button type="button" class="uc-back" data-od="close">← 学習手帳</button></div>`;
+  }
+  function odRenderLoading() {
+    const ov = document.getElementById("od-overlay"); if (!ov) return;
+    ov.innerHTML = `<div class="od"><div class="od-controls">${odTopRowHtml()}</div>
+      <p class="od-title">音読トレーニング</p>
+      <div class="card od-empty" style="margin-top:12px;">${od.error ? escapeHtml(od.error) + `<br><button type="button" class="od-btn pri" data-od="retry" style="margin-top:10px;">もう一度読み込む</button>` : "読み込み中..."}</div></div>`;
+    odBindOverlay(ov);
+  }
+  function odRender() {
+    const ov = document.getElementById("od-overlay"); if (!ov) return;
+    const us = odUnits();
+    if (!us.length) {
+      ov.innerHTML = `<div class="od"><div class="od-controls">${odTopRowHtml()}</div>
+        <p class="od-title">音読トレーニング</p>
+        <div class="card od-empty" style="margin-top:12px;">あなたの学年の教科書は、ただいま準備中です。<br>使えるようになるまで、もう少しお待ちください。</div></div>`;
+      odBindOverlay(ov); return;
+    }
+    const u = us[od.unit], p = u.parts[od.part];
+    const n = p.s.length, d = odDoneCount(od.unit, od.part);
+    let h = `<div class="od" id="od-root" data-mode="${od.mode}" data-sv="${od.sv}" data-sl="${od.sl}">
+      <div class="od-controls">
+        ${odTopRowHtml()}
+        <div class="od-seg" role="group" aria-label="表示の切り替え">
+          <button type="button" data-odmode="both" class="${od.mode === "both" ? "on" : ""}" aria-pressed="${od.mode === "both"}">英文＋和訳</button>
+          <button type="button" data-odmode="ja" class="${od.mode === "ja" ? "on" : ""}" aria-pressed="${od.mode === "ja"}">和訳だけ</button>
+          <button type="button" data-odmode="en" class="${od.mode === "en" ? "on" : ""}" aria-pressed="${od.mode === "en"}">英文だけ</button>
+        </div>
+        <div class="od-chips">
+          <button type="button" class="od-chip ${od.sv === "on" ? "on" : ""}" data-od="sv" aria-pressed="${od.sv === "on"}">主語・述語</button>
+          <button type="button" class="od-chip ${od.sl === "on" ? "on" : ""}" data-od="sl" aria-pressed="${od.sl === "on"}">区切り /</button>
+        </div>
+      </div>
+      <p class="od-title">音読トレーニング</p>
+      <p class="od-book">${escapeHtml(od.data.book || "")}</p>
+      <button type="button" class="od-unitbtn" data-od="toc"><span class="od-ut"><b>${escapeHtml(u.title)}</b><small>${escapeHtml(u.name)}</small></span><span class="od-toc">目次 ▾</span></button>
+      <div class="od-parts">${u.parts.map((pp, pi) => `<button type="button" class="od-part ${pi === od.part ? "on" : ""}" data-odpart="${pi}"><b>${escapeHtml(pp.title.replace("Read and Think", "R&T"))}</b><small>${odDoneCount(od.unit, pi)} / ${pp.s.length}</small></button>`).join("")}</div>
+      <div class="od-legend">
+        <span><b class="od-r od-rS">主語</b>(S)</span>
+        <span><b class="od-r od-rV">述語</b>(V)</span>
+        <span><i class="od-sw od-t0"></i><i class="od-sw od-t1"></i><i class="od-sw od-t2"></i>同じ色が英文と和訳の対応</span>
+      </div>
+      <div class="od-head"><h2>${escapeHtml(p.sub || "")}</h2>${p.intro ? `<p>${escapeHtml(p.intro)}</p>` : ""}
+        <div class="od-prog"><span>言えた</span><div class="od-bar"><i style="width:${n ? d / n * 100 : 0}%"></i></div><b>${d} / ${n}</b></div></div>
+      <div class="od-list">`;
+    p.s.forEach((s, si) => {
+      const ok = !!od.done[odKey(od.unit, od.part, si)];
+      h += `<article class="od-card ${ok ? "done" : ""}" data-si="${si}">
+        <div class="od-top"><span class="od-no">${si + 1}</span>${s.sp ? `<span class="od-who">${escapeHtml(s.sp)}</span>` : ""}</div>
+        <div class="od-chunks">${s.c.map(odChunkHtml).join("")}</div>
+        ${s.note ? `<p class="od-note">${escapeHtml(s.note)}</p>` : ""}
+        <div class="od-acts">
+          <button type="button" class="od-btn pri" data-od="repeat">足していく練習</button>
+          <button type="button" class="od-btn" data-od="reveal">ぜんぶ見る</button>
+          <button type="button" class="od-btn ok ${ok ? "on" : ""}" data-od="done" aria-pressed="${ok}">${ok ? "✓ 言えた" : "言えた"}</button>
+        </div></article>`;
+    });
+    h += `</div>
+      <p class="od-foot">和訳は、英語の語順にそろえた直訳です。日本語と英語で語順がどう違うかも見比べましょう。学校のテストでは、自然な日本語にして答えます。<br>音声は、教科書のQRコードで聞いてから練習しましょう。<br>「和訳だけ」にして、ブロックをタップすると英文が出ます。全部言えるようになったら「言えた」を押しましょう。</p>
+      </div>`;
+    ov.innerHTML = h;
+    odBindOverlay(ov);
+  }
+  function odChunkHtml(c, i) {
+    return `<button type="button" class="od-ch od-t${i % 3}"><span class="od-en">${odMark(c[0])}</span><span class="od-ja">${odMark(c[1])}</span></button>`;
+  }
+  function odBindOverlay(ov) {
+    if (ov.dataset.bound) return;
+    ov.dataset.bound = "1";
+    ov.addEventListener("click", (e) => {
+      const ch = e.target.closest(".od-ch");
+      if (ch) { ch.classList.toggle("open"); return; }
+      const m = e.target.closest("[data-odmode]");
+      if (m) { od.mode = m.dataset.odmode; odRenderKeepScroll(); return; }
+      const pt = e.target.closest("[data-odpart]");
+      if (pt) { od.part = Number(pt.dataset.odpart); odSavePos(); odRender(); ov.scrollTop = 0; return; }
+      const a = e.target.closest("[data-od]");
+      if (!a) return;
+      const act = a.dataset.od;
+      if (act === "close") { odClose(); return; }
+      if (act === "retry") { od.error = ""; odClose(); odOpen(); return; }
+      if (act === "sv" || act === "sl") { od[act] = od[act] === "on" ? "off" : "on"; odRenderKeepScroll(); return; }
+      if (act === "toc") { odOpenToc(); return; }
+      const card = a.closest(".od-card"); if (!card) return;
+      const si = Number(card.dataset.si);
+      if (act === "reveal") {
+        const cells = card.querySelectorAll(".od-ch");
+        const allOpen = Array.from(cells).every((x) => x.classList.contains("open"));
+        cells.forEach((x) => x.classList.toggle("open", !allOpen));
+        a.textContent = allOpen ? "ぜんぶ見る" : "かくす";
+      } else if (act === "done") {
+        const key = odKey(od.unit, od.part, si), on = !od.done[key];
+        if (on) od.done[key] = 1; else delete od.done[key];
+        odSetLS(OD_DONE_KEY + studentId, od.done);
+        odRenderKeepScroll();
+      } else if (act === "repeat") {
+        odOpenSheet(si);
+      }
+    });
+  }
+  // 表示の切り替えや「言えた」で描き直しても、読んでいた位置がずれないようにする
+  function odRenderKeepScroll() {
+    const ov = document.getElementById("od-overlay"); if (!ov) return;
+    const y = ov.scrollTop; odRender(); ov.scrollTop = y;
+  }
+
+  // ---- 目次（Unitの切り替え） ----
+  function odOpenToc() {
+    odCloseSheet();
+    const root = document.createElement("div");
+    root.id = "od-sheet";
+    root.innerHTML = `<div class="od-backdrop" data-odclose="1"></div>
+      <div class="od-sheet" role="dialog" aria-modal="true" aria-label="目次"><div class="od-sheet-in">
+        <div class="od-sheet-top"><h3>目次</h3><button type="button" class="od-x" data-odclose="1" aria-label="閉じる">✕</button></div>
+        <div class="od-toc-list">${odUnits().map((u, ui) => { const c = odUnitCount(ui); return `<button type="button" class="od-toc-item ${ui === od.unit ? "on" : ""}" data-odunit="${ui}"><span class="od-ut"><b>${escapeHtml(u.title)}</b><small>${escapeHtml(u.name)}</small></span><span class="od-cnt ${c.n && c.d === c.n ? "all" : ""}">${c.d === c.n && c.n ? "✓ " : ""}${c.d} / ${c.n}</span></button>`; }).join("")}</div>
+      </div></div>`;
+    document.body.appendChild(root);
+    root.addEventListener("click", (e) => {
+      if (e.target.closest("[data-odclose]")) { odCloseSheet(); return; }
+      const it = e.target.closest("[data-odunit]");
+      if (it) {
+        od.unit = Number(it.dataset.odunit); od.part = 0; odSavePos(); odCloseSheet(); odRender();
+        const ov = document.getElementById("od-overlay"); if (ov) ov.scrollTop = 0;
+      }
+    });
+    const cur = root.querySelector(".od-toc-item.on"); if (cur) cur.scrollIntoView({ block: "center" });
+  }
+
+  // ---- 足していく練習 ----
+  function odOpenSheet(si) {
+    odCloseSheet();
+    od.sheet = { si, dir: "front", step: 1, showEn: false };
+    const root = document.createElement("div");
+    root.id = "od-sheet";
+    root.innerHTML = `<div class="od" id="od-sheet-od" data-mode="ja" data-sv="${od.sv}" data-sl="${od.sl}">
+      <div class="od-backdrop" data-odclose="1"></div>
+      <div class="od-sheet" role="dialog" aria-modal="true" aria-label="足していく練習"><div class="od-sheet-in">
+        <div class="od-sheet-top"><h3>足していく練習</h3><button type="button" class="od-x" data-odclose="1" aria-label="閉じる">✕</button></div>
+        <div class="od-seg2"><button type="button" data-oddir="front">前から足す</button><button type="button" data-oddir="back">後ろから足す</button></div>
+        <div class="od-stage" id="od-stage"></div>
+        <p class="od-hint" id="od-hint"></p>
+        <div class="od-nav"><button type="button" class="od-btn" data-odnav="prev">◀ 前へ</button><button type="button" class="od-btn" data-odnav="next">次へ ▶</button></div>
+        <button type="button" class="od-btn" id="od-enbtn">英文を見る</button>
+      </div></div></div>`;
+    document.body.appendChild(root);
+    root.addEventListener("click", (e) => {
+      if (!od.sheet) return;
+      if (e.target.closest("[data-odclose]")) { odCloseSheet(); return; }
+      const dir = e.target.closest("[data-oddir]");
+      if (dir) { od.sheet.dir = dir.dataset.oddir; od.sheet.step = 1; odDrawSheet(); return; }
+      const nav = e.target.closest("[data-odnav]");
+      if (nav) {
+        const n = odSheetSentence().c.length;
+        if (nav.dataset.odnav === "next" && od.sheet.step < n) od.sheet.step++;
+        if (nav.dataset.odnav === "prev" && od.sheet.step > 1) od.sheet.step--;
+        odDrawSheet(); return;
+      }
+      if (e.target.closest("#od-enbtn")) { od.sheet.showEn = !od.sheet.showEn; odDrawSheet(); return; }
+      const ch = e.target.closest(".od-ch");
+      if (ch) ch.classList.toggle("open");
+    });
+    odDrawSheet();
+  }
+  function odSheetSentence() { return odUnits()[od.unit].parts[od.part].s[od.sheet.si]; }
+  function odDrawSheet() {
+    const wrap = document.getElementById("od-sheet-od"); if (!wrap || !od.sheet) return;
+    const c = odSheetSentence().c, n = c.length, sh = od.sheet;
+    // 前から足す：最初のブロックの位置は変えずに、うしろへ足していく。後ろから足す：最後から前へ足していく
+    const start = sh.dir === "front" ? 0 : n - sh.step, end = sh.dir === "front" ? sh.step : n;
+    wrap.dataset.mode = sh.showEn ? "both" : "ja";
+    document.getElementById("od-stage").innerHTML =
+      `<div class="od-step"><span>ステップ <b>${sh.step} / ${n}</b></span><span class="od-dots">${c.map((_, i) => `<i class="${i < sh.step ? "on" : ""}"></i>`).join("")}</span></div>
+       <div class="od-chunks">${c.slice(start, end).map((x, k) => odChunkHtml(x, start + k)).join("")}</div>`;
+    document.getElementById("od-hint").textContent = sh.step === n ? "最後は1文ぜんぶ。つなげて言ってみよう。" : "和訳を見ながら、英文を声に出して言おう。言えたら「次へ」。";
+    document.getElementById("od-enbtn").textContent = sh.showEn ? "英文をかくす" : "英文を見る";
+    wrap.querySelectorAll("[data-oddir]").forEach((b) => { b.classList.toggle("on", b.dataset.oddir === sh.dir); b.setAttribute("aria-pressed", b.dataset.oddir === sh.dir); });
+    wrap.querySelector('[data-odnav="prev"]').disabled = sh.step === 1;
+    wrap.querySelector('[data-odnav="next"]').disabled = sh.step === n;
+  }
+  function odCloseSheet() {
+    const r = document.getElementById("od-sheet"); if (r) r.remove();
+    od.sheet = null;
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (document.getElementById("od-sheet")) odCloseSheet();
+    else if (document.getElementById("od-overlay")) odClose();
+  });
 
   // ---------- コネーシャタブ(今は準備中の画面) ----------
   // ---- コネーシャの返事の表示(数式・図) ----
@@ -2018,6 +2376,7 @@
   function renderNotebook(el) {
     if (!NOTEBOOK_ENABLED) {
       el.innerHTML = `
+        ${odEntryHtml()}
         <div class="card coming-soon-card">
           <div class="cs-icon">📔</div>
           <p class="cs-title">現在準備中です</p>
@@ -2041,6 +2400,7 @@
     }
 
     el.innerHTML = `
+      ${odEntryHtml()}
       <div class="week-nav">
         <button id="week-prev" ${weekNavBusy ? "disabled" : ""}>← 前週</button>
         <span class="week-label">${weekNavBusy ? "⏳ 切り替え中…" : `${formatMD(weekStart)}(月)〜${formatMD(weekEnd)}(日)`}</span>
