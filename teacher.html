@@ -279,6 +279,21 @@
   .uc-item { border-top: 1px dashed var(--line); padding: 6px 0; font-size: 13px; line-height: 1.5; }
   .uc-item b { font-weight: 700; }
   .uc-item .uc-fac { display: block; font-size: 11.5px; color: var(--muted); }
+  .uc-stbtn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0 0 6px; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font-family: inherit; text-align: left; cursor: pointer; }
+  .uc-stbtn.on { border-color: var(--brand); background: var(--brand-soft); margin-bottom: 0; border-radius: 12px 12px 0 0; }
+  .uc-stbtn-main { display: flex; flex-direction: column; min-width: 0; }
+  .uc-stbtn-name { font-size: 15px; font-weight: 700; }
+  .uc-stbtn-meta { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .uc-stbtn-arr { flex: none; font-size: 11px; color: var(--brand); }
+  .uc-stdet { border: 1.5px solid var(--brand); border-top: none; border-radius: 0 0 12px 12px; padding: 10px 14px 12px; margin: 0 0 8px; background: var(--card); font-size: 13px; }
+  .uc-pc-h { font-size: 13px; font-weight: 700; margin: 12px 0 6px; color: var(--ink); }
+  .uc-pc-h.rs { color: #C0392B; }
+  .uc-pc { background: var(--paper); border-radius: 10px; border-left: 5px solid var(--ink); padding: 9px 12px; margin: 0 0 8px; }
+  .uc-pc.rs { border-left-color: #C0392B; background: #FDF1EF; }
+  .uc-pc-name { font-size: 15.5px; font-weight: 800; margin: 0 0 3px; }
+  .uc-pc-row { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; line-height: 1.5; padding: 2px 0; }
+  .uc-pc.rs .uc-pc-row { color: #C0392B; }
+  .uc-pc-rank { flex: none; font-size: 11px; font-weight: 700; color: var(--brand); background: var(--brand-soft); border-radius: 999px; padding: 0 8px; }
   .uc-note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 12px; }
   .uc-plan-row { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 6px; font-size: 12.5px; padding: 4px 0; border-top: 1px dashed var(--line); }
   .uc-plan-row:first-of-type { border-top: none; }
@@ -1152,11 +1167,12 @@
     return 1;
   }
   function ucRenderCalendar(el, opts) {
-    const personal = opts.personal || [];
+    let personal = opts.personal || [];
     if (ucCal.month == null) ucCal.month = ucDefaultMonth(personal);
     if (ucCal.view == null) ucCal.view = (opts.personalTab && personal.length) ? "mine" : "univ";
     if (!opts.personalTab) ucCal.view = "univ";
     const showUniv = ucCal.view === "univ";
+    if (showUniv && opts.personalTab) personal = []; // 「大学の日程」では生徒の予定は出さない
     const m = ucCal.month;
     const first = new Date(UC_YEAR, m - 1, 1), days = new Date(UC_YEAR, m, 0).getDate();
     const t = new Date(); const todayMd = t.getFullYear() === UC_YEAR ? `${t.getMonth() + 1}/${t.getDate()}` : "";
@@ -1186,8 +1202,8 @@
     }
     el.innerHTML = `
       ${opts.headHtml || ""}
-      <div class="uc-legend"><span><b>黒字</b>＝入試日</span><span class="rs"><b>赤字</b>＝合格発表日</span>${opts.personalTab ? `<span>★＝${ucEsc(opts.personalTab.replace(/の受験予定$/, ""))}</span>` : ""}<span>※＝要項で確認</span></div>
-      ${opts.personalTab ? `<div class="uc-seg"><button type="button" data-ucview="mine" class="${ucCal.view === "mine" ? "on" : ""}">${ucEsc(opts.personalTab)}</button><button type="button" data-ucview="univ" class="${ucCal.view === "univ" ? "on" : ""}">大学の日程も表示</button></div>` : ""}
+      <div class="uc-legend"><span><b>黒字</b>＝入試日</span><span class="rs"><b>赤字</b>＝合格発表日</span>${opts.personalTab && !showUniv ? `<span>★＝${ucEsc(opts.personalTab.replace(/の受験予定$/, ""))}</span>` : ""}<span>※＝要項で確認</span></div>
+      ${opts.personalTab ? `<div class="uc-seg"><button type="button" data-ucview="mine" class="${ucCal.view === "mine" ? "on" : ""}">${ucEsc(opts.personalTab)}</button><button type="button" data-ucview="univ" class="${ucCal.view === "univ" ? "on" : ""}">大学の日程</button></div>` : ""}
       <div class="uc-seg">${[1, 2, 3].map((mm) => `<button type="button" data-ucmonth="${mm}" class="${mm === m ? "on" : ""}">${UC_YEAR}年${mm}月</button>`).join("")}</div>
       ${showUniv ? `<div class="uc-filter"><select id="uc-univ-filter" aria-label="大学で絞り込む"><option value="all">すべての大学（${UC_U.length}校）</option>${UC_U.map((u) => `<option value="${u.key}" ${ucCal.univ === u.key ? "selected" : ""}>${u.name}</option>`).join("")}</select></div>` : ""}
       <div class="uc-grid">${UC_DOW.split("").map((w) => `<div class="uc-dow">${w}</div>`).join("")}${cells}</div>
@@ -1202,6 +1218,20 @@
     if (f) f.addEventListener("change", (e) => { ucCal.univ = e.target.value; rerender(); });
     if (opts.afterRender) opts.afterRender(el);
   }
+  // 日付をタップしたときの「受験する生徒／合格発表がある生徒」のカード表示
+  function ucPersonalDayHtml(mine, opts) {
+    const rowHtml = (e) => `<div class="uc-pc-row">${e.rank ? `<span class="uc-pc-rank">${ucEsc(e.rank)}志望</span>` : ""}<span>${ucEsc(e.txt)}</span></div>`;
+    const sec = (t, title) => {
+      const list = mine.filter((e) => e.t === t);
+      if (!list.length) return "";
+      if (!opts.showNames) {
+        return `<p class="uc-pc-h ${t}">${title}</p><div class="uc-pc ${t}">${list.map(rowHtml).join("")}</div>`;
+      }
+      const names = [...new Set(list.map((e) => e.who))];
+      return `<p class="uc-pc-h ${t}">${title}（${names.length}人）</p>` + names.map((nm) => `<div class="uc-pc ${t}"><div class="uc-pc-name">${ucEsc(nm)}</div>${list.filter((e) => e.who === nm).map(rowHtml).join("")}</div>`).join("");
+    };
+    return sec("ex", opts.showNames ? "この日に受験する生徒" : "この日の受験") + sec("rs", opts.showNames ? "この日に合格発表がある生徒" : "この日の合格発表");
+  }
   function ucDetailHtml(personal, opts, showUniv) {
     const key = ucCal.day;
     if (!key) {
@@ -1215,9 +1245,7 @@
     let html = `<h3>${mm}月${dd}日（${ucWd(key)}）${UC_HOL[key] ? ` <span class="uc-sub">${UC_HOL[key]}</span>` : ""}</h3>`;
     if (UC_SPECIAL[key]) html += `<p class="uc-sub">大学入学共通テスト 本試験（1/16・1/17）</p>`;
     const mine = personal.filter((e) => e.d === key);
-    if (mine.length) {
-      html += `<p class="uc-sec-h">${ucEsc(opts.personalTab || "受験予定")}</p>` + mine.map((e) => `<div class="uc-item ${e.t === "rs" ? "uc-red" : ""}">${opts.showNames ? `<b>${ucEsc(e.who)}</b> ` : "★ "}${ucEsc(e.txt)}${e.rank ? `<span class="uc-fac">${ucEsc(e.rank)}志望</span>` : ""}</div>`).join("");
-    }
+    if (mine.length) html += ucPersonalDayHtml(mine, opts);
     if (showUniv) {
       const pick = (fn) => UC_R.filter((r) => (ucCal.univ === "all" || r.k === ucCal.univ) && fn(r));
       const ex = pick((r) => r.ex.includes(key)), rs = pick((r) => r.res === key);
@@ -1226,13 +1254,34 @@
       if (rs.length) html += `<p class="uc-sec-h rs">合格発表</p>${block(rs, true)}`;
       if (!ex.length && !rs.length && !mine.length && !UC_SPECIAL[key]) html += `<p class="uc-sub">この日の入試・合格発表はありません。</p>`;
     } else if (!mine.length && !UC_SPECIAL[key]) {
-      html += `<p class="uc-sub">この日の予定はありません。「大学の日程も表示」に切り替えると、全大学の日程が見られます。</p>`;
+      html += `<p class="uc-sub">この日の予定はありません。「大学の日程」に切り替えると、全大学の日程が見られます。</p>`;
     }
     return html;
   }
 
   // ---------- 講師アプリ：大学入試カレンダー（塾全体の高校生の受験予定） ----------
   let ucAllShibo = null;
+  // 生徒の志望校一覧：生徒ごとのボタン。押すとその生徒の志望校が開く（もう一度押すと閉じる）
+  let ucOpenSt = null;
+  function ucStListHtml() {
+    const list = ucAllShibo || [];
+    if (!list.length) return `<p class="section-title" style="margin-top:0;">生徒の志望校一覧</p><p class="uc-sub" style="margin:0;">まだ志望校を登録した生徒はいません。</p>`;
+    return `<p class="section-title" style="margin-top:0;">生徒の志望校一覧（${list.length}人）</p><p class="uc-sub">名前を押すと、その生徒の志望校が出ます。</p>` + list.map((s) => {
+      const open = ucOpenSt === s.studentId;
+      const cards = (s.data && s.data.cards) || [];
+      const first = cards[0] ? (cards[0].u === UC_OTHER ? ((cards[0].free || {}).name || "") : ((UC_UM[cards[0].u] || {}).short || "")) : "";
+      const meta = [s.grade || "", first ? `第1志望 ${first}` : "", cards.length ? `${cards.length}校` : "共テのみ"].filter(Boolean).join("・");
+      return `<button type="button" class="uc-stbtn${open ? " on" : ""}" data-ucst="${ucEsc(s.studentId)}" aria-expanded="${open}"><span class="uc-stbtn-main"><span class="uc-stbtn-name">${ucEsc(s.name)}</span><span class="uc-stbtn-meta">${ucEsc(meta)}</span></span><span class="uc-stbtn-arr">${open ? "▲" : "▼"}</span></button>${open ? `<div class="uc-stdet"><p class="uc-sub" style="margin:0 0 4px;">最終更新：${ucEsc(s.savedAtLabel || "")}</p>${ucShiboSummaryHtml(s.data)}</div>` : ""}`;
+    }).join("");
+  }
+  function ucBindStList() {
+    const box = document.getElementById("uc-st-list"); if (!box) return;
+    box.querySelectorAll("[data-ucst]").forEach((b) => b.addEventListener("click", () => {
+      ucOpenSt = ucOpenSt === b.dataset.ucst ? null : b.dataset.ucst;
+      box.innerHTML = ucStListHtml(); ucBindStList();
+      const nb = box.querySelector(`[data-ucst="${CSS.escape(b.dataset.ucst)}"]`); if (nb) nb.focus({ preventScroll: true });
+    }));
+  }
   async function renderUnivCalendarTeacher(el, force) {
     if (!ucAllShibo || force) {
       el.innerHTML = `<p class="empty">読み込み中...</p>`;
@@ -1243,13 +1292,13 @@
     const personal = [];
     ucAllShibo.forEach((s) => ucEventsFromShibo(s.data, s.name).forEach((e) => personal.push(e)));
     personal.sort((a, b) => ucNum(a.d) - ucNum(b.d) || (a.t === "ex" ? -1 : 1));
-    const listHtml = ucAllShibo.length ? ucAllShibo.map((s) => `<div class="uc-st"><span class="uc-st-name">${ucEsc(s.name)}</span> <span class="uc-sub">${ucEsc(s.grade || "")}｜更新 ${ucEsc(s.savedAtLabel || "")}</span>${ucShiboSummaryHtml(s.data)}</div>`).join("") : `<p class="uc-sub">まだ志望校を登録した生徒はいません。</p>`;
+
     ucRenderCalendar(el, {
       personal, personalTab: "生徒の受験予定", showNames: true,
       headHtml: `<p class="uc-sub">高校生が生徒用アプリで登録した志望校から、塾全体の受験日（黒）と合格発表日（赤）を表示しています。<button type="button" class="uc-mini" id="uc-reload" style="color:var(--brand);font-weight:700;">⟳ 更新</button></p>`,
       afterRender: (root) => {
         const det = document.getElementById("uc-detail");
-        if (det && !document.getElementById("uc-st-list")) det.insertAdjacentHTML("afterend", `<div class="card" id="uc-st-list"><p class="section-title" style="margin-top:0;">生徒の志望校一覧（${ucAllShibo.length}人）</p>${listHtml}</div>`);
+        if (det && !document.getElementById("uc-st-list")) { det.insertAdjacentHTML("afterend", `<div class="card" id="uc-st-list">${ucStListHtml()}</div>`); ucBindStList(); }
         const rb = document.getElementById("uc-reload");
         if (rb) rb.addEventListener("click", () => renderUnivCalendarTeacher(el, true));
       },
