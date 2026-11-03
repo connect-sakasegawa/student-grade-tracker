@@ -897,16 +897,50 @@
     return res.json();
   }
 
+
+  // 前回読み込んだデータをこの端末に保存しておき、次に開いたときはまずそれを表示する（その裏で最新を読み込んで差し替える）
+  function appCacheGet(key) { try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : null; } catch (err) { return null; } }
+  function appCacheSet(key, d) { try { localStorage.setItem(key, JSON.stringify(d)); } catch (err) {} }
+  function appCacheClear(key) { try { localStorage.removeItem(key); } catch (err) {} }
+  function showSyncBadge(on) {
+    let b = document.getElementById("app-sync-badge");
+    if (!on) { if (b) b.remove(); return; }
+    if (b) return;
+    b = document.createElement("div");
+    b.id = "app-sync-badge";
+    b.textContent = "最新の情報を読み込み中…";
+    b.style.cssText = "position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%);z-index:9999;background:rgba(31,42,68,0.85);color:#fff;font-size:12px;padding:5px 12px;border-radius:999px;pointer-events:none;";
+    document.body.appendChild(b);
+  }
+  const APP_CACHE_KEY = "connect-app-cache-v1_" + studentId;
+
   async function loadAndRender() {
-    if (!currentData) appEl.innerHTML = `<div class="loading-screen">${LOADING_TEXT}</div>`;
+    let fromCache = false;
+    if (!currentData) {
+      const cached = appCacheGet(APP_CACHE_KEY);
+      if (cached && cached.ok) {
+        currentData = cached;
+        if (cached.isElementary && currentTab === "grades") currentTab = NOTEBOOK_ENABLED ? "notebook" : "schedule";
+        try { renderShell(); fromCache = true; } catch (err) { currentData = null; }
+        if (fromCache) showSyncBadge(true);
+      }
+      if (!fromCache) appEl.innerHTML = `<div class="loading-screen">${LOADING_TEXT}</div>`;
+    }
     let data;
     try { data = await fetchData(); }
-    catch (err) { appEl.innerHTML = `<div class="id-error">通信に失敗しました。電波の良い場所でもう一度お試しください。</div>`; return; }
-    if (!data.ok) { appEl.innerHTML = `<div class="id-error">リンクが無効です。講師に確認してください。</div>`; return; }
+    catch (err) {
+      showSyncBadge(false);
+      if (fromCache) return;
+      appEl.innerHTML = `<div class="id-error">通信に失敗しました。電波の良い場所でもう一度お試しください。</div>`; return;
+    }
+    showSyncBadge(false);
+    if (!data.ok) { appCacheClear(APP_CACHE_KEY); appEl.innerHTML = `<div class="id-error">リンクが無効です。講師に確認してください。</div>`; return; }
     if (urlId) localStorage.setItem(STORAGE_KEY_ID, urlId);
+    appCacheSet(APP_CACHE_KEY, data);
 
     checkRankChange(data.rank);
     currentData = data;
+    if (fromCache) { selectedWeekStart = null; invalidateWeekCache(); }
     if (!selectedWeekStart) selectedWeekStart = data.weekStart;
     if (data.isElementary && currentTab === "grades") currentTab = NOTEBOOK_ENABLED ? "notebook" : "schedule";
     renderShell();
@@ -1461,6 +1495,7 @@
   async function forceRefreshApp() {
     const btn = document.getElementById("force-refresh-btn");
     if (btn) btn.textContent = "更新中…";
+    appCacheClear(APP_CACHE_KEY);
     try {
       if ("caches" in window) {
         const keys = await caches.keys();
