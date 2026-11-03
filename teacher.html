@@ -581,7 +581,7 @@
         <button class="tab-btn ${currentTab === "unical" ? "active" : ""}" data-tab="unical"><span class="tab-icon">🎓</span><span style="white-space:nowrap;letter-spacing:-0.04em;">入試カレンダー</span></button>
         <button class="tab-btn ${currentTab === "grades" ? "active" : ""}" data-tab="grades"><span class="tab-icon">📊</span>成績表</button>
         <button class="tab-btn ${currentTab === "ranking" ? "active" : ""}" data-tab="ranking"><span class="tab-icon">🏆</span>ランキング</button>
-        <button class="tab-btn ${currentTab === "rules" ? "active" : ""}" data-tab="rules"><span class="tab-icon">📖</span>コネクトのルール</button>
+        <button class="tab-btn ${currentTab === "rules" ? "active" : ""}" data-tab="rules"><span class="tab-icon">📖</span>マニュアル</button>
       </nav>
     `;
     document.querySelectorAll(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
@@ -1022,7 +1022,7 @@
 
   function renderRules(el) {
     const rules = currentData.rules;
-    let html = `<p class="section-title" style="margin-top:0;">コネクトのルール</p>`;
+    let html = `<p class="section-title" style="margin-top:0;">コネクトの重要ルール</p>`;
     RULE_BOXES.forEach(r => {
       const open = openRuleId === r.id;
       html += `<div class="rule-box ${open ? "open" : ""}">
