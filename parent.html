@@ -81,6 +81,9 @@
   .year-cell.empty { border: none; background: none; }
   .year-cell.none { background: #E3E6EC; color: #4A5163; }
   .year-cell.closed { background: #5A6070; border-color: #5A6070; color: #fff; }
+  .year-cell.nostudy { background: #BFC4CC; border-color: #A3A9B3; color: #2F3542; }
+  .year-cell .year-ns { font-size: 8.5px; font-weight: 700; line-height: 1.1; color: #2F3542; white-space: nowrap; }
+  .yl-nostudy { background: #BFC4CC; border-color: #A3A9B3; }
   .year-cell.spill.lesson { background: var(--amber-soft); border-color: #E7B9A8; }
   .year-cell.spill .year-num { color: var(--amber); font-weight: 700; }
   .year-cell.spill.none .year-num, .year-cell.spill.closed .year-num { color: inherit; }
@@ -209,6 +212,12 @@
   .schedule-table td.schedule-daycell { background: var(--paper); font-weight: 700; color: var(--ink); text-align: left; padding-left: 4px; font-size: 10px; white-space: normal; line-height: 1.3; }
   .schedule-table tr.schedule-today td { background: #FBE7D0; }
   .schedule-table td.schedule-cell-changed { background: #FFF6C4; font-weight: 700; color: #8A6A1E; }
+  /* 自習不可の日(NO_STUDY_DAYS)は灰色で塗りつぶす */
+  .schedule-table tr td.schedule-nostudy, .schedule-table tr.schedule-nostudy-row td { background: #BFC4CC; color: #2F3542; }
+  .schedule-table tr td.schedule-nostudy { font-weight: 700; font-size: 12px; letter-spacing: .2em; }
+  .schedule-table tr.schedule-nostudy-row td.schedule-cell-changed { background: #FFF6C4; color: #8A6A1E; }
+  .schedule-table td.schedule-daycell .schedule-nostudy-tag { display: block; font-size: 9px; color: #2F3542; }
+  .schedule-legend-swatch.nostudy { background: #BFC4CC; border-color: #A3A9B3; }
   .schedule-legend { font-size: 11px; color: var(--muted); margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
   .schedule-legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #FFF6C4; border: 1px solid var(--line); }
   .schedule-notes-list { margin: 0; padding-left: 18px; }
@@ -917,6 +926,11 @@
 
   // ---------- スケジュールタブ(生徒用と同じ内容) ----------
   const SCHEDULE_PERIODS = ["1限", "2限", "3限", "4限", "5限", "6限"];
+  // 自習不可の日。スケジュールのその日を灰色で塗りつぶし、右側の文字を表示します。
+  // 追加するときは "年-月-日": "表示する文字" を1行ずつ足してください(例: "2027-01-10": "自習不可",)
+  const NO_STUDY_DAYS = {
+    "2026-12-13": "自習不可",
+  };
   const SCHEDULE_TIMES = ["13:00〜14:20", "14:30〜15:50", "16:00〜17:20", "17:30〜18:50", "19:00〜20:20", "20:30〜21:50"];
   const SCHEDULE_DOW = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -964,6 +978,7 @@
       <div class="year-legend">
       <span><i class="yl-box yl-none"></i>授業なし(自習は可)</span>
       <span><i class="yl-box yl-closed"></i>教室休み</span>
+      <span><i class="yl-box yl-nostudy"></i>自習不可</span>
       <span><i class="yl-hol">日</i>祝日</span>
       <span><i class="yl-spill">10/30</i>別の月の日付</span>
     </div>
@@ -977,9 +992,10 @@
       for (let i = 0; i < lead; i++) html += `<div class="year-cell empty"></div>`;
       b.cells.forEach((c) => {
         const spill = c.cm !== b.m;
-        const cls = ["year-cell", c.k === "N" ? "none" : c.k === "X" ? "closed" : "lesson", spill ? "spill" : "", c.date === today ? "today" : ""].join(" ");
+        const ns = c.k !== "X" ? NO_STUDY_DAYS[c.date] : "";
+        const cls = ["year-cell", c.k === "N" ? "none" : c.k === "X" ? "closed" : "lesson", ns ? "nostudy" : "", spill ? "spill" : "", c.date === today ? "today" : ""].join(" ");
         const num = spill ? `<span class="year-num${c.h ? " hol" : ""}"><small>${c.cm}/</small>${Number(c.date.slice(8, 10))}</span>` : `<span class="year-num${c.h ? " hol" : ""}">${Number(c.date.slice(8, 10))}</span>`;
-        html += `<button type="button" class="${cls}" data-b="${bi}" data-d="${c.date}" data-k="${c.k}" data-h="${c.h}" data-n="${c.nth}" data-w="${c.dow}">${num}${c.nth ? `<span class="year-nth">${c.nth}回</span>` : ""}</button>`;
+        html += `<button type="button" class="${cls}" data-b="${bi}" data-d="${c.date}" data-k="${c.k}" data-h="${c.h}" data-n="${c.nth}" data-w="${c.dow}" data-ns="${ns ? escapeHtml(ns) : ""}">${num}${c.nth ? `<span class="year-nth">${c.nth}回</span>` : ""}${ns ? `<span class="year-ns">${escapeHtml(ns)}</span>` : ""}</button>`;
       });
       html += `</div><p class="year-detail" id="year-detail-${bi}">日付をタップすると詳しく表示されます</p></div>`;
     });
@@ -996,7 +1012,9 @@
       if (btn.dataset.h === "1") text += " 祝日";
       if (btn.dataset.k === "L") text += ` → ${b.m}月分 第${btn.dataset.n}回の授業`;
       else if (btn.dataset.k === "X") text += " → 教室休み";
+      else if (btn.dataset.ns) text += ` → 平常授業なし・${btn.dataset.ns}`;
       else text += " → 平常授業なし(教室は自習で利用できます)";
+      if (btn.dataset.k === "L" && btn.dataset.ns) text += `(${btn.dataset.ns})`;
       const box = document.getElementById("year-detail-" + bi);
       if (box) {
         box.textContent = text;
@@ -1091,13 +1109,24 @@
     html += `<thead><tr><th rowspan="2">日付</th>${SCHEDULE_PERIODS.map((p) => `<th>${p}</th>`).join("")}</tr>`;
     html += `<tr>${SCHEDULE_TIMES.map((t) => `<th class="schedule-time-row">${t}</th>`).join("")}</tr></thead><tbody>`;
 
+    let hasNoStudyDay = false;
     for (let day = 1; day <= daysInMonth; day++) {
       const dateCompact = `${year}${String(monthNum).padStart(2, "0")}${String(day).padStart(2, "0")}`;
       const dowIndex = new Date(year, monthNum - 1, day).getDay();
       const dow = SCHEDULE_DOW[dowIndex];
       const isToday = dateCompact === todayCompact;
       const dowStyle = dowIndex === 0 ? ' style="color:#C0392B;"' : "";
-      html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell"${dowStyle}>${monthNum}/${day}<br>(${dow})</td>`;
+      const noStudyLabel = NO_STUDY_DAYS[`${year}-${String(monthNum).padStart(2, "0")}-${String(day).padStart(2, "0")}`];
+      if (noStudyLabel) {
+        hasNoStudyDay = true;
+        const hasLesson = SCHEDULE_PERIODS.some((period) => cellMap[`${dateCompact}_${period}`]);
+        if (!hasLesson) {
+          // 授業がない日は、時間の欄をまとめて1つの灰色の枠にして文字を出す
+          html += `<tr class="${isToday ? "schedule-today" : ""}"><td class="schedule-daycell"${dowStyle}>${monthNum}/${day}<br>(${dow})</td><td class="schedule-nostudy" colspan="${SCHEDULE_PERIODS.length}">${escapeHtml(noStudyLabel)}</td></tr>`;
+          continue;
+        }
+      }
+      html += `<tr class="${[isToday ? "schedule-today" : "", noStudyLabel ? "schedule-nostudy-row" : ""].join(" ").trim()}"><td class="schedule-daycell"${dowStyle}>${monthNum}/${day}<br>(${dow})${noStudyLabel ? `<span class="schedule-nostudy-tag">${escapeHtml(noStudyLabel)}</span>` : ""}</td>`;
       SCHEDULE_PERIODS.forEach((period) => {
         const cell = cellMap[`${dateCompact}_${period}`];
         if (!cell) { html += `<td></td>`; return; }
@@ -1109,6 +1138,7 @@
 
     html += `</tbody></table></div>`;
     html += `<p class="schedule-legend"><span class="schedule-legend-swatch"></span>前回から日時が変更になったコマ</p>`;
+    if (hasNoStudyDay) html += `<p class="schedule-legend"><span class="schedule-legend-swatch nostudy"></span>自習不可の日（自習はできません）</p>`;
     html += `</div>`;
 
     html += koshuCounterHtml(monthNum);
