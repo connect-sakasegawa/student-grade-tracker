@@ -945,28 +945,39 @@
   const REGULAR_TEST_NAMES = ["1学期中間テスト", "1学期期末テスト", "2学期中間テスト", "2学期期末テスト", "学年末テスト"];
   const JITSURYOKU_TEST_NAMES = ["第1回実力テスト（6月）", "第2回実力テスト（9月）", "第3回実力テスト（11月）", "第4回実力テスト（1月）"];
   let selectedRankingTestName = "all";
+  let selectedRankingLevel = "jh"; // jh=中学生 / hs=高校生 / all=総合
+  const RANKING_LEVELS = [["jh", "中学生"], ["hs", "高校生"], ["all", "総合"]];
+  function rankingLevelOf(grade) {
+    const g = String(grade || "").trim();
+    if (g.indexOf("高") === 0) return "hs";
+    if (g.indexOf("中") === 0) return "jh";
+    return "other";
+  }
 
   function renderRanking(el) {
     const allRanking = currentData.ranking || [];
     let html = `
       <div class="card guide-card">
         <p class="guide-title">成績アップランキング</p>
-        <p class="guide-item">テスト区分を選択してください。ランキングは「定期テスト」と「実力テスト」で区別しています。担当生徒に対して、他の生徒の成績やランキングについて口外しないように注意してください。</p>
+        <p class="guide-item">「中学生」「高校生」「総合」を切り替えて、テスト区分を選択してください。ランキングは「定期テスト」と「実力テスト」で区別しています。担当生徒に対して、他の生徒の成績やランキングについて口外しないように注意してください。</p>
       </div>
     `;
+    if (selectedRankingLevel === "hs" && JITSURYOKU_TEST_NAMES.indexOf(selectedRankingTestName) >= 0) selectedRankingTestName = "all";
+    html += `<div class="uc-seg" id="ranking-level-seg">${RANKING_LEVELS.map(([k, label]) => `<button type="button" data-rklevel="${k}" class="${selectedRankingLevel === k ? "on" : ""}">${label}</button>`).join("")}</div>`;
     html += `<div class="field schedule-month-select">
       <select id="ranking-test-select">
         <option value="all" ${selectedRankingTestName === "all" ? "selected" : ""}>すべてのテスト</option>
         <optgroup label="定期テスト">
           ${REGULAR_TEST_NAMES.map((n) => `<option value="${escapeHtml(n)}" ${selectedRankingTestName === n ? "selected" : ""}>${escapeHtml(n)}</option>`).join("")}
         </optgroup>
-        <optgroup label="実力テスト">
+        ${selectedRankingLevel === "hs" ? "" : `<optgroup label="実力テスト">
           ${JITSURYOKU_TEST_NAMES.map((n) => `<option value="${escapeHtml(n)}" ${selectedRankingTestName === n ? "selected" : ""}>${escapeHtml(n)}</option>`).join("")}
-        </optgroup>
+        </optgroup>`}
       </select>
     </div>`;
     html += `<div class="card">`;
-    const filtered = selectedRankingTestName === "all" ? allRanking : allRanking.filter((r) => r.testName === selectedRankingTestName);
+    const byLevel = selectedRankingLevel === "all" ? allRanking : allRanking.filter((r) => rankingLevelOf(r.grade) === selectedRankingLevel);
+    const filtered = selectedRankingTestName === "all" ? byLevel : byLevel.filter((r) => r.testName === selectedRankingTestName);
     const ranking = filtered.slice(0, 30);
     if (ranking.length === 0) {
       html += `<p class="empty">まだランキングデータがありません</p>`;
@@ -980,7 +991,7 @@
             <span class="rank-list-title">${escapeHtml(r.studentName)}
               ${r.rank ? `<span class="rank-medal-mini">${medalIcon(r.rank.className, 14)}${escapeHtml(r.rank.rankName)}</span>` : ""}
             </span>
-            <span class="rank-list-sub">${escapeHtml(r.subject)} ・ ${escapeHtml(r.testName)} ・ 担当:${escapeHtml(r.teacherName || "未設定")}</span>
+            <span class="rank-list-sub">${r.grade ? `${escapeHtml(r.grade)} ・ ` : ""}${escapeHtml(r.subject)} ・ ${escapeHtml(r.testName)} ・ 担当:${escapeHtml(r.teacherName || "未設定")}</span>
           </span>
           <span class="rank-list-diff">+${r.diff}</span>
         </div>`;
@@ -989,6 +1000,10 @@
     html += `</div>`;
     el.innerHTML = html;
 
+    el.querySelectorAll("[data-rklevel]").forEach((b) => b.addEventListener("click", () => {
+      selectedRankingLevel = b.dataset.rklevel;
+      renderRanking(document.getElementById("tab-content"));
+    }));
     const rankingSelect = document.getElementById("ranking-test-select");
     if (rankingSelect) {
       rankingSelect.addEventListener("change", (e) => {
