@@ -405,6 +405,73 @@
   .wb-pager button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-family: inherit; font-size: 12.5px; cursor: pointer; }
   .wb-pager button:disabled { opacity: .4; cursor: default; }
   .wb-under { text-align: right; margin: 6px 0 2px; }
+  /* ---- 動く板書(v37: 解説の要点を、ショート動画のように1枚ずつ見せる) ---- */
+  .wb .wb-surface.km-surface { position: relative; padding: 0; min-height: 0; aspect-ratio: 3 / 4; overflow-x: clip; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: pan-y; line-height: 1.85; }
+  .wb.km-talking .wb-konesha { animation: wbBob .9s ease-in-out infinite; }
+  .km-bars { position: absolute; z-index: 2; top: 10px; left: 12px; right: 86px; display: flex; gap: 4px; }
+  .km-bars span { flex: 1; height: 4px; border-radius: 2px; background: rgba(31,42,68,.14); overflow: hidden; }
+  .km-bars i { display: block; height: 100%; width: 0; background: var(--brand); }
+  .km-count { position: absolute; z-index: 2; top: 20px; left: 12px; font: 600 11px 'Inter', system-ui, sans-serif; color: var(--muted); }
+  .km-slide { padding: 50px 18px 82px; display: flex; flex-direction: column; gap: 4px; animation: kmIn .45s ease-out both; }
+  .km-slide.km-back { animation-name: kmBack; }
+  @keyframes kmIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+  @keyframes kmBack { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+  .km-title { font-size: 20px; line-height: 1.45; color: #1F3F9E; margin: 0 0 2px; }
+  .km-ln { font-size: 16px; line-height: 1.85; margin: 0; }
+  .km-ln .wb-box { margin: 22px 2px 4px; }
+  .km-mk { background-image: linear-gradient(transparent 58%, rgba(255,214,64,.75) 58%); background-repeat: no-repeat; background-size: 100% 100%; }
+  .km-slide .km-mk { background-size: 0% 100%; animation: kmMk .7s ease-out forwards; animation-delay: calc(var(--at, 0s) + var(--d, .9s)); }
+  @keyframes kmMk { to { background-size: 100% 100%; } }
+  .km-w { clip-path: inset(0 100% 0 0); animation: kmWrite var(--d, .9s) steps(14, end) var(--at, 0s) forwards; }
+  @keyframes kmWrite { to { clip-path: inset(0 0 0 0); } }
+  .km-fig { display: block; width: 100%; height: auto; margin: 4px 0; overflow: visible; }
+  .km-fig text { font-family: 'Klee One', 'Zen Maru Gothic', sans-serif; font-weight: 600; }
+  .km-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: kmDraw var(--d, .7s) ease-out var(--at, 0s) forwards; }
+  @keyframes kmDraw { to { stroke-dashoffset: 0; } }
+  .km-t { stroke-width: .9; stroke-dasharray: 160; stroke-dashoffset: 160; fill-opacity: 0; animation: kmDrawT .7s ease-out var(--at, 0s) forwards, kmFill .3s ease-out calc(var(--at, 0s) + .5s) forwards; }
+  @keyframes kmDrawT { to { stroke-dashoffset: 0; } }
+  @keyframes kmFill { to { fill-opacity: 1; } }
+  .km-tilt { transform-box: view-box; transform-origin: 150px 62px; animation: kmTilt 2.4s ease-in-out var(--at, 0s) both; }
+  @keyframes kmTilt { 0% { transform: rotate(-7deg); } 55% { transform: rotate(2deg); } 100% { transform: rotate(0); } }
+  .km-pop { opacity: 0; animation: kmPop .5s ease-out var(--at, 0s) forwards; }
+  @keyframes kmPop { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: none; } }
+  .km-zu { display: block; max-width: 100%; max-height: 210px; margin: 4px auto; }
+  .km-sub { position: absolute; z-index: 2; left: 10px; right: 10px; bottom: 10px; min-height: 48px; padding: 7px 11px; border-radius: 10px; background: rgba(31,42,68,.86); color: #fff; font: 700 13.5px/1.6 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', sans-serif; }
+  .km-pause { position: absolute; z-index: 4; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .km-pause span { width: 64px; height: 64px; border-radius: 50%; background: rgba(31,42,68,.7); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .km-hint { position: absolute; z-index: 2; top: 48%; font: 700 22px 'Inter', sans-serif; color: rgba(31,42,68,.18); pointer-events: none; }
+  .km-hint.l { left: 4px; } .km-hint.r { right: 4px; }
+  .km-surface.km-paused .km-slide, .km-surface.km-paused .km-slide * { animation-play-state: paused !important; }
+  .km-end { position: absolute; z-index: 5; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; background: rgba(251,252,252,.94); animation: kmIn .35s ease-out both; cursor: default; }
+  .km-end p { margin: 0 0 4px; font-size: 18px; text-align: center; line-height: 1.6; }
+  .km-pause[hidden], .km-end[hidden] { display: none !important; }
+  .km-btn { font-family: 'Inter', system-ui, sans-serif; font-size: 14.5px; font-weight: 700; border-radius: 12px; padding: 12px 16px; cursor: pointer; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); width: 100%; max-width: 260px; }
+  .km-btn.main { background: var(--brand); border-color: var(--brand); color: #fff; box-shadow: 0 3px 0 #A85608; }
+  .km-ctl { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 8px; margin: 12px 0 0; }
+  .km-ctl button, .km-ctl2 button { font-family: inherit; font-size: 13.5px; font-weight: 700; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 9px 6px; cursor: pointer; }
+  .km-ctl button:disabled { opacity: .4; cursor: default; }
+  .km-ctl2 { display: flex; gap: 8px; margin: 8px 0 2px; }
+  .km-ctl2 button { flex: 1; border-radius: 12px; font-size: 13px; padding: 10px 6px; }
+  .km-ctl2 button[aria-pressed="true"] { background: var(--brand-soft); border-color: var(--brand); color: #8A4606; }
+  .km-help { margin: 6px 0 0; font-size: 11.5px; line-height: 1.6; color: var(--muted); }
+  .km-under { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0 2px; flex-wrap: wrap; }
+  .km-explain-btn { border: 1.5px solid var(--brand); background: var(--card); color: var(--brand); border-radius: 999px; padding: 7px 12px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .km-explain-btn:disabled { opacity: .5; cursor: default; }
+  /* 質問を送ったあとの「ヒント / 解説」の選択 */
+  .km-choice { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+  .km-choice-q { margin: 0 0 2px; font-size: 18px; line-height: 1.7; }
+  .km-choice-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left; border-radius: 12px; padding: 12px 14px; font-family: 'Inter', system-ui, sans-serif; cursor: pointer; border: 2px solid; background: #fff; }
+  .km-choice-btn b { font-size: 16px; }
+  .km-choice-btn span { font-size: 12.5px; line-height: 1.55; font-weight: 500; color: #4A4F57; }
+  .km-choice-btn.hint { border-color: #2A5FB4; color: #2A5FB4; box-shadow: 0 3px 0 #9DB8E3; }
+  .km-choice-btn.explain { border-color: var(--brand); color: #B85E06; box-shadow: 0 3px 0 #F0C08A; }
+  .km-choice-btn:disabled { opacity: .5; cursor: default; }
+  .km-choice-note { margin: 0; font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .km-choice .konesha-link { align-self: flex-start; font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) {
+    .km-w, .km-draw, .km-t, .km-mk, .km-slide, .km-end, .km-pop, .km-tilt { animation-duration: .01s !important; animation-delay: 0s !important; }
+    .wb.km-talking .wb-konesha { animation: none; }
+  }
   .konesha-board-err { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--amber-soft); color: var(--amber); font-size: 13.5px; line-height: 1.7; text-align: left; }
   .konesha-input-label { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 14px 0 6px; text-align: left; }
   .wb-full { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 10px); background: #E7DCCB; overscroll-behavior: contain; }
@@ -1418,7 +1485,7 @@
     } catch (e) { return ""; }
   }
   // 板書の色の目印: [赤]重要[/赤] [青]見出し・まとめ[/青] [波]赤い波線[/波] [枠]ポイントの枠[/枠]
-  const KONESHA_INK_TAGS = { "赤": "wb-red", "青": "wb-blue", "波": "wb-wave" };
+  const KONESHA_INK_TAGS = { "赤": "wb-red", "青": "wb-blue", "波": "wb-wave", "マ": "km-mk" }; // マ = 黄色いマーカー(v37 動く板書)
   // 文章のなかの数式($...$ / $$...$$)と色の目印を、板書の表示にする
   function koneshaInkHtml(raw) {
     raw = raw.replace(/^\n+|\n+$/g, "").replace(/\n?\[枠\]\n?/g, "[枠]").replace(/\n?\[\/枠\]\n?/g, "[/枠]").replace(/\n?(\$\$[\s\S]+?\$\$)\n?/g, "$1");
@@ -1427,11 +1494,11 @@
     let s = raw.replace(/\$\$[\s\S]+?\$\$|\$[^$\n]+?\$/g, (p) => { math.push(p); return "\u0000" + (math.length - 1) + "\u0000"; });
     s = escapeHtml(s);
     for (let i = 0; i < 3; i++) {
-      s = s.replace(/\[(赤|青|波|枠)\]([\s\S]*?)\[\/\1\]/g, (m, t, inner) => t === "枠"
+      s = s.replace(/\[(赤|青|波|枠|マ)\]([\s\S]*?)\[\/\1\]/g, (m, t, inner) => t === "枠"
         ? `<span class="wb-box"><span class="wb-box-label">point</span>${inner}</span>`
         : `<span class="${KONESHA_INK_TAGS[t]}">${inner}</span>`);
     }
-    s = s.replace(/\[\/?(赤|青|波|枠)\]/g, "").replace(/\n/g, "<br />"); // 閉じ忘れた目印は消す
+    s = s.replace(/\[\/?(赤|青|波|枠|マ)\]/g, "").replace(/\n/g, "<br />"); // 閉じ忘れた目印は消す
     return s.replace(/\u0000(\d+)\u0000/g, (m, i) => {
       const p = math[Number(i)];
       const display = p.indexOf("$$") === 0;
@@ -1455,10 +1522,307 @@
     return out + koneshaInkHtml(rest);
   }
 
+
+  // ---- 動く板書(v37) ----
+  // 解説の返事の最後に [[スライド]]{JSON}[[/スライド]] が付いていれば、要点を1枚ずつ自動でめくって見せる。
+  // 付いていない・壊れているときは、これまでどおりの板書(全文)を表示する。
+  const KONESHA_SLIDE_RE = /\[\[スライド\]\]([\s\S]*?)(?:\[\[\/スライド\]\]|$)/;
+  function koneshaSplitSlides(text) {
+    text = String(text || "");
+    const m = text.match(KONESHA_SLIDE_RE);
+    if (!m) return { body: text, slides: null };
+    const body = (text.slice(0, m.index) + text.slice(m.index + m[0].length)).replace(/\s+$/, "");
+    return { body, slides: koneshaParseSlides(m[1]) };
+  }
+  function koneshaParseSlides(raw) {
+    let s = String(raw || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
+    const a = s.indexOf("{"), b = s.lastIndexOf("}");
+    if (a === -1 || b <= a) return null;
+    s = s.slice(a, b + 1);
+    let d;
+    try { d = JSON.parse(s); } catch (e) { try { d = JSON.parse(s.replace(/,\s*([\]}])/g, "$1")); } catch (e2) { return null; } }
+    const list = Array.isArray(d) ? d : d && d.slides;
+    if (!Array.isArray(list)) return null;
+    const str = (v, n) => (typeof v === "string" || typeof v === "number") ? String(v).slice(0, n) : "";
+    const out = list.slice(0, 6).map((x) => {
+      if (!x || typeof x !== "object") return null;
+      const lines = (Array.isArray(x.lines) ? x.lines : []).map((l) => str(l, 120)).filter(Boolean).slice(0, 5);
+      const slide = { title: str(x.title, 40), lines, say: str(x.say, 160), fig: koneshaCleanFig(x.fig) };
+      return slide.title || lines.length ? slide : null;
+    }).filter(Boolean);
+    return out.length >= 2 ? out : null;
+  }
+  function koneshaCleanFig(f) {
+    if (!f || typeof f !== "object") return null;
+    const s = (v, n) => (typeof v === "string" || typeof v === "number") ? String(v).replace(/\$/g, "").slice(0, n || 40) : "";
+    const arr = (v, n) => Array.isArray(v) ? v.slice(0, n) : [];
+    switch (f.type) {
+      case "step": return f.from && f.to ? { type: "step", from: s(f.from), op: s(f.op, 24), to: s(f.to) } : null;
+      case "check": { const rows = arr(f.rows, 4).map((r) => s(r)).filter(Boolean); return rows.length >= 2 ? { type: "check", rows } : null; }
+      case "balance": return f.left && f.right ? { type: "balance", left: s(f.left, 16), right: s(f.right, 16) } : null;
+      case "flow": { const steps = arr(f.steps, 4).map((r) => s(r, 20)).filter(Boolean); return steps.length >= 2 ? { type: "flow", steps } : null; }
+      case "chips": {
+        const groups = arr(f.groups, 3).filter(Array.isArray).map((g) => [s(g[0], 10), arr(g[1], 4).map((w) => s(w, 16)).filter(Boolean)]).filter((g) => g[1].length);
+        return groups.length >= 2 ? { type: "chips", groups, mark: Number.isInteger(f.mark) ? f.mark : -1 } : null;
+      }
+      case "fix": return f.wrong && f.right ? { type: "fix", wrong: s(f.wrong), right: s(f.right) } : null;
+      case "rule": { const rows = arr(f.rows, 4).filter(Array.isArray).map((r) => [s(r[0], 16), s(r[1], 16), s(r[2], 14)]).filter((r) => r[0] && r[1]); return rows.length ? { type: "rule", rows } : null; }
+      case "pair": { const rows = arr(f.rows, 4).filter(Array.isArray).map((r) => [s(r[0], 40), r[1] === "ng" ? "ng" : "ok"]).filter((r) => r[0]); return rows.length ? { type: "pair", rows } : null; }
+      case "zu": return { type: "zu" };
+    }
+    return null;
+  }
+  // 本文の [[図]] (スライドの {"type":"zu"} で使う)
+  function koneshaFirstFigure(body) {
+    const m = String(body || "").match(/\[\[図\]\]([\s\S]*?)\[\[\/図\]\]/);
+    return m ? koneshaSanitizeSvg(m[1].trim()) : "";
+  }
+
+  // 図の型(AIは型の名前と文字だけを書く。絵はここで描く)
+  const KM_INK = "#1F2328", KM_RED = "#D0263A", KM_BLUE = "#1F3F9E", KM_GRAY = "#5A6470";
+  function kmW(str) { let w = 0; for (const ch of String(str)) w += /[\x20-\x7e]/.test(ch) ? .58 : 1; return w || 1; }
+  function kmFit(str, maxW, base) { return Math.max(11, Math.min(base, maxW / kmW(str))); }
+  function kmT(txt, x, y, at, fill, size, anchor) {
+    return txt ? `<text class="km-t" style="--at:${at.toFixed(2)}s" x="${x}" y="${y}" font-size="${size.toFixed(1)}" text-anchor="${anchor || "middle"}" fill="${fill}" stroke="${fill}">${escapeHtml(txt)}</text>` : "";
+  }
+  function kmP(d, at, col, w, dur) {
+    return `<path class="km-draw" pathLength="1" style="--at:${at.toFixed(2)}s;--d:${dur || .7}s" d="${d}" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+  }
+  const KM_FIGS = {
+    step(f, at) {
+      let h = `<svg class="km-fig" viewBox="0 0 300 150" aria-label="式の変形">`;
+      h += kmT(f.from, 150, 38, at, KM_INK, kmFit(f.from, 240, 26));
+      h += kmP("M26 30 C12 62 12 100 26 128 M26 128 l-8 -9 M26 128 l9 -7", at + .8, KM_RED, 2.5);
+      h += kmT(f.op, 152, 84, at + .9, KM_RED, kmFit(f.op, 230, 19));
+      h += kmT(f.to, 150, 132, at + 1.5, KM_INK, kmFit(f.to, 240, 30));
+      h += kmP("M64 143 Q150 149 236 141", at + 2.2, KM_RED, 2, .5);
+      return { html: h + `</svg>`, end: at + 2.7 };
+    },
+    check(f, at) {
+      const n = f.rows.length, H = 36 + 44 * (n - 1) + 26;
+      let h = `<svg class="km-fig" viewBox="0 0 300 ${H}" aria-label="計算の流れ">`, lastSize = 24, lastY = 0, lastX = 40;
+      f.rows.forEach((r, i) => {
+        const size = kmFit(r, 230, 26), y = 36 + i * 44, x = /^[=＝]/.test(r) ? 52 : 34;
+        h += kmT(r, x, y, at + i * .7, KM_INK, size, "start");
+        lastSize = size; lastY = y; lastX = x;
+      });
+      const last = f.rows[n - 1], w = lastSize * kmW(last), cx = lastX + w / 2, cy = lastY - lastSize * .35, rx = Math.min(140, w / 2 + 14), ry = lastSize * .8;
+      const c = at + n * .7 + .1;
+      h += kmP(`M${(cx - rx).toFixed(1)} ${cy.toFixed(1)} A${rx.toFixed(1)} ${ry.toFixed(1)} 0 1 1 ${(cx + rx).toFixed(1)} ${cy.toFixed(1)} A${rx.toFixed(1)} ${ry.toFixed(1)} 0 1 1 ${(cx - rx + 4).toFixed(1)} ${(cy + 4).toFixed(1)}`, c, KM_RED, 2.6, .7);
+      return { html: h + `</svg>`, end: c + .8 };
+    },
+    balance(f, at) {
+      let h = `<svg class="km-fig" viewBox="0 0 300 150" aria-label="天びん">`;
+      h += kmP("M150 140 L150 62 M120 140 L180 140", at, KM_GRAY, 4);
+      h += `<g class="km-tilt" style="--at:${(at + 1.2).toFixed(2)}s">`;
+      h += kmP("M40 62 L260 62", at + .4, KM_INK, 4);
+      h += kmP("M58 62 L26 100 L114 100 L82 62 M218 62 L186 100 L274 100 L242 62", at + .8, KM_GRAY, 2.5);
+      h += kmT(f.left, 70, 93, at + 1.1, KM_BLUE, kmFit(f.left, 80, 19));
+      h += kmT(f.right, 230, 93, at + 1.4, KM_BLUE, kmFit(f.right, 80, 19));
+      h += `</g>` + kmP("M156 62 A6 6 0 1 1 144 62 A6 6 0 1 1 156 62", at + .2, KM_INK, 3);
+      return { html: h + `</svg>`, end: at + 2.2 };
+    },
+    flow(f, at) {
+      const n = f.steps.length, H = n * 54 - 10;
+      let h = `<svg class="km-fig" viewBox="0 0 300 ${H}" aria-label="流れ">`;
+      f.steps.forEach((t, i) => {
+        const y0 = i * 54, a = at + i * .7, last = i === n - 1;
+        h += kmP(`M40 ${y0 + 2} L260 ${y0 + 2} L260 ${y0 + 38} L40 ${y0 + 38} Z`, a, last ? KM_RED : KM_GRAY, last ? 2.6 : 2, .5);
+        h += kmT(t, 150, y0 + 27, a + .2, last ? KM_RED : KM_INK, kmFit(t, 200, 19));
+        if (!last) h += kmP(`M150 ${y0 + 40} L150 ${y0 + 52} M150 ${y0 + 52} l-6 -6 M150 ${y0 + 52} l6 -6`, a + .45, KM_BLUE, 2.2, .25);
+      });
+      return { html: h + `</svg>`, end: at + n * .7 + .3 };
+    },
+    chips(f, at) {
+      const g = f.groups.length, colW = (284 - (g - 1) * 8) / g, maxItems = Math.max(...f.groups.map((x) => x[1].length)), H = 38 + maxItems * 30 + 20;
+      let h = `<svg class="km-fig" viewBox="0 0 300 ${H}" aria-label="仲間分け">`;
+      f.groups.forEach((grp, i) => {
+        const x1 = 8 + i * (colW + 8), cx = x1 + colW / 2, a = at + i * .6, on = i === f.mark;
+        h += kmP(`M${x1.toFixed(1)} 38 L${(x1 + colW).toFixed(1)} 38 L${(x1 + colW).toFixed(1)} ${H - 4} L${x1.toFixed(1)} ${H - 4} Z`, a, on ? KM_RED : KM_GRAY, on ? 2.6 : 1.8, .6);
+        h += kmT(grp[0], cx, 27, a + .1, on ? KM_RED : KM_BLUE, kmFit(grp[0], colW, 15));
+        grp[1].forEach((w, k) => { h += kmT(w, cx, 68 + k * 30, a + .3 + k * .15, KM_INK, kmFit(w, colW - 12, 20)); });
+      });
+      return { html: h + `</svg>`, end: at + g * .6 + .6 };
+    },
+    fix(f, at) {
+      const sz = kmFit(f.wrong, 240, 24), w = sz * kmW(f.wrong), s = at + .8;
+      let h = `<svg class="km-fig" viewBox="0 0 300 130" aria-label="まちがい直し">`;
+      h += kmT(f.wrong, 150, 42, at, KM_INK, sz);
+      h += kmP(`M${(150 - w / 2 - 4).toFixed(1)} 36 L${(150 + w / 2 + 4).toFixed(1)} 32`, s, KM_RED, 2.6, .5);
+      h += kmT("×", Math.min(290, 150 + w / 2 + 14), 22, s + .3, KM_RED, 20);
+      h += kmP("M150 56 L150 82 M150 82 l-7 -8 M150 82 l7 -8", s + .5, KM_RED, 2.5, .35);
+      h += kmT(f.right, 150, 116, s + .9, KM_RED, kmFit(f.right, 260, 27));
+      return { html: h + `</svg>`, end: s + 1.6 };
+    },
+    rule(f, at) {
+      const n = f.rows.length, H = 30 + 40 * (n - 1) + 18;
+      let h = `<svg class="km-fig" viewBox="0 0 300 ${H}" aria-label="変化の表">`;
+      f.rows.forEach((r, i) => {
+        const y = 30 + i * 40, a = at + i * .55;
+        h += kmT(r[0], 8, y, a, KM_INK, kmFit(r[0], 72, 20), "start");
+        h += kmP(`M84 ${y - 7} L98 ${y - 7} M98 ${y - 7} l-5 -4 M98 ${y - 7} l-5 4`, a + .15, KM_GRAY, 2, .25);
+        h += kmT(r[1], 104, y, a + .25, KM_RED, kmFit(r[1], 88, 20), "start");
+        h += kmT(r[2], 198, y - 2, a + .4, KM_BLUE, kmFit(r[2], 98, 12.5), "start");
+        if (i < n - 1) h += kmP(`M8 ${y + 14} L292 ${y + 14}`, a + .5, "#C9CDD2", 1, .3);
+      });
+      return { html: h + `</svg>`, end: at + n * .55 + .5 };
+    },
+    pair(f, at) {
+      const n = f.rows.length, H = 34 + 44 * (n - 1) + 16;
+      let h = `<svg class="km-fig" viewBox="0 0 300 ${H}" aria-label="正しい文とまちがいの文">`;
+      f.rows.forEach((r, i) => {
+        const y = 34 + i * 44, a = at + i * .8;
+        h += kmT(r[0], 8, y, a, KM_INK, kmFit(r[0], 250, 19.5), "start");
+        h += r[1] === "ok" ? kmP(`M284 ${y - 18} C270 ${y - 18} 266 ${y + 4} 280 ${y + 5} C296 ${y + 6} 298 ${y - 16} 282 ${y - 19}`, a + .45, KM_RED, 2.6, .45)
+          : kmP(`M270 ${y - 17} L292 ${y + 3} M292 ${y - 17} L270 ${y + 3}`, a + .45, KM_BLUE, 2.8, .4);
+      });
+      return { html: h + `</svg>`, end: at + n * .8 + .4 };
+    },
+  };
+
+  // 1枚ぶんの板書(書く順番とタイミングもここで決める)
+  function koneshaSlideHtml(s, zuSvg) {
+    let t = .2;
+    let html = s.title ? `<p class="km-title km-w" style="--at:${t}s;--d:.6s">${koneshaInkHtml(s.title)}</p>` : "";
+    if (s.title) t += .7;
+    if (s.fig) {
+      if (s.fig.type === "zu") {
+        if (zuSvg) { html += `<img class="km-zu km-pop" style="--at:${t}s" alt="コネーシャの図" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(zuSvg)}" />`; t += 1; }
+      } else if (KM_FIGS[s.fig.type]) {
+        try { const r = KM_FIGS[s.fig.type](s.fig, t); html += r.html; t = r.end; } catch (e) {}
+      }
+    }
+    s.lines.forEach((ln) => {
+      const d = Math.min(1.6, .3 + ln.replace(/\[[^\]]+\]|\$/g, "").length * .036);
+      html += `<p class="km-ln km-w" style="--at:${t.toFixed(2)}s;--d:${d.toFixed(2)}s">${koneshaInkHtml(ln)}</p>`;
+      t += d + .25;
+    });
+    return { html, writeEnd: t };
+  }
+  function koneshaMotionHtml(slides) {
+    return `<div class="km-bars">${slides.map(() => "<span><i></i></span>").join("")}</div>
+      <div class="km-count"></div>
+      <div class="km-host"></div>
+      <span class="km-hint l" aria-hidden="true">‹</span><span class="km-hint r" aria-hidden="true">›</span>
+      <div class="km-sub" aria-live="polite"></div>
+      <div class="km-pause" hidden><span>❚❚</span></div>
+      <div class="km-end" hidden><p>ポイントは以上や！<br />くわしくは全文を読んでな。</p><button class="km-btn main" data-km="full">全文を読む</button><button class="km-btn" data-km="replay">もう一回見る</button></div>`;
+  }
+  function koneshaMotionCtlHtml() {
+    return `<div class="km-ctl"><button data-km="prev">‹ 戻る</button><button data-km="play">❚❚ 止める</button><button data-km="next">次へ ›</button></div>
+      <div class="km-ctl2"><button data-km="voice" aria-pressed="${koneshaState.voice ? "true" : "false"}">${koneshaState.voice ? "🔊 読み上げ オン" : "🔈 読み上げ オフ"}</button><button data-km="full">全文を読む</button></div>
+      <p class="km-help">板書の右をタップで次へ、左で戻る、まん中で止める。左右にスワイプしても動かせるで。</p>`;
+  }
+
+  // 再生(画面を描き直しても、何枚目まで見たかは koneshaState.motion に残る)
+  let kmActive = null;
+  function koneshaMotionStop() { if (kmActive) { kmActive.stop(); kmActive = null; } }
+  function koneshaSpeakStop() { try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {} }
+  document.addEventListener("visibilitychange", () => { if (document.hidden && kmActive) kmActive.pause(); });
+  function koneshaMotionMount(root, slides, zuSvg, mst, onFull) {
+    koneshaMotionStop();
+    const stage = root.querySelector(".km-surface");
+    if (!stage) return;
+    const wbEl = stage.closest(".wb");
+    const host = stage.querySelector(".km-host"), sub = stage.querySelector(".km-sub"), endEl = stage.querySelector(".km-end"), pauseEl = stage.querySelector(".km-pause"), countEl = stage.querySelector(".km-count");
+    const fills = Array.from(stage.querySelectorAll(".km-bars i"));
+    const all = (k) => Array.from(root.querySelectorAll(`[data-km="${k}"]`));
+    let idx = Math.min(mst.idx || 0, slides.length - 1), elapsed = 0, dur = 6, paused = false, ended = false, last = 0, raf = 0, speaking = false, alive = true;
+    function speak(text) {
+      koneshaSpeakStop(); speaking = false;
+      if (!koneshaState.voice || !window.speechSynthesis || !text) return;
+      try {
+        const u = new SpeechSynthesisUtterance(text.replace(/[「」]/g, ""));
+        u.lang = "ja-JP"; u.rate = 1.1; u.pitch = 1.1;
+        const v = speechSynthesis.getVoices().find((x) => /ja/i.test(x.lang)); if (v) u.voice = v;
+        u.onend = u.onerror = () => { speaking = false; };
+        speaking = true; speechSynthesis.speak(u);
+      } catch (e) { speaking = false; }
+    }
+    function syncButtons() {
+      all("play").forEach((b) => { b.textContent = ended ? "↺ 最初から" : paused ? "▶ 再生" : "❚❚ 止める"; });
+      all("prev").forEach((b) => { b.disabled = idx === 0 && !ended; });
+    }
+    function setPaused(p) {
+      paused = p; stage.classList.toggle("km-paused", p); pauseEl.hidden = !p;
+      if (wbEl) wbEl.classList.toggle("km-talking", !p && !ended);
+      try { if (window.speechSynthesis) { if (p) speechSynthesis.pause(); else speechSynthesis.resume(); } } catch (e) {}
+      syncButtons();
+    }
+    function show(i, back) {
+      idx = Math.max(0, Math.min(slides.length - 1, i)); mst.idx = idx; mst.ended = false;
+      const s = slides[idx], b = koneshaSlideHtml(s, zuSvg);
+      host.innerHTML = `<div class="km-slide${back ? " km-back" : ""}">${b.html}</div>`;
+      sub.textContent = s.say || s.title || "";
+      sub.hidden = !(s.say || s.title);
+      countEl.textContent = `${idx + 1} / ${slides.length}`;
+      dur = Math.max(b.writeEnd + 1.4, (s.say || "").length * .17 + 1);
+      elapsed = 0; ended = false; endEl.hidden = true;
+      fills.forEach((f, k) => { f.style.width = k < idx ? "100%" : "0%"; });
+      speak(s.say);
+      setPaused(false);
+    }
+    function finish() {
+      ended = true; mst.ended = true; mst.idx = slides.length - 1;
+      fills.forEach((f) => { f.style.width = "100%"; });
+      if (!host.firstChild) { const s = slides[slides.length - 1]; host.innerHTML = `<div class="km-slide">${koneshaSlideHtml(s, zuSvg).html}</div>`; sub.textContent = s.say || ""; countEl.textContent = `${slides.length} / ${slides.length}`; }
+      endEl.hidden = false; pauseEl.hidden = true; stage.classList.remove("km-paused");
+      if (wbEl) wbEl.classList.remove("km-talking");
+      koneshaSpeakStop(); speaking = false; syncButtons();
+    }
+    function next() { if (ended) return; if (idx < slides.length - 1) show(idx + 1, false); else finish(); }
+    function prev() { if (ended) { show(slides.length - 1, true); return; } if (elapsed > 1.5 || idx === 0) show(idx, true); else show(idx - 1, true); }
+    function tick(now) {
+      if (!alive) return;
+      if (!document.body.contains(stage)) { ctl.stop(); if (kmActive === ctl) kmActive = null; return; }
+      const dt = last ? Math.min(.1, (now - last) / 1000) : 0; last = now;
+      if (!paused && !ended) {
+        elapsed += dt;
+        if (fills[idx]) fills[idx].style.width = Math.min(100, elapsed / dur * 100) + "%";
+        if (elapsed >= dur && !(koneshaState.voice && speaking)) next();
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    const ctl = {
+      stop() { alive = false; cancelAnimationFrame(raf); koneshaSpeakStop(); if (wbEl) wbEl.classList.remove("km-talking"); },
+      pause() { if (!ended && !paused) setPaused(true); },
+    };
+    kmActive = ctl;
+    // タップ・スワイプ
+    let sx = 0, sy = 0, down = false;
+    stage.addEventListener("pointerdown", (e) => { if (e.target.closest(".km-end")) return; sx = e.clientX; sy = e.clientY; down = true; });
+    stage.addEventListener("pointerup", (e) => {
+      if (!down || e.target.closest(".km-end")) return;
+      down = false;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { if (dx < 0) next(); else prev(); return; }
+      if (Math.abs(dy) > 30) return;
+      const r = stage.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+      if (x < .3) prev(); else if (x > .7) next(); else if (!ended) setPaused(!paused);
+    });
+    stage.addEventListener("pointercancel", () => { down = false; });
+    all("prev").forEach((b) => { b.onclick = prev; });
+    all("next").forEach((b) => { b.onclick = next; });
+    all("play").forEach((b) => { b.onclick = () => { if (ended) show(0, false); else setPaused(!paused); }; });
+    all("replay").forEach((b) => { b.onclick = () => show(0, false); });
+    all("full").forEach((b) => { b.onclick = () => { ctl.stop(); onFull(); }; });
+    all("voice").forEach((b) => {
+      b.onclick = () => {
+        koneshaState.voice = !koneshaState.voice;
+        const ok = !!window.speechSynthesis;
+        b.setAttribute("aria-pressed", koneshaState.voice ? "true" : "false");
+        b.textContent = koneshaState.voice ? (ok ? "🔊 読み上げ オン" : "この端末は読み上げ非対応") : "🔈 読み上げ オフ";
+        if (koneshaState.voice && !ended) show(idx, false); else { koneshaSpeakStop(); speaking = false; }
+      };
+    });
+    if (mst.ended) finish(); else show(idx, false);
+    raf = requestAnimationFrame(tick);
+  }
+
   // ---- コネーシャ質問チャット ----
   const KONESHA_DESC_LINES = ["コネクトに住みつく学問の神様", "趣味は寺社仏閣巡り", "カメムシが苦手"];
   const KONESHA_NO_TEXT_LABEL = "(画像を送りました)";
-  const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", hintLevel: "light", sessions: { hint: [], explain: [], study: [] }, cur: { hint: null, explain: null, study: null }, view: "board", page: null, full: false, fresh: false, loaded: false, busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
+  const koneshaState = { info: null, infoError: "", loadingInfo: false, category: null, mode: "hint", hintLevel: "light", pending: null, motion: null, voice: false, sessions: { hint: [], explain: [], study: [] }, cur: { hint: null, explain: null, study: null }, view: "board", page: null, full: false, fresh: false, loaded: false, busy: false, draft: "", error: "", image: null, imageBusy: false, el: null };
 
   function koneshaGreeting(info) {
     let t = `${escapeHtml(info.callName || (info.studentName + "さん"))}<br />よう来たな。`;
@@ -1555,14 +1919,15 @@
   }
   function koneshaBack() {
     if (koneshaState.busy) return;
-    Object.assign(koneshaState, { category: null, view: "board", error: "", draft: "", image: null, page: null, full: false });
+    Object.assign(koneshaState, { category: null, view: "board", error: "", draft: "", image: null, page: null, full: false, pending: null });
     koneshaRerender();
   }
   // 板書を消して、新しい質問を書けるようにする
   function koneshaNewBoard() {
     if (koneshaState.busy) return;
     koneshaState.cur[koneshaKey()] = null;
-    Object.assign(koneshaState, { error: "", page: null, full: false });
+    if (koneshaState.pending) { koneshaState.draft = koneshaState.pending.text; koneshaState.image = koneshaState.pending.image; }
+    Object.assign(koneshaState, { error: "", page: null, full: false, pending: null });
     koneshaRerender(); koneshaScrollTo("konesha-top");
   }
   // 過去の質問を開く
@@ -1570,10 +1935,8 @@
     const st = koneshaState;
     st.category = key === "study" ? "study" : "subject";
     if (key !== "study") st.mode = key;
-    const s = st.sessions[key].find((x) => x.id === id);
-    if (s && s.level) st.hintLevel = s.level;
     st.cur[key] = id;
-    Object.assign(st, { view: "board", error: "", page: null });
+    Object.assign(st, { view: "board", error: "", page: null, pending: null });
     koneshaRerender(); koneshaScrollTo("konesha-top");
   }
 
@@ -1612,34 +1975,75 @@
     koneshaRerender();
   }
 
-  async function koneshaSend() {
+  // 送るボタン: 科目の新しい質問は、送ったあとに「ちょっとだけヒント / 解説」を選んでもらう(v37)
+  //  - 選ぶまではAIを呼ばないので、回数は減らない(選んだときに1回)
+  //  - 同じ板書について続けて聞くときは、その板書と同じ種類で、すぐに送る
+  function koneshaSend() {
     const st = koneshaState;
-    if (st.busy || st.imageBusy) return;
+    if (st.busy || st.imageBusy || st.pending) return;
     const text = (st.draft || "").trim();
     const image = st.image;
     if (!text && !image) return;
     if (st.info && st.info.remaining <= 0) { st.error = "今月の質問回数の上限に達したみたいや。来月になったらまた質問できるで。急ぎのときは、教室のLINEで先生に聞いてみてな。"; koneshaRerender(); return; }
-    const key = koneshaKey(), list = st.sessions[key];
-    let session = koneshaCurSession();
+    const session = koneshaCurSession();
     const isNew = !session || session.turns.length >= KONESHA_MAX_TURNS;
+    if (st.category === "subject" && isNew) {
+      st.pending = { text, image, t: Date.now() };
+      st.draft = ""; st.image = null; st.error = ""; st.page = null; st.full = false;
+      koneshaRerender(); koneshaScrollTo("konesha-top");
+      return;
+    }
+    koneshaAsk(st.mode, text, image, isNew, null);
+  }
+  function koneshaPick(mode) {
+    const st = koneshaState, p = st.pending;
+    if (!p || st.busy) return;
+    st.pending = null;
+    koneshaAsk(mode, p.text, p.image, true, p);
+  }
+  function koneshaCancelPick() {
+    const st = koneshaState, p = st.pending;
+    if (!p || st.busy) return;
+    Object.assign(st, { pending: null, draft: p.text, image: p.image, error: "" });
+    koneshaRerender();
+  }
+  // ヒントのあとで「この問題の解説を見る」(最初の質問と写真を、解説として送り直す。1回分)
+  function koneshaHintToExplain() {
+    const st = koneshaState, session = koneshaCurSession();
+    if (st.busy || !session || !session.turns[0]) return;
+    if (st.info && st.info.remaining <= 0) { st.error = "今月の質問回数の上限に達したみたいや。来月になったらまた質問できるで。"; koneshaRerender(); return; }
+    const first = session.turns[0];
+    const image = first.thumb ? { dataUrl: first.thumb, base64: first.thumb.split(",")[1], mediaType: "image/jpeg" } : null;
+    koneshaAsk("explain", first.q === KONESHA_NO_TEXT_LABEL ? "" : first.q, image, true, null);
+  }
+
+  async function koneshaAsk(mode, text, image, forceNew, pendingBack) {
+    const st = koneshaState;
+    if (st.busy) return;
+    if (st.category === "subject") st.mode = mode === "explain" ? "explain" : "hint";
+    const key = koneshaKey(), list = st.sessions[key];
+    let session = forceNew ? null : koneshaCurSession();
+    const isNew = !session;
     if (isNew) {
-      session = { id: "s" + Date.now(), t: Date.now(), level: st.category === "subject" && st.mode === "hint" ? st.hintLevel : "", turns: [] };
+      session = { id: "s" + Date.now(), t: Date.now(), level: st.category === "subject" && st.mode === "hint" ? "light" : "", turns: [] };
       list.push(session); st.cur[key] = session.id;
     }
     const turn = { q: text || KONESHA_NO_TEXT_LABEL, thumb: image ? image.dataUrl : null, a: null, t: Date.now() };
     session.turns.push(turn);
-    st.draft = ""; st.image = null; st.error = ""; st.busy = true; st.page = null; st.fresh = false;
+    st.error = ""; st.busy = true; st.page = null; st.fresh = false;
     koneshaRerender(); koneshaScrollTo("konesha-top");
     const undo = () => {
       session.turns.pop();
       if (isNew) { list.splice(list.indexOf(session), 1); st.cur[key] = null; }
-      st.draft = text; st.image = image; // 送れなかった質問は入力欄にもどす
+      // 送れなかった質問は、選ぶ画面か入力欄にもどす
+      if (pendingBack) st.pending = pendingBack;
+      else if (!forceNew || text || image) { st.draft = text; st.image = image; }
     };
     try {
-      // 続けて聞くときは、この板書のやり取りだけを送る(関係のない昔の会話は送らない)
+      // 続けて聞くときは、この板書のやり取りだけを送る(関係のない昔の会話は送らない。スライドのデータは送らない)
       const messages = [];
-      session.turns.forEach((u) => { messages.push({ role: "user", content: u.q }); if (u.a) messages.push({ role: "assistant", content: u.a }); });
-      const payload = { action: "askKonesha", studentId, category: st.category, mode: st.mode, hintLevel: st.hintLevel, messages };
+      session.turns.forEach((u) => { messages.push({ role: "user", content: u.q }); if (u.a) messages.push({ role: "assistant", content: koneshaSplitSlides(u.a).body }); });
+      const payload = { action: "askKonesha", studentId, category: st.category, mode: st.mode, hintLevel: "light", messages };
       if (image) payload.image = { mediaType: image.mediaType, data: image.base64 };
       const r = await koneshaPost(payload);
       if (r && r.ok) {
@@ -1669,7 +2073,7 @@
     opts = opts || {};
     return `<div class="wb${opts.full ? " wb-full-board" : ""}">
         <div class="wb-konesha${opts.busy ? " wb-konesha-think" : ""}" aria-hidden="true">${koneshaHeroHtml()}</div>
-        <div class="wb-surface${opts.fresh ? " wb-write" : ""}${opts.short ? " wb-short" : ""}">${inner}</div>
+        <div class="wb-surface${opts.motion ? " km-surface" : ""}${opts.fresh ? " wb-write" : ""}${opts.short ? " wb-short" : ""}">${inner}</div>
         <div class="wb-tray"><span class="wb-eraser"></span><span class="wb-marker wb-mk-k"></span><span class="wb-marker wb-mk-r"></span><span class="wb-marker wb-mk-b"></span></div>
       </div>`;
   }
@@ -1737,7 +2141,7 @@
           <div class="konesha-desc-box">${KONESHA_DESC_LINES.map((l) => `<p>${escapeHtml(l)}</p>`).join("")}</div>
           <p class="konesha-greet konesha-voice">${koneshaGreeting(st.info)}</p>
           ${koneshaRemainHtml(st.info)}
-          <button class="konesha-entry" id="konesha-e-subject"><div class="ke-text"><b>勉強のわからないところ</b><span>英語・数学・国語・理科・社会の質問。問題の写真も送れます。ヒントか解説を選べます</span></div><div class="ke-go">›</div></button>
+          <button class="konesha-entry" id="konesha-e-subject"><div class="ke-text"><b>勉強のわからないところ</b><span>英語・数学・国語・理科・社会の質問。問題の写真も送れます。送ったあとに、ヒントか解説を選べます</span></div><div class="ke-go">›</div></button>
           <button class="konesha-entry green" id="konesha-e-study"><div class="ke-text"><b>勉強法・教材の相談</b><span>テスト勉強の進め方、ワークの使い方など</span></div><div class="ke-go">›</div></button>
           ${histCount ? histBtn : ""}
           <p class="konesha-note">AIが答えるので間違うこともあります。大事なところは先生にも確認してね。質問内容はコネクトの先生も見ることがあります。</p>
@@ -1752,55 +2156,61 @@
     const isSubject = st.category === "subject";
     const key = koneshaKey();
     const dis = st.busy ? "disabled" : "";
-    const HELP = {
-      light: "解き方の取っかかり(どの知識を使うか)を、ちょっとだけ教えます",
-      strong: "解き方の道すじを、答えの手前まで教えます",
-      explain: "最初から最後まで、できるだけ詳しく解説します",
-    };
-    const helpKey = st.mode === "explain" ? "explain" : st.hintLevel;
-    const modeHtml = isSubject ? `
-      <div class="konesha-mode">
-        <button data-mode="hint" class="${st.mode === "hint" ? "on" : ""}" ${dis}>ヒント</button>
-        <button data-mode="explain" class="${st.mode === "explain" ? "on" : ""}" ${dis}>解説</button>
-      </div>
-      ${st.mode === "hint" ? `<div class="konesha-level">
-        <button data-level="light" class="${st.hintLevel === "light" ? "on" : ""}" ${dis}>ちょっとだけヒント</button>
-        <button data-level="strong" class="${st.hintLevel === "strong" ? "on" : ""}" ${dis}>がっつりヒント</button>
-      </div>` : ""}
-      <p class="konesha-modehelp">${HELP[helpKey]}</p>` : "";
+    const modeHtml = isSubject ? `<p class="konesha-modehelp">質問を送ったら、「ちょっとだけヒント」か「解説」を選べるで。</p>` : "";
     const INTRO = {
-      light: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\nまずは[赤]取っかかりだけ[/赤]、ちょっとだけ教えるで。",
-      strong: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\n[赤]答えの手前[/赤]まで、がっつりヒント出すで。",
-      explain: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\n[赤]最初から最後まで[/赤]、できる限り詳しく解説するで。",
+      subject: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\n送ったら、[赤]ちょっとだけヒント[/赤]か[赤]解説[/赤]か、\n選べるで。",
       study: "勉強の進め方でも、教材のことでも、\nなんでも聞いてや。\n\n[青]⇒ テストまでの計画づくりも手伝うで。[/青]",
     };
-    const intro = isSubject ? (st.mode === "explain" ? INTRO.explain : INTRO[st.hintLevel]) : INTRO.study;
+    const intro = isSubject ? INTRO.subject : INTRO.study;
     const session = koneshaCurSession();
     const turns = session ? session.turns : [];
     const page = st.page === null || st.page >= turns.length ? turns.length - 1 : st.page;
-    const turn = turns[page] || null;
+    const pending = isSubject ? st.pending : null;
+    const turn = pending ? null : turns[page] || null;
     // 板書の中身
-    let board;
-    if (!turn) board = `<div class="wb-intro">${koneshaInkHtml(intro)}</div>`;
+    let board, fullBoard = "", motion = null, zuSvg = "";
+    if (pending) {
+      board = `<div class="km-choice">
+          <p class="km-choice-q">${koneshaInkHtml("[青]了解や！[/青]\nどっちで教えよか?")}</p>
+          <button class="km-choice-btn hint" id="konesha-pick-hint" ${dis}><b>ちょっとだけヒント</b><span>解き方の取っかかりだけ教えるで。まずは自分で考えたいときに</span></button>
+          <button class="km-choice-btn explain" id="konesha-pick-explain" ${dis}><b>解説</b><span>最初から最後まで、動く板書でくわしく説明するで</span></button>
+          <p class="km-choice-note">どっちを選んでも1回分やで(選ぶまでは減らへん)</p>
+          <button class="konesha-link" id="konesha-pick-cancel" ${dis}>✕ 質問を書き直す</button>
+        </div>`;
+    } else if (!turn) board = `<div class="wb-intro">${koneshaInkHtml(intro)}</div>`;
     else if (turn.a === null) board = `<div class="wb-thinking">ふむ…考え中やで…<span class="wb-dots"><i></i><i></i><i></i></span></div>`;
-    else board = koneshaRichHtml(turn.a);
+    else {
+      const sp = koneshaSplitSlides(turn.a);
+      const mkey = session.id + ":" + page;
+      if (!st.motion || st.motion.id !== mkey) st.motion = { id: mkey, idx: 0, ended: false, showFull: false };
+      fullBoard = koneshaRichHtml(sp.body);
+      if (sp.slides && !st.motion.showFull) { motion = sp.slides; zuSvg = koneshaFirstFigure(sp.body); board = koneshaMotionHtml(sp.slides); }
+      else board = fullBoard;
+    }
     // 質問のメモ(ボードに貼った付せん)
     let note = "";
-    if (turn) {
-      const thumb = turn.thumb ? `<img class="konesha-thumb" src="${turn.thumb}" alt="送った写真" />` : (turn.hadImage ? `<div class="konesha-photo-note">(写真つきの質問)</div>` : "");
-      const showText = !((turn.thumb || turn.hadImage) && turn.q === KONESHA_NO_TEXT_LABEL);
-      note = `<div class="wb-note"><div class="wb-note-label">${page === 0 ? "質問" : "続けて質問"}・${koneshaDateLabel(turn.t)}</div>${thumb}${showText ? koneshaBubbleHtml(turn.q) : ""}</div>`;
+    const noteSrc = pending ? { q: pending.text || KONESHA_NO_TEXT_LABEL, thumb: pending.image ? pending.image.dataUrl : null, t: pending.t } : turn;
+    if (noteSrc) {
+      const thumb = noteSrc.thumb ? `<img class="konesha-thumb" src="${noteSrc.thumb}" alt="送った写真" />` : (noteSrc.hadImage ? `<div class="konesha-photo-note">(写真つきの質問)</div>` : "");
+      const showText = !((noteSrc.thumb || noteSrc.hadImage) && noteSrc.q === KONESHA_NO_TEXT_LABEL);
+      note = `<div class="wb-note"><div class="wb-note-label">${pending || page === 0 ? "質問" : "続けて質問"}・${koneshaDateLabel(noteSrc.t)}</div>${thumb}${showText ? koneshaBubbleHtml(noteSrc.q) : ""}</div>`;
     }
-    const pager = turns.length > 1 ? `<div class="wb-pager">
+    // ヒントの板書の下: 「この問題の解説を見る」(写真の質問は、写真が手元に残っているときだけ)
+    const first = session && session.turns[0];
+    const canExplain = !pending && isSubject && st.mode === "hint" && turn && turn.a !== null && first && !(first.hadImage && !first.thumb);
+    const underHtml = !turn || turn.a === null ? ""
+      : motion ? koneshaMotionCtlHtml()
+      : `<div class="km-under">${canExplain ? `<button class="km-explain-btn" id="konesha-to-explain" ${dis}>この問題の解説を見る(1回分)</button>` : "<span></span>"}<span>${st.motion && st.motion.showFull && koneshaSplitSlides(turn.a).slides ? `<button class="konesha-link" id="konesha-motion-back">▶ 動く板書で見る</button>　` : ""}<button class="konesha-link" id="konesha-full">⤢ 大きく見る</button></span></div>`;
+    const pager = !pending && turns.length > 1 ? `<div class="wb-pager">
         <button id="konesha-prev" ${page <= 0 || st.busy ? "disabled" : ""}>‹ 前の板書</button>
         <span>${page + 1} / ${turns.length}</span>
         <button id="konesha-next" ${page >= turns.length - 1 || st.busy ? "disabled" : ""}>次の板書 ›</button>
       </div>` : "";
     const errHtml = st.error ? `<div class="konesha-board-err">${koneshaBubbleHtml(st.error)}</div>` : "";
-    const canFollow = session && turns.length < KONESHA_MAX_TURNS && !st.busy;
+    const canFollow = session && !pending && turns.length < KONESHA_MAX_TURNS && !st.busy;
     const previewHtml = st.imageBusy ? `<div class="konesha-preview">写真を読み込み中…</div>`
       : st.image ? `<div class="konesha-preview"><img src="${st.image.dataUrl}" alt="選んだ写真" /><span>この写真を送ります</span><button class="konesha-link" id="konesha-img-remove">✕ とりやめ</button></div>` : "";
-    const inputLabel = !session ? "質問を書く" : canFollow ? "この板書について、続けて質問する" : "続けて聞けるのは" + KONESHA_MAX_TURNS + "回までや。送ると新しい板書になるで";
+    const inputLabel = !session || pending ? "質問を書く" : canFollow ? "この板書について、続けて質問する" : "続けて聞けるのは" + KONESHA_MAX_TURNS + "回までや。送ると新しい板書になるで";
     const ph = !session ? "質問を書くか、左のボタンで写真を送ってね" : "例: 2行目の式がわからへん";
     el.innerHTML = `
       <div class="card konesha-chat m-${key}" id="konesha-top">
@@ -1811,13 +2221,14 @@
         ${modeHtml}
         <div class="konesha-tools">
           <button class="konesha-histbtn" id="konesha-hist" ${dis}><span>📋 過去の質問内容</span><b>${histCount}件</b></button>
-          ${session ? `<button class="konesha-newbtn" id="konesha-new" ${dis}>＋ 新しい質問</button>` : ""}
+          ${session && !pending ? `<button class="konesha-newbtn" id="konesha-new" ${dis}>＋ 新しい質問</button>` : ""}
         </div>
         ${note}
         ${pager}
-        ${koneshaBoardHtml(board, { fresh: st.fresh && turn && turn.a !== null && page === turns.length - 1, short: !turn || turn.a === null, busy: !!(turn && turn.a === null) })}
-        ${turn && turn.a !== null ? `<div class="wb-under"><button class="konesha-link" id="konesha-full">⤢ 大きく見る</button></div>` : ""}
+        ${koneshaBoardHtml(board, { motion: !!motion, fresh: !motion && st.fresh && turn && turn.a !== null && page === turns.length - 1, short: !pending && (!turn || turn.a === null), busy: !!(turn && turn.a === null) })}
+        ${underHtml}
         ${errHtml}
+        <div ${pending ? "hidden" : ""}>
         <p class="konesha-input-label">${inputLabel}</p>
         ${previewHtml}
         <div class="konesha-input">
@@ -1825,13 +2236,24 @@
           <textarea id="konesha-text" rows="2" maxlength="1500" placeholder="${ph}">${escapeHtml(st.draft)}</textarea>
           <button class="konesha-send" id="konesha-send" ${st.busy || st.imageBusy ? "disabled" : ""}>送る</button>
         </div>
+        </div>
         <p class="konesha-note" style="margin-top:8px;">※文字が見えやすいように写真はきれいに撮ってや<br />※写真の中のどの問題がわからへんのか教えてや<br />※写真に名前や住所が写らんようにしてや<br />※ちがう問題を聞くときは「＋ 新しい質問」を押してな<br />※質問内容は${KONESHA_KEEP_DAYS}日後に自動で消えるで</p>
       </div>
       ${st.full && turn && turn.a !== null ? `<div class="wb-full" id="konesha-fullview">
         <div class="wb-full-bar"><span>${escapeHtml(KONESHA_KEY_LABEL[key])}${turns.length > 1 ? `(${page + 1} / ${turns.length})` : ""}</span><button id="konesha-full-close">✕ 閉じる</button></div>
-        ${koneshaBoardHtml(board, { full: true })}
+        ${koneshaBoardHtml(fullBoard, { full: true })}
       </div>` : ""}`;
     st.fresh = false;
+    if (motion) koneshaMotionMount(el, motion, zuSvg, st.motion, () => { st.motion.showFull = true; koneshaRerender(); });
+    else koneshaMotionStop();
+    const pickH = document.getElementById("konesha-pick-hint"), pickE = document.getElementById("konesha-pick-explain"), pickC = document.getElementById("konesha-pick-cancel");
+    if (pickH) pickH.onclick = () => koneshaPick("hint");
+    if (pickE) pickE.onclick = () => koneshaPick("explain");
+    if (pickC) pickC.onclick = koneshaCancelPick;
+    const toEx = document.getElementById("konesha-to-explain");
+    if (toEx) toEx.onclick = koneshaHintToExplain;
+    const mb = document.getElementById("konesha-motion-back");
+    if (mb) mb.onclick = () => { Object.assign(st.motion, { showFull: false, idx: 0, ended: false }); koneshaRerender(); };
     document.getElementById("konesha-back").onclick = koneshaBack;
     document.getElementById("konesha-hist").onclick = () => { st.view = "history"; st.full = false; koneshaRerender(); koneshaScrollTo("konesha-top-any"); };
     const nb = document.getElementById("konesha-new");
@@ -1843,8 +2265,6 @@
     if (fb) fb.onclick = () => { st.full = true; koneshaRerender(); };
     const fc = document.getElementById("konesha-full-close");
     if (fc) fc.onclick = () => { st.full = false; koneshaRerender(); };
-    el.querySelectorAll(".konesha-mode button").forEach((b) => { b.onclick = () => { st.mode = b.dataset.mode; st.error = ""; st.page = null; koneshaRerender(); }; });
-    el.querySelectorAll(".konesha-level button").forEach((b) => { b.onclick = () => { st.hintLevel = b.dataset.level; koneshaRerender(); }; });
     const ta = document.getElementById("konesha-text");
     ta.oninput = () => { st.draft = ta.value; };
     document.getElementById("konesha-send").onclick = koneshaSend;
