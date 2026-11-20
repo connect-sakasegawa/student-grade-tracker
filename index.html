@@ -1711,7 +1711,7 @@
   function koneshaMotionCtlHtml() {
     return `<div class="km-ctl"><button data-km="prev">‹ 戻る</button><button data-km="play">❚❚ 止める</button><button data-km="next">次へ ›</button></div>
       <div class="km-ctl2"><button data-km="voice" aria-pressed="${koneshaState.voice ? "true" : "false"}">${koneshaState.voice ? "🔊 読み上げ オン" : "🔈 読み上げ オフ"}</button><button data-km="full">全文を読む</button></div>
-      <p class="km-help">板書の右をタップで次へ、左で戻る、まん中で止める。左右にスワイプしても動かせるで。</p>`;
+      <p class="km-help">「読み上げ」をオンにすると、わしの解説が声でも流れるで。<br />※声はスマホに入っている読み上げの音声やから、わしの本当の声とはちゃうし、読み方がおかしいところもあるかもしれへん。<br />※マナーモードのときは、音が出えへんことがあるで。</p>`;
   }
 
   // 再生(画面を描き直しても、何枚目まで見たかは koneshaState.motion に残る)
@@ -2158,7 +2158,7 @@
     const dis = st.busy ? "disabled" : "";
     const modeHtml = isSubject ? `<p class="konesha-modehelp">質問を送ったら、「ちょっとだけヒント」か「解説」を選べるで。</p>` : "";
     const INTRO = {
-      subject: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\n送ったら、[赤]ちょっとだけヒント[/赤]か[赤]解説[/赤]か、\n選べるで。",
+      subject: "どの問題がわからんの?\n問題文を書くか、写真を送ってや。\n\n送ったら、\n[赤]ちょっとだけヒント[/赤]か[赤]解説[/赤]か、\n選べるで。",
       study: "勉強の進め方でも、教材のことでも、\nなんでも聞いてや。\n\n[青]⇒ テストまでの計画づくりも手伝うで。[/青]",
     };
     const intro = isSubject ? INTRO.subject : INTRO.study;
