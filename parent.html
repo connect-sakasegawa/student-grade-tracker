@@ -383,7 +383,12 @@
     return relevant.reduce((sum, s) => sum + Number(s.score), 0);
   }
 
-  function currentTestNames() { return (currentData && currentData.isHighSchool) ? HS_TEST_NAMES : TEST_NAMES; }
+  // 成績入力が「科目を自分で登録する方式」か(高校生と、対象の私立中に通う中学生。判定はサーバー側の freeSubjects)
+  function usesFreeSubjects() {
+    if (!currentData) return false;
+    return currentData.freeSubjects !== undefined ? !!currentData.freeSubjects : !!currentData.isHighSchool;
+  }
+  function currentTestNames() { return usesFreeSubjects() ? HS_TEST_NAMES : TEST_NAMES; }
 
   function getPreviousScore(subject, testName) {
     const testNames = currentTestNames();
@@ -547,7 +552,8 @@
 
   // ---------- 成績表タブ(閲覧+「修正」ボタンで全枠を開いて編集) ----------
   function renderGrades(el) {
-    const isHS = !!(currentData && currentData.isHighSchool);
+    const isHS = usesFreeSubjects(); // 科目を自分で登録する方式(高校生・対象の私立中)
+    const isRealHS = !!(currentData && currentData.isHighSchool); // 模試は高校生だけ
     const isES = !!(currentData && currentData.isElementary);
     const testNames = isHS ? HS_TEST_NAMES : TEST_NAMES;
     const tests = (currentData.tests || []).slice().sort((a, b) => testNames.indexOf(a.testName) - testNames.indexOf(b.testName));
@@ -558,7 +564,7 @@
         <p class="grades-guide-title">保護者用アプリについて</p>
         <p class="grades-guide-item">お子様が入力した成績を確認いただけます。誤りがある場合は、各テストの「修正」ボタンから直接修正できます。</p>
       </div>
-      ${(!isHS && !isES) ? '<div id="naishin-section"></div>' : ""}
+      ${(!isRealHS && !isES) ? '<div id="naishin-section"></div>' : ""}
       <p class="section-title">テストごとの記録</p>
       <div id="tests-list">${tests.length === 0 ? '<div class="card"><p class="empty">まだ記録がありません</p></div>' : ""}</div>
     `;
@@ -636,7 +642,7 @@
       testsListEl.appendChild(card);
     });
 
-    if (isHS) {
+    if (isRealHS) {
       const mockExams = currentData.mockExams || [];
       const mockHtml = `
         <p class="section-title">模試の成績表</p>
@@ -818,7 +824,7 @@
 
   function mergeTestScoresLocally(testName, submittedSubjects) {
     currentData.tests = currentData.tests || [];
-    const isHS = !!currentData.isHighSchool;
+    const isHS = usesFreeSubjects();
     const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
     let test = currentData.tests.find((t) => t.testName === testName);
     if (!test) {
@@ -842,7 +848,7 @@
     const btn = document.getElementById("submit-btn");
     errorEl.classList.remove("show");
 
-    const isHS = !!(currentData && currentData.isHighSchool);
+    const isHS = usesFreeSubjects();
     const isES = !!(currentData && currentData.isElementary);
     const subjectKeys = isHS ? HS_SLOT_KEYS : (isES ? ES_SUBJECTS : SUBJECTS);
 
@@ -914,7 +920,7 @@
       const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "uploadPhoto", parentId, sid: currentSid, testName, imageBase64: base64, mimeType: "image/jpeg" }) });
       const result = await res.json();
       if (!result.ok) throw new Error(result.error || "failed");
-      const isHS = !!currentData.isHighSchool;
+      const isHS = usesFreeSubjects();
       const subjectKeys = isHS ? HS_SLOT_KEYS : SUBJECTS;
       let test = (currentData.tests || []).find((t) => t.testName === testName);
       if (!test) { test = { testName, subjects: subjectKeys.map((s) => ({ subject: s, score: null, average: null, target: null })) }; currentData.tests.push(test); }
