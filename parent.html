@@ -676,8 +676,22 @@
 
   // ---------- 内申点(中学生のみ。閲覧+「修正」で入力・修正) ----------
   function naishinFmt(n) { return Number.isInteger(n) ? String(n) : n.toFixed(1); }
+  // 内申点の段階(小林聖心など10段階の学校は 10。判定はサーバー側)と満点
+  function naishinScale() { return (currentData && currentData.naishin && currentData.naishin.scale === 10) ? 10 : 5; }
+  function naishinMax() { return naishinScale() === 10 ? 90 : 250; }
+  function naishinOptions() { return naishinScale() === 10 ? [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] : [5, 4, 3, 2, 1]; }
+  function naishinGroupLabel(main) { return naishinScale() === 10 ? (main ? "主要5教科" : "副教科") : (main ? "主要5教科(×4)" : "副教科(×7.5)"); }
+  function naishinNote() {
+    return naishinScale() === 10
+      ? "通知表の10段階評価を入れると、9教科の合計が自動で計算されます。オール10なら90点満点です。"
+      : "通知表の5段階評価を入れると、内申点が自動で計算されます。主要5教科は×4、副教科は×7.5で、オール5なら250点満点です。";
+  }
   function naishinCalc(ratings) {
     let total = 0, count = 0;
+    if (naishinScale() === 10) {
+      NAISHIN_MAIN.concat(NAISHIN_SUB).forEach((s) => { const r = Number(ratings[s]); if (r >= 1 && r <= 10) { total += r; count++; } });
+      return { total, complete: count === NAISHIN_MAIN.length + NAISHIN_SUB.length };
+    }
     NAISHIN_MAIN.forEach((s) => { const r = Number(ratings[s]); if (r >= 1 && r <= 5) { total += r * 4; count++; } });
     NAISHIN_SUB.forEach((s) => { const r = Number(ratings[s]); if (r >= 1 && r <= 5) { total += r * 7.5; count++; } });
     return { total, complete: count === NAISHIN_MAIN.length + NAISHIN_SUB.length };
@@ -701,19 +715,19 @@
         ? `<div class="entry"><div>${s}</div><div>${ratings[s]}</div></div>` : "";
       const c = naishinCalc(ratings);
       bodyHtml = hasData ? `
-        <div class="naishin-total"><span>${naishinTerm}の内申点<br><span style="font-size:11px;font-weight:500;color:var(--muted)">${c.complete ? "" : "未入力の教科があります"}</span></span><span><strong>${naishinFmt(c.total)}</strong> / 250</span></div>
-        <p class="naishin-group">主要5教科(×4)</p>${NAISHIN_MAIN.map(viewRow).join("")}
-        <p class="naishin-group">副教科(×7.5)</p>${NAISHIN_SUB.map(viewRow).join("")}`
+        <div class="naishin-total"><span>${naishinTerm}の内申点<br><span style="font-size:11px;font-weight:500;color:var(--muted)">${c.complete ? "" : "未入力の教科があります"}</span></span><span><strong>${naishinFmt(c.total)}</strong> / ${naishinMax()}</span></div>
+        <p class="naishin-group">${naishinGroupLabel(true)}</p>${NAISHIN_MAIN.map(viewRow).join("")}
+        <p class="naishin-group">${naishinGroupLabel(false)}</p>${NAISHIN_SUB.map(viewRow).join("")}`
         : `<p class="empty" style="padding:10px 0;">まだ記録がありません</p>`;
     } else {
       const row = (s) => `
         <div class="naishin-row"><label for="ns-${s}">${s}</label>
-          <select id="ns-${s}" data-ns="${s}"><option value="">—</option>${[5, 4, 3, 2, 1].map((n) => `<option value="${n}" ${ratings[s] === n ? "selected" : ""}>${n}</option>`).join("")}</select>
+          <select id="ns-${s}" data-ns="${s}"><option value="">—</option>${naishinOptions().map((n) => `<option value="${n}" ${ratings[s] === n ? "selected" : ""}>${n}</option>`).join("")}</select>
         </div>`;
       bodyHtml = `
-        <p class="naishin-group">主要5教科(×4)</p>${NAISHIN_MAIN.map(row).join("")}
-        <p class="naishin-group">副教科(×7.5)</p>${NAISHIN_SUB.map(row).join("")}
-        <div class="naishin-total"><span>${naishinTerm}の内申点<br><span id="naishin-incomplete" style="font-size:11px;font-weight:500;color:var(--muted)"></span></span><span><strong id="naishin-total-value">-</strong> / 250</span></div>
+        <p class="naishin-group">${naishinGroupLabel(true)}</p>${NAISHIN_MAIN.map(row).join("")}
+        <p class="naishin-group">${naishinGroupLabel(false)}</p>${NAISHIN_SUB.map(row).join("")}
+        <div class="naishin-total"><span>${naishinTerm}の内申点<br><span id="naishin-incomplete" style="font-size:11px;font-weight:500;color:var(--muted)"></span></span><span><strong id="naishin-total-value">-</strong> / ${naishinMax()}</span></div>
         <div id="naishin-error" class="msg error"></div>
         <button class="submit" id="naishin-save-btn" type="button">${naishinTerm}の内申点を保存する</button>`;
     }
@@ -724,7 +738,7 @@
           <p class="test-name">内申点(通知表)</p>
           <button type="button" class="test-edit-btn ${editingNaishin ? "active" : ""}" id="naishin-edit-btn">${editingNaishin ? "閉じる" : "修正"}</button>
         </div>
-        <p class="field-note" style="margin:0;">通知表の5段階評価から自動で計算します。主要5教科は×4、副教科は×7.5で、オール5なら250点満点です。</p>
+        <p class="field-note" style="margin:0;">${naishinNote()}</p>
         <div class="naishin-tabs">${tabs}</div>
         ${bodyHtml}
       </div>`;
@@ -757,7 +771,7 @@
         const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "saveNaishin", parentId, sid: currentSid, term: naishinTerm, ratings: newRatings }) });
         const result = await res.json();
         if (!result.ok) throw new Error(result.error || "failed");
-        if (!currentData.naishin) currentData.naishin = { terms: NAISHIN_TERMS.map((t) => ({ term: t, ratings: {}, total: null, complete: false })), max: 250 };
+        if (!currentData.naishin) currentData.naishin = { terms: NAISHIN_TERMS.map((t) => ({ term: t, ratings: {}, total: null, complete: false })), scale: naishinScale(), max: naishinMax() };
         const c = naishinCalc(newRatings);
         const idx = currentData.naishin.terms.findIndex((t) => t.term === naishinTerm);
         const entry = { term: naishinTerm, ratings: newRatings, total: c.total, complete: c.complete };
