@@ -116,6 +116,32 @@
   .submit-flag { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; margin-left: 6px; }
   .submit-flag.done { background: var(--growth-soft); color: var(--growth); }
   .submit-flag.pending { background: var(--amber-soft); color: var(--amber); }
+  /* 成績表：生徒BOX内のテスト区分（折りたたみ＋小さな表） */
+  .student-card.grade-box { padding: 14px 14px 10px; }
+  .grade-box .student-card-header { margin-bottom: 6px; }
+  .gb-test { border: 1px solid var(--line); border-radius: 9px; margin-bottom: 7px; overflow: hidden; }
+  .gb-test > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: var(--paper); font-size: 12.5px; }
+  .gb-test > summary::-webkit-details-marker { display: none; }
+  .gb-test > summary::before { content: "▸"; color: var(--muted); font-size: 11px; width: 10px; transition: transform .15s; }
+  .gb-test[open] > summary::before { transform: rotate(90deg); }
+  .gb-test-name { font-weight: 700; color: var(--ink); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gb-test-sum { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .gb-test-sum b { color: var(--ink); font-size: 12.5px; }
+  .gb-photo { font-size: 10px; padding: 1px 6px; border-radius: 999px; white-space: nowrap; }
+  .gb-photo.pending { background: var(--amber-soft); color: var(--amber); }
+  .gb-photo.done { background: var(--growth-soft); color: var(--growth); }
+  .gb-table { width: 100%; border-collapse: collapse; font-size: 12.5px; table-layout: fixed; }
+  .gb-table th { font-size: 10px; font-weight: 600; color: var(--muted); padding: 5px 2px 3px; text-align: center; border-bottom: 1px solid var(--line); }
+  .gb-table td { padding: 5px 2px; text-align: center; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .gb-table tr:last-child td { border-bottom: none; }
+  .gb-table td.gb-subj { text-align: left; padding-left: 10px; color: var(--ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gb-table th.gb-subj { text-align: left; padding-left: 10px; }
+  .gb-table td.gb-score { color: var(--ink); font-weight: 700; font-size: 13.5px; }
+  .gb-table td.gb-score.reach { color: var(--growth); }
+  .gb-table .score-diff { margin-left: 0; font-size: 12px; }
+  .gb-table .ph-ok { color: var(--growth); font-weight: 700; }
+  .gb-table .ph-ng { display: inline-block; background: var(--amber-soft); color: var(--amber); border-radius: 999px; padding: 0 6px; font-size: 10.5px; font-weight: 700; }
+  .gb-legend { font-size: 10.5px; color: var(--muted); margin: -6px 0 8px; text-align: right; }
   .student-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .student-filter button { padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 12.5px; font-family: inherit; font-weight: 600; }
   .student-filter button.active { background: var(--brand); border-color: var(--brand); color: #fff; }
@@ -849,21 +875,54 @@
   }
 
   // ===== 担当生徒の成績表 =====
+  // 生徒ごとのBOXの中に、テスト区分ごとの「小さな表」を折りたたみで並べる
   let selectedTestName = "all";
+  // 新しい順に並べるための時系列（実力テストも時期の位置に入れる）
+  const GRADE_TEST_CHRONO = ["1学期中間テスト", "第1回実力テスト（6月）", "1学期期末テスト", "第2回実力テスト（9月）", "2学期中間テスト", "第3回実力テスト（11月）", "2学期期末テスト", "第4回実力テスト（1月）", "学年末テスト"];
+  // 開閉状態（再描画しても保つ）。key = 生徒ID|テスト名 → true/false
+  const gradeOpenState = {};
 
-  function scoreEntryHtml(t, showTestName) {
-    const diff = t.diff;
-    const diffHtml = (diff === null || diff === undefined) ? "" :
-      `<span class="score-diff ${diff >= 0 ? "up" : "down"}">${diff >= 0 ? "+" : ""}${diff}</span>`;
-    const label = showTestName ? `${escapeHtml(t.testName)} / ${escapeHtml(t.subject)}` : escapeHtml(t.subject);
-    return `<div class="score-entry">
-      <span>${label}
-        <span class="score-entry-meta">目標${t.target ?? "-"} ・ 平均${t.average ?? "-"}
-          ${t.photoSubmitted === true ? '<span class="submit-flag done">写真提出済</span>' : t.photoSubmitted === false ? '<span class="submit-flag pending">写真未提出</span>' : ""}
-        </span>
-      </span>
-      <span class="score-entry-value">${t.score ?? "-"}点${diffHtml}</span>
-    </div>`;
+  function gradeTestTableHtml(tests) {
+    const rows = tests.map((t) => {
+      const diff = t.diff;
+      const diffHtml = (diff === null || diff === undefined) ? "" :
+        `<span class="score-diff ${diff >= 0 ? "up" : "down"}">${diff >= 0 ? "+" : ""}${diff}</span>`;
+      const hasScore = t.score !== null && t.score !== undefined && t.score !== "";
+      const reach = hasScore && t.target !== null && t.target !== undefined && t.target !== "" && Number(t.score) >= Number(t.target);
+      const photo = t.photoSubmitted === true ? '<span class="ph-ok">済</span>' : t.photoSubmitted === false ? '<span class="ph-ng">未</span>' : "";
+      return `<tr>
+        <td class="gb-subj">${escapeHtml(t.subject)}</td>
+        <td class="gb-score${reach ? " reach" : ""}">${hasScore ? t.score : "-"}</td>
+        <td>${diffHtml}</td>
+        <td>${t.target ?? "-"}</td>
+        <td>${t.average ?? "-"}</td>
+        <td>${photo}</td>
+      </tr>`;
+    }).join("");
+    return `<table class="gb-table">
+      <colgroup><col style="width:24%"><col style="width:16%"><col style="width:16%"><col style="width:15%"><col style="width:15%"><col style="width:14%"></colgroup>
+      <thead><tr><th class="gb-subj">科目</th><th>得点</th><th>前回比</th><th>目標</th><th>平均</th><th>写真</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  function gradeTestBlockHtml(studentId, testName, tests, defaultOpen) {
+    const key = studentId + "|" + testName;
+    const open = (key in gradeOpenState) ? gradeOpenState[key] : defaultOpen;
+    const scored = tests.filter((t) => t.score !== null && t.score !== undefined && t.score !== "" && !isNaN(Number(t.score)));
+    const total = scored.reduce((a, t) => a + Number(t.score), 0);
+    const pending = tests.filter((t) => t.photoSubmitted === false).length;
+    const flagged = tests.filter((t) => t.photoSubmitted === true || t.photoSubmitted === false).length;
+    const photoChip = pending > 0 ? `<span class="gb-photo pending">写真未提出${pending}</span>`
+      : (flagged > 0 ? `<span class="gb-photo done">写真提出済</span>` : "");
+    return `<details class="gb-test" data-key="${escapeHtml(key)}" ${open ? "open" : ""}>
+      <summary>
+        <span class="gb-test-name">${escapeHtml(testName)}</span>
+        <span class="gb-test-sum">計<b>${scored.length ? total : "-"}</b>点（${scored.length}科目）</span>
+        ${photoChip}
+      </summary>
+      ${gradeTestTableHtml(tests)}
+    </details>`;
   }
 
   function renderGrades(el) {
@@ -902,33 +961,36 @@
     </div>`;
 
     const visible = studentFilterId === "all" ? students : students.filter((s) => s.studentId === studentFilterId);
-    const allTestOrder = REGULAR_TEST_NAMES.concat(JITSURYOKU_TEST_NAMES);
+    if (visible.length > 0) html += `<p class="gb-legend">区分名をタップで開閉 ・ 目標に届いた得点は緑色</p>`;
+    const chronoIdx = (n) => { const i = GRADE_TEST_CHRONO.indexOf(n); return i < 0 ? -1 : i; };
 
     visible.forEach((s) => {
       const tests = (s.tests || []).filter((t) => selectedTestName === "all" || t.testName === selectedTestName);
-      html += `<div class="card student-card">`;
+      html += `<div class="card student-card grade-box">`;
       html += `<div class="student-card-header">
         <p class="student-card-name">${escapeHtml(s.studentName)}<span class="student-card-grade">${escapeHtml(s.grade || "")}</span></p>
         ${s.rank ? `<span class="student-rank-chip">${medalIcon(s.rank.className, 16)}${escapeHtml(s.rank.rankName)}</span>` : ""}
       </div>`;
       if (tests.length === 0) {
         html += `<p class="empty" style="padding:10px 0;">該当する成績データがまだありません</p>`;
-      } else if (selectedTestName === "all") {
-        // 「すべてのテスト」表示の時は、テスト区分ごとに見出しを付けてグループ表示する
-        const grouped = {};
-        tests.forEach((t) => { if (!grouped[t.testName]) grouped[t.testName] = []; grouped[t.testName].push(t); });
-        const orderedNames = allTestOrder.filter((n) => grouped[n]).concat(Object.keys(grouped).filter((n) => !allTestOrder.includes(n)));
-        orderedNames.forEach((testName) => {
-          html += `<p style="font-size:12.5px;font-weight:700;color:var(--muted);margin:14px 0 4px;">${escapeHtml(testName)}</p>`;
-          grouped[testName].forEach((t) => { html += scoreEntryHtml(t, false); });
-        });
       } else {
-        tests.forEach((t) => { html += scoreEntryHtml(t, false); });
+        // テスト区分ごとにまとめ、新しいテストを上に。いちばん新しい区分だけ最初から開く
+        const grouped = {};
+        const firstSeen = [];
+        tests.forEach((t) => { if (!grouped[t.testName]) { grouped[t.testName] = []; firstSeen.push(t.testName); } grouped[t.testName].push(t); });
+        const orderedNames = firstSeen.slice().sort((a, b) => chronoIdx(b) - chronoIdx(a));
+        orderedNames.forEach((testName, i) => {
+          const defaultOpen = selectedTestName !== "all" || i === 0;
+          html += gradeTestBlockHtml(s.studentId, testName, grouped[testName], defaultOpen);
+        });
       }
       html += `</div>`;
     });
     el.innerHTML = html;
 
+    document.querySelectorAll(".gb-test").forEach((d) => {
+      d.addEventListener("toggle", () => { gradeOpenState[d.dataset.key] = d.open; });
+    });
     document.querySelectorAll(".student-filter button").forEach((btn) => {
       btn.addEventListener("click", () => { studentFilterId = btn.dataset.sid; renderGrades(document.getElementById("tab-content")); });
     });
