@@ -1432,7 +1432,9 @@
     kdSeenSet(seen);
   }
   async function kdLoad(fileId) {
-    const d = await ucPost({ action: "getKondan", teacherId, fileId: fileId || "" });
+    let d;
+    try { d = await ucPost({ action: "getKondan", teacherId, fileId: fileId || "" }); }
+    catch (err) { throw new Error("通信エラー"); }
     if (!d.ok) throw new Error(d.error || "error");
     kdData = d; kdFileId = d.fileId; kdFresh = true;
     return d;
@@ -1462,7 +1464,14 @@
     if (!kdData || force) {
       el.innerHTML = `<p class="empty">懇談記録を読み込み中...</p>`;
       try { if (kdLoading && !force) await kdLoading; if (!kdData || force) await kdLoad(kdFileId); }
-      catch (err) { if (currentTab === "kondan") el.innerHTML = `<div class="card"><p class="empty">読み込みに失敗しました。電波の良い場所でもう一度お試しください。</p></div>`; return; }
+      catch (err) {
+        if (currentTab !== "kondan") return;
+        const msg = String((err && err.message) || err || "");
+        el.innerHTML = `<div class="card"><p class="empty">読み込みに失敗しました。もう一度お試しください。</p>${msg ? `<p class="kd-note" style="text-align:center;">（${escapeHtml(msg.slice(0, 200))}）</p>` : ""}<button type="button" class="year-open-btn" id="kd-retry" style="margin:8px 0 0;">⟳ もう一度読み込む</button>${kdData && kdData.fileId !== kdFileId ? `<button type="button" class="year-open-btn" id="kd-back" style="margin:8px 0 0;">← ${escapeHtml(kdData.fileName)}に戻る</button>` : ""}</div>`;
+        const rt = document.getElementById("kd-retry"); if (rt) rt.addEventListener("click", () => renderKondan(el, true));
+        const bk = document.getElementById("kd-back"); if (bk) bk.addEventListener("click", () => { kdFileId = kdData.fileId; renderKondan(el); });
+        return;
+      }
       if (currentTab !== "kondan") return;
     }
     const d = kdData;
