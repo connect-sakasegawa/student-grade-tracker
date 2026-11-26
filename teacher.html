@@ -1436,18 +1436,46 @@
     try { d = await ucPost({ action: "getKondan", teacherId, fileId: fileId || "" }); }
     catch (err) { throw new Error("通信エラー"); }
     if (!d.ok) throw new Error(d.error || "error");
+    kdCacheSet(fileId || "", d); if (!fileId) kdCacheSet(d.fileId, d);
+    // 読み込み中に別の日誌に切り替えていたら、画面の内容は差し替えない(端末への保存だけ)
+    if (fileId && kdFileId && fileId !== kdFileId) return d;
+    if (!fileId && kdUserSwitched) return d;
     kdData = d; kdFileId = d.fileId; kdFresh = true;
     return d;
+  }
+  // 前回読み込んだ懇談記録をこの端末に保存しておき、次に開いたときはまずそれを出す(その裏で最新を読み込んで差し替える)
+  function kdCacheKeyOf(fid) { return "connect-kondan-cache-v1_" + teacherId + "_" + (fid || "latest"); }
+  function kdCacheGet(fid) { try { const s = localStorage.getItem(kdCacheKeyOf(fid)); return s ? JSON.parse(s) : null; } catch (err) { return null; } }
+  function kdCacheSet(fid, d) { try { localStorage.setItem(kdCacheKeyOf(fid), JSON.stringify(d)); } catch (err) {} }
+  function kdSig(d) { return d ? (d.fileId + "|" + d.updatedLabel + "|" + (d.entries || []).map((e) => e.key + ":" + e.hash + ":" + (e.mine ? 1 : 0)).join(",") + "|" + (d.files || []).map((f) => f.id).join(",")) : ""; }
+  let kdBgBusy = false, kdUserSwitched = false;
+  function kdBgRefresh(fid) {
+    if (kdBgBusy) return;
+    kdBgBusy = true;
+    const before = kdSig(kdData);
+    kdLoad(fid).then(() => {
+      kdBgBusy = false;
+      if (currentTab !== "kondan") return;
+      if (kdSig(kdData) !== before) renderKondan(document.getElementById("tab-content"));
+      else { const n = document.getElementById("kd-checking"); if (n) n.remove(); }
+    }).catch(() => { kdBgBusy = false; const n = document.getElementById("kd-checking"); if (n) n.textContent = "（最新の確認に失敗しました）"; });
   }
   // 起動後に裏で読み込み、新しい記録があればタブに赤い点を付ける
   function kdPrefetch() {
     if (kdData || kdLoading) return;
+    const cached = kdCacheGet("");
+    if (cached && cached.ok) { kdData = cached; kdFileId = cached.fileId; }
+    const before = kdSig(kdData);
     kdLoading = kdLoad("").then(() => {
       kdLoading = null;
-      if (currentTab === "kondan") return;
+      if (currentTab === "kondan") {
+        if (kdSig(kdData) !== before) renderKondan(document.getElementById("tab-content"));
+        else { const n = document.getElementById("kd-checking"); if (n) n.remove(); }
+        return;
+      }
       const btn = document.querySelector('.tab-btn[data-tab="kondan"]');
       if (btn && kdHasUnread() && !btn.querySelector(".tab-unread-dot")) btn.insertAdjacentHTML("beforeend", '<span class="tab-unread-dot"></span>');
-    }).catch(() => { kdLoading = null; });
+    }).catch(() => { kdLoading = null; const n = document.getElementById("kd-checking"); if (n) n.remove(); });
   }
   function kdBodyHtml(text) {
     return String(text || "").split("\n").map((l) => {
@@ -1461,9 +1489,15 @@
     return e.studentNames && e.studentNames.length ? e.studentNames.join("・") : e.nameRaw;
   }
   async function renderKondan(el, force) {
-    if (!kdData || force) {
+    const want = kdFileId || "";
+    const have = kdData && (!want || kdData.fileId === want);
+    if (!have && !force) {
+      const cached = kdCacheGet(want);
+      if (cached && cached.ok) { kdData = cached; kdFileId = cached.fileId; kdFresh = true; if (!kdLoading) kdBgRefresh(want); }
+    }
+    if (!(kdData && (!want || kdData.fileId === want)) || force) {
       el.innerHTML = `<p class="empty">懇談記録を読み込み中...</p>`;
-      try { if (kdLoading && !force) await kdLoading; if (!kdData || force) await kdLoad(kdFileId); }
+      try { if (kdLoading && !force) await kdLoading; if (!(kdData && (!want || kdData.fileId === want)) || force) await kdLoad(want); }
       catch (err) {
         if (currentTab !== "kondan") return;
         const msg = String((err && err.message) || err || "");
@@ -1493,7 +1527,7 @@
 
     let html = `<div class="card guide-card">
       <p class="guide-title">📝 ${escapeHtml(d.fileName)}</p>
-      <p class="kd-head-meta">日誌に書いた内容が自動で反映されます（最終更新 ${escapeHtml(d.updatedLabel || "")}）<button type="button" class="kd-reload" id="kd-reload">⟳ 更新</button></p>
+      <p class="kd-head-meta">日誌に書いた内容が自動で反映されます（最終更新 ${escapeHtml(d.updatedLabel || "")}）${kdBgBusy || kdLoading ? `<span id="kd-checking">（最新を確認中…）</span>` : ""}<button type="button" class="kd-reload" id="kd-reload">⟳ 更新</button></p>
     </div>`;
     if (d.files.length > 1) html += `<div class="kd-files">${d.files.map((f) => `<button type="button" data-kdfile="${escapeHtml(f.id)}" class="${f.id === d.fileId ? "on" : ""}">${escapeHtml(f.name)}</button>`).join("")}</div>`;
     if (d.showAll) html += `<div class="kd-seg"><button type="button" data-kdview="mine" class="${kdView === "mine" ? "on" : ""}">担当の生徒（${mine.length}）</button><button type="button" data-kdview="all" class="${kdView === "all" ? "on" : ""}">全員（${entries.length}）</button></div>`;
@@ -1517,7 +1551,7 @@
 
     el.querySelectorAll("[data-kd]").forEach((b) => b.addEventListener("click", () => { kdOpen[b.dataset.kd] = !kdOpen[b.dataset.kd]; renderKondan(el); }));
     el.querySelectorAll("[data-kdview]").forEach((b) => b.addEventListener("click", () => { kdView = b.dataset.kdview; renderKondan(el); }));
-    el.querySelectorAll("[data-kdfile]").forEach((b) => b.addEventListener("click", async () => { if (b.dataset.kdfile === kdData.fileId) return; kdFileId = b.dataset.kdfile; renderKondan(el, true); }));
+    el.querySelectorAll("[data-kdfile]").forEach((b) => b.addEventListener("click", async () => { if (b.dataset.kdfile === kdData.fileId) return; kdFileId = b.dataset.kdfile; kdUserSwitched = true; renderKondan(el); }));
     const rb = document.getElementById("kd-reload"); if (rb) rb.addEventListener("click", () => renderKondan(el, true));
     const si = document.getElementById("kd-search");
     if (si) si.addEventListener("input", () => {
