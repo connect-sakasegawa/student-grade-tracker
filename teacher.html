@@ -360,7 +360,7 @@
   .kd-files button.on, .kd-seg button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
   .kd-seg { display: flex; gap: 6px; margin: 0 0 10px; }
   .kd-seg button { flex: 1; }
-  .kd-search { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; font-family: inherit; background: #fff; margin: 0 0 12px; }
+  .kd-search { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 16px; font-family: inherit; background: #fff; margin: 0 0 12px; -webkit-appearance: none; appearance: none; }
   .kd-date { font-size: 13px; font-weight: 700; color: var(--brand); margin: 14px 0 6px; }
   .kd-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0 0 6px; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font-family: inherit; text-align: left; cursor: pointer; }
   .kd-btn.on { border-color: var(--brand); background: var(--brand-soft); margin-bottom: 0; border-radius: 12px 12px 0 0; }
@@ -1449,6 +1449,12 @@
   function kdCacheSet(fid, d) { try { localStorage.setItem(kdCacheKeyOf(fid), JSON.stringify(d)); } catch (err) {} }
   function kdSig(d) { return d ? (d.fileId + "|" + d.updatedLabel + "|" + (d.entries || []).map((e) => e.key + ":" + e.hash + ":" + (e.mine ? 1 : 0)).join(",") + "|" + (d.files || []).map((f) => f.id).join(",")) : ""; }
   let kdBgBusy = false, kdUserSwitched = false;
+  // 裏で最新を読み込んだあとの描き直し。検索欄に入力中なら、欄は作り直さずに一覧だけ書き換える
+  function kdRefreshView() {
+    const si = document.getElementById("kd-search");
+    if (si && document.activeElement === si) { kdRenderList(); const n = document.getElementById("kd-checking"); if (n) n.remove(); return; }
+    renderKondan(document.getElementById("tab-content"));
+  }
   function kdBgRefresh(fid) {
     if (kdBgBusy) return;
     kdBgBusy = true;
@@ -1456,7 +1462,7 @@
     kdLoad(fid).then(() => {
       kdBgBusy = false;
       if (currentTab !== "kondan") return;
-      if (kdSig(kdData) !== before) renderKondan(document.getElementById("tab-content"));
+      if (kdSig(kdData) !== before) kdRefreshView();
       else { const n = document.getElementById("kd-checking"); if (n) n.remove(); }
     }).catch(() => { kdBgBusy = false; const n = document.getElementById("kd-checking"); if (n) n.textContent = "（最新の確認に失敗しました）"; });
   }
@@ -1469,7 +1475,7 @@
     kdLoading = kdLoad("").then(() => {
       kdLoading = null;
       if (currentTab === "kondan") {
-        if (kdSig(kdData) !== before) renderKondan(document.getElementById("tab-content"));
+        if (kdSig(kdData) !== before) kdRefreshView();
         else { const n = document.getElementById("kd-checking"); if (n) n.remove(); }
         return;
       }
@@ -1514,16 +1520,10 @@
       return;
     }
     if (kdFresh || !kdSnap[d.fileId]) { kdSnap[d.fileId] = Object.assign(kdSnap[d.fileId] || {}, kdStatusMap()); kdMarkAllSeen(); kdFresh = false; }
-    const st = kdSnap[d.fileId];
     const entries = d.entries || [];
     const mine = entries.filter((e) => e.mine);
     if (!d.showAll) kdView = "mine";
     else if (!kdView) kdView = mine.length ? "mine" : "all";
-    const q = kdQuery.replace(/\s/g, "");
-    let list = kdView === "mine" ? mine : entries;
-    if (q) list = list.filter((e) => (kdEntryTitle(e) + e.nameRaw + e.grade + e.meta).replace(/\s/g, "").indexOf(q) >= 0 || String(e.body).indexOf(q) >= 0);
-    // 新しい日付を上に。同じ日の中は日誌に書いた順
-    list = list.slice().sort((a, b) => (b.sort - a.sort) || (a.seq - b.seq));
 
     let html = `<div class="card guide-card">
       <p class="guide-title">📝 ${escapeHtml(d.fileName)}</p>
@@ -1532,7 +1532,36 @@
     if (d.files.length > 1) html += `<div class="kd-files">${d.files.map((f) => `<button type="button" data-kdfile="${escapeHtml(f.id)}" class="${f.id === d.fileId ? "on" : ""}">${escapeHtml(f.name)}</button>`).join("")}</div>`;
     if (d.showAll) html += `<div class="kd-seg"><button type="button" data-kdview="mine" class="${kdView === "mine" ? "on" : ""}">担当の生徒（${mine.length}）</button><button type="button" data-kdview="all" class="${kdView === "all" ? "on" : ""}">全員（${entries.length}）</button></div>`;
     html += `<input type="search" class="kd-search" id="kd-search" placeholder="名前・ことばで探す" value="${escapeHtml(kdQuery)}" />`;
-    html += `<div id="kd-list">`;
+    html += `<div id="kd-list"></div>`;
+    html += `<p class="kd-note">保護者との懇談内容です。生徒・保護者には見せないでください。<span style="opacity:.6;">（画面の版 11/26-5）</span></p>`;
+    el.innerHTML = html;
+    kdRenderList();
+
+    el.querySelectorAll("[data-kdview]").forEach((b) => b.addEventListener("click", () => { kdView = b.dataset.kdview; renderKondan(el); }));
+    el.querySelectorAll("[data-kdfile]").forEach((b) => b.addEventListener("click", async () => { if (b.dataset.kdfile === kdData.fileId) return; kdFileId = b.dataset.kdfile; kdUserSwitched = true; renderKondan(el); }));
+    const rb = document.getElementById("kd-reload"); if (rb) rb.addEventListener("click", () => renderKondan(el, true));
+    // 検索欄は作り直さず、一覧だけを書き換える(日本語入力の変換中に欄を作り直すと、打った文字が崩れるため)
+    const si = document.getElementById("kd-search");
+    if (si) {
+      let composing = false;
+      si.addEventListener("compositionstart", () => { composing = true; });
+      si.addEventListener("compositionend", () => { composing = false; kdQuery = si.value; kdRenderList(); });
+      si.addEventListener("input", () => { if (composing) return; kdQuery = si.value; kdRenderList(); });
+    }
+  }
+  // 懇談記録の一覧部分だけを描く(検索・開閉のたびに呼ぶ)
+  function kdRenderList() {
+    const box = document.getElementById("kd-list");
+    if (!box || !kdData) return;
+    const d = kdData;
+    const st = kdSnap[d.fileId] || {};
+    const entries = d.entries || [];
+    const q = kdQuery.replace(/\s/g, "");
+    let list = kdView === "mine" ? entries.filter((e) => e.mine) : entries;
+    if (q) list = list.filter((e) => (kdEntryTitle(e) + e.nameRaw + e.grade + e.meta).replace(/\s/g, "").indexOf(q) >= 0 || String(e.body).indexOf(q) >= 0);
+    // 新しい日付を上に。同じ日の中は日誌に書いた順
+    list = list.slice().sort((a, b) => (b.sort - a.sort) || (a.seq - b.seq));
+    let html = "";
     if (!list.length) {
       html += `<p class="empty">${q ? "当てはまる記録はありません" : kdView === "mine" ? "担当の生徒の懇談記録は、まだありません" : "まだ記録がありません"}</p>`;
     } else {
@@ -1545,20 +1574,8 @@
         if (open) html += `<div class="kd-body">${kdBodyHtml(e.body)}</div>`;
       });
     }
-    html += `</div>`;
-    html += `<p class="kd-note">保護者との懇談内容です。生徒・保護者には見せないでください。</p>`;
-    el.innerHTML = html;
-
-    el.querySelectorAll("[data-kd]").forEach((b) => b.addEventListener("click", () => { kdOpen[b.dataset.kd] = !kdOpen[b.dataset.kd]; renderKondan(el); }));
-    el.querySelectorAll("[data-kdview]").forEach((b) => b.addEventListener("click", () => { kdView = b.dataset.kdview; renderKondan(el); }));
-    el.querySelectorAll("[data-kdfile]").forEach((b) => b.addEventListener("click", async () => { if (b.dataset.kdfile === kdData.fileId) return; kdFileId = b.dataset.kdfile; kdUserSwitched = true; renderKondan(el); }));
-    const rb = document.getElementById("kd-reload"); if (rb) rb.addEventListener("click", () => renderKondan(el, true));
-    const si = document.getElementById("kd-search");
-    if (si) si.addEventListener("input", () => {
-      kdQuery = si.value; const pos = si.selectionStart;
-      renderKondan(el);
-      const n = document.getElementById("kd-search"); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (err) {} }
-    });
+    box.innerHTML = html;
+    box.querySelectorAll("[data-kd]").forEach((b) => b.addEventListener("click", () => { kdOpen[b.dataset.kd] = !kdOpen[b.dataset.kd]; kdRenderList(); }));
   }
 
   // ---------- 講師アプリ：大学入試カレンダー（塾全体の高校生の受験予定） ----------
