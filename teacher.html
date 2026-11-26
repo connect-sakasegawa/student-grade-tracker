@@ -360,6 +360,10 @@
   .kd-files button.on, .kd-seg button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
   .kd-seg { display: flex; gap: 6px; margin: 0 0 10px; }
   .kd-seg button { flex: 1; }
+  .kd-search-row { display: flex; gap: 6px; margin: 0 0 12px; }
+  .kd-search-row .kd-search { margin: 0; flex: 1; min-width: 0; }
+  .kd-search-btn { flex: none; padding: 0 16px; border: none; border-radius: 10px; background: var(--brand); color: #fff; font-size: 14px; font-weight: 700; font-family: inherit; }
+  .kd-search-clear { flex: none; width: 40px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--muted); font-size: 18px; font-family: inherit; }
   .kd-search { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 16px; font-family: inherit; background: #fff; margin: 0 0 12px; -webkit-appearance: none; appearance: none; }
   .kd-date { font-size: 13px; font-weight: 700; color: var(--brand); margin: 14px 0 6px; }
   .kd-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0 0 6px; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); font-family: inherit; text-align: left; cursor: pointer; }
@@ -521,6 +525,7 @@
     renderShell();
     maybeShowBirthdayPopup();
     kdPrefetch();
+    checkAppVersion();
     if (currentTab === "schedule" && needsScheduleAck()) markTeacherScheduleSeen();
   }
 
@@ -529,6 +534,23 @@
     showYearView = false;
     renderShell();
     if (tab === "schedule" && needsScheduleAck()) markTeacherScheduleSeen();
+  }
+
+  // ===== 画面の版 =====
+  // teacher.html を更新したら、この版の文字を必ず変える。
+  // 開いたときに最新の teacher.html の版を確かめ、古い版が表示されていたら自動で読み込み直す(ホーム画面のアプリで古い画面が残るのを防ぐ)
+  const TEACHER_APP_VERSION = "2026-11-26-7";
+  async function checkAppVersion() {
+    try {
+      const res = await fetch(location.pathname + "?_vc=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) return;
+      const m = (await res.text()).match(/const TEACHER_APP_VERSION = "([^"]+)"/);
+      if (!m || m[1] === TEACHER_APP_VERSION) return;
+      const key = "connect-teacher-vreload-" + m[1];
+      try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (err) {}
+      const u = new URL(location.href); u.searchParams.set("_v", m[1]);
+      location.replace(u.toString());
+    } catch (err) {}
   }
 
   // ホーム画面に追加した状態(ブラウザの更新ボタンがない状態)でも、
@@ -547,7 +569,9 @@
         await Promise.all(regs.map((r) => r.unregister()));
       }
     } catch (err) {}
-    location.reload();
+    // 同じURLのままだと古い画面が出ることがあるので、URLに時刻を付けて読み込み直す
+    try { const u = new URL(location.href); u.searchParams.set("_v", String(Date.now())); location.replace(u.toString()); }
+    catch (err) { location.reload(); }
   }
 
   function isTrueFlag(v) { return v === true || v === "TRUE" || v === "true"; }
@@ -1452,7 +1476,7 @@
   // 裏で最新を読み込んだあとの描き直し。検索欄に入力中なら、欄は作り直さずに一覧だけ書き換える
   function kdRefreshView() {
     const si = document.getElementById("kd-search");
-    if (si && document.activeElement === si) { kdRenderList(); const n = document.getElementById("kd-checking"); if (n) n.remove(); return; }
+    if (si && document.activeElement === si) { const n = document.getElementById("kd-checking"); if (n) n.remove(); return; }
     renderKondan(document.getElementById("tab-content"));
   }
   function kdBgRefresh(fid) {
@@ -1531,23 +1555,27 @@
     </div>`;
     if (d.files.length > 1) html += `<div class="kd-files">${d.files.map((f) => `<button type="button" data-kdfile="${escapeHtml(f.id)}" class="${f.id === d.fileId ? "on" : ""}">${escapeHtml(f.name)}</button>`).join("")}</div>`;
     if (d.showAll) html += `<div class="kd-seg"><button type="button" data-kdview="mine" class="${kdView === "mine" ? "on" : ""}">担当の生徒（${mine.length}）</button><button type="button" data-kdview="all" class="${kdView === "all" ? "on" : ""}">全員（${entries.length}）</button></div>`;
-    html += `<input type="search" class="kd-search" id="kd-search" placeholder="名前・ことばで探す" value="${escapeHtml(kdQuery)}" />`;
+    html += `<form class="kd-search-row" id="kd-search-form" autocomplete="off"><input type="text" class="kd-search" id="kd-search" placeholder="名前・ことばで探す" value="${escapeHtml(kdQuery)}" enterkeyhint="search" /><button type="submit" class="kd-search-btn">検索</button>${kdQuery ? `<button type="button" class="kd-search-clear" id="kd-search-clear">×</button>` : ""}</form>`;
     html += `<div id="kd-list"></div>`;
-    html += `<p class="kd-note">保護者との懇談内容です。生徒・保護者には見せないでください。<span style="opacity:.6;">（画面の版 11/26-5）</span></p>`;
+    html += `<p class="kd-note">保護者との懇談内容です。生徒・保護者には見せないでください。<span style="opacity:.6;">（画面の版 ${escapeHtml(TEACHER_APP_VERSION)}）</span></p>`;
     el.innerHTML = html;
     kdRenderList();
 
     el.querySelectorAll("[data-kdview]").forEach((b) => b.addEventListener("click", () => { kdView = b.dataset.kdview; renderKondan(el); }));
     el.querySelectorAll("[data-kdfile]").forEach((b) => b.addEventListener("click", async () => { if (b.dataset.kdfile === kdData.fileId) return; kdFileId = b.dataset.kdfile; kdUserSwitched = true; renderKondan(el); }));
     const rb = document.getElementById("kd-reload"); if (rb) rb.addEventListener("click", () => renderKondan(el, true));
-    // 検索欄は作り直さず、一覧だけを書き換える(日本語入力の変換中に欄を作り直すと、打った文字が崩れるため)
-    const si = document.getElementById("kd-search");
-    if (si) {
-      let composing = false;
-      si.addEventListener("compositionstart", () => { composing = true; });
-      si.addEventListener("compositionend", () => { composing = false; kdQuery = si.value; kdRenderList(); });
-      si.addEventListener("input", () => { if (composing) return; kdQuery = si.value; kdRenderList(); });
-    }
+    // 検索は「検索」ボタン(またはキーボードの検索キー)を押したときだけ行う。
+    // 文字を打っている間は画面を一切さわらないので、日本語入力の変換やカーソルが崩れない
+    const sf = document.getElementById("kd-search-form");
+    if (sf) sf.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const si = document.getElementById("kd-search");
+      kdQuery = si ? si.value : "";
+      if (si) si.blur();
+      renderKondan(el);
+    });
+    const sc = document.getElementById("kd-search-clear");
+    if (sc) sc.addEventListener("click", () => { kdQuery = ""; renderKondan(el); });
   }
   // 懇談記録の一覧部分だけを描く(検索・開閉のたびに呼ぶ)
   function kdRenderList() {
