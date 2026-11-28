@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>CONNEC＋ 管理者用 | 個別指導塾コネクト</title>
+<meta name="theme-color" content="#1F2A44">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<!--
+  管理者用アプリ（全生徒の成績・入力状況）
+  - URL: admin.html?adminId=XXXXXXXX（IDはスプレッドシートのメニュー「管理者アプリ」→「管理者用URLを表示する」）
+  - 古いタブレットのブラウザでも動くよう、昔ながらの書き方（var / function / XMLHttpRequest）だけで書いています
+-->
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #F2F6FC; color: #1F2A44; font-family: "Hiragino Sans", "Noto Sans JP", "Noto Sans CJK JP", Meiryo, sans-serif; -webkit-text-size-adjust: 100%; }
+  body { padding: 14px 16px 40px; }
+  button, input, select { font-family: inherit; }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+
+  .head { overflow: hidden; margin-bottom: 10px; }
+  .head-title { float: left; }
+  .eyebrow { font-size: 12px; color: #6B7488; margin: 0; }
+  h1 { font-size: 20px; margin: 0; color: #1F2A44; line-height: 1.3; }
+  .head-right { float: right; text-align: right; padding-top: 4px; }
+  .updated { display: block; font-size: 11px; color: #6B7488; margin-bottom: 4px; }
+  .btn-refresh { background: #fff; border: 1px solid #C9D4E6; border-radius: 16px; padding: 5px 12px; font-size: 12px; color: #2A5FB4; }
+
+  .notice { background: #FFF8E1; border: 1px solid #F0D68A; color: #7A5B00; border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-bottom: 10px; }
+  .error-box { background: #fff; border: 1px solid #F3C0B5; border-radius: 12px; padding: 22px 16px; text-align: center; color: #B24D2F; font-size: 14px; line-height: 1.7; margin-top: 30px; }
+  .loading { text-align: center; color: #6B7488; font-size: 14px; padding: 60px 10px; }
+
+  /* タブ */
+  .tabs { background: #E2EBF9; border-radius: 10px; padding: 3px; margin-bottom: 10px; white-space: nowrap; }
+  .tabs button { display: inline-block; width: 33.33%; border: 0; background: transparent; padding: 9px 2px; font-size: 13.5px; font-weight: bold; color: #4A5878; border-radius: 8px; }
+  .tabs button.on { background: #2A5FB4; color: #fff; }
+
+  /* 絞り込み */
+  .filters { background: #fff; border: 1px solid #DDE5F2; border-radius: 12px; padding: 10px 10px 4px; margin-bottom: 12px; }
+  .chips { margin: 0 0 4px; }
+  .chips button { display: inline-block; margin: 0 4px 6px 0; padding: 6px 11px; border-radius: 16px; border: 1px solid #DDE5F2; background: #fff; color: #4A5878; font-size: 12.5px; font-weight: bold; }
+  .chips button.on { background: #1F2A44; border-color: #1F2A44; color: #fff; }
+  .chips button .cnt { font-weight: normal; font-size: 11px; opacity: .8; margin-left: 2px; }
+  .search { width: 100%; border: 1px solid #C9D4E6; border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-bottom: 6px; background: #fff; -webkit-appearance: none; }
+  .sel { width: 100%; border: 1px solid #C9D4E6; border-radius: 8px; padding: 8px 10px; font-size: 14px; background: #fff; margin-bottom: 6px; }
+  .count-line { font-size: 11.5px; color: #6B7488; margin: 0 2px 8px; }
+
+  /* 生徒ごと */
+  .cards { margin: 0 -5px; }
+  .cards:after { content: ""; display: table; clear: both; }
+  .card-col { padding: 0 5px; }
+  .card { background: #fff; border: 1px solid #DDE5F2; border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+  .card-head { padding: 11px 12px; cursor: pointer; position: relative; padding-right: 30px; }
+  .card-head:after { content: "▼"; position: absolute; right: 12px; top: 14px; font-size: 10px; color: #8A94A8; }
+  .card.open .card-head:after { content: "▲"; }
+  .s-name { font-size: 15px; font-weight: bold; margin: 0; }
+  .s-grade { display: inline-block; font-size: 11px; font-weight: bold; background: #E2EBF9; color: #2A5FB4; border-radius: 10px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
+  .s-tag { display: inline-block; font-size: 10px; background: #F1E6FA; color: #6A3D99; border-radius: 10px; padding: 1px 7px; margin-left: 4px; vertical-align: 2px; }
+  .s-sub { font-size: 11.5px; color: #6B7488; margin: 3px 0 0; }
+  .s-latest { font-size: 12px; color: #1F2A44; margin: 4px 0 0; }
+  .s-latest b { font-size: 14px; }
+  .marks-mini { margin-top: 5px; }
+  .mk { display: inline-block; min-width: 22px; text-align: center; font-size: 11px; font-weight: bold; border-radius: 4px; padding: 1px 3px; margin: 0 2px 2px 0; }
+  .mk-lb { display: inline-block; font-size: 10px; color: #8A94A8; margin: 0 3px 0 4px; }
+  .mk-lb:first-child { margin-left: 0; }
+  .card-body { display: none; padding: 0 10px 8px; border-top: 1px solid #EEF2F8; }
+  .card.open .card-body { display: block; }
+
+  .t-block { border: 1px solid #DDE5F2; border-radius: 9px; margin-top: 8px; overflow: hidden; }
+  .t-head { background: #F2F6FC; padding: 8px 10px; font-size: 12.5px; cursor: pointer; overflow: hidden; }
+  .t-name { font-weight: bold; float: left; }
+  .t-name:before { content: "▸ "; color: #8A94A8; }
+  .t-block.open .t-name:before { content: "▾ "; }
+  .t-sum { float: right; font-size: 11.5px; color: #6B7488; }
+  .t-sum b { color: #1F2A44; font-size: 12.5px; }
+  .t-body { display: none; }
+  .t-block.open .t-body { display: block; }
+  .ph { display: inline-block; font-size: 10px; border-radius: 9px; padding: 0 6px; margin-left: 4px; }
+  .ph.ok { background: #E3EEE7; color: #3E7C59; }
+  .ph.ng { background: #F3DCD3; color: #B24D2F; }
+
+  table.gt { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.gt th { font-size: 10.5px; font-weight: normal; color: #6B7488; padding: 5px 2px 3px; border-bottom: 1px solid #DDE5F2; text-align: center; }
+  table.gt td { padding: 5px 2px; border-bottom: 1px solid #EEF2F8; text-align: center; color: #6B7488; }
+  table.gt tr:last-child td { border-bottom: 0; }
+  table.gt .subj { text-align: left; padding-left: 10px; color: #1F2A44; font-weight: bold; }
+  table.gt .score { color: #1F2A44; font-weight: bold; font-size: 13.5px; }
+  .reach { color: #2E7D46 !important; }
+  .up { color: #2E7D46; font-weight: bold; }
+  .down { color: #C0392B; font-weight: bold; }
+  .empty { text-align: center; color: #6B7488; font-size: 13px; padding: 16px 6px; }
+
+  /* 一覧表 */
+  .tbl-wrap { background: #fff; border: 1px solid #DDE5F2; border-radius: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 14px; }
+  table.lt { border-collapse: collapse; font-size: 12.5px; min-width: 100%; }
+  table.lt th { background: #1F2A44; color: #fff; font-weight: bold; font-size: 11.5px; padding: 7px 5px; white-space: nowrap; text-align: center; }
+  table.lt td { padding: 6px 5px; border-bottom: 1px solid #EEF2F8; text-align: center; white-space: nowrap; }
+  table.lt td.nm { text-align: left; font-weight: bold; padding-left: 8px; }
+  table.lt td.gr { color: #6B7488; font-size: 11.5px; }
+  table.lt td.tot { background: #F7F9FD; font-weight: bold; }
+  table.lt tr.gsep td { border-top: 2px solid #8A94A8; }
+  table.lt .df { display: block; font-size: 10px; line-height: 1.1; }
+  table.lt td.na { color: #B8C0CF; }
+  .sec-title { font-size: 13px; font-weight: bold; color: #4A5878; margin: 4px 2px 6px; }
+  .hs-chip { display: inline-block; background: #F2F6FC; border-radius: 6px; padding: 2px 6px; margin: 1px 3px 1px 0; font-size: 11.5px; }
+  .hs-chip b { font-size: 12.5px; }
+  td.hs-cell { text-align: left !important; white-space: normal !important; min-width: 220px; }
+
+  /* 入力状況 */
+  table.mt td.m { font-size: 15px; font-weight: bold; min-width: 44px; cursor: pointer; }
+  table.mt tr.sum td { background: #FCE8B2; font-weight: bold; font-size: 12px; }
+  table.mt td.sel-cell { outline: 2px solid #2A5FB4; outline-offset: -2px; }
+  .legend { font-size: 11px; color: #6B7488; line-height: 1.8; margin: 0 2px 8px; }
+  .detail { background: #fff; border: 1px solid #2A5FB4; border-radius: 10px; padding: 9px 12px; font-size: 13px; margin-bottom: 10px; line-height: 1.6; }
+
+  .m-ok2 { background: #b7e1cd; color: #0b6b3a; }
+  .m-ok1 { background: #cfe2f3; color: #1a4f8b; }
+  .m-part { background: #fff2cc; color: #8a6100; }
+  .m-late { background: #f4cccc; color: #a61c1c; }
+  .m-na { background: #efefef; color: #9e9e9e; }
+  .m-none { background: #fff; color: #B8C0CF; }
+
+  /* タブレット横向きなど広い画面では、生徒BOXを2列に */
+  @media (min-width: 760px) {
+    .card-col { float: left; width: 50%; }
+    .card-col:nth-child(2n+1) { clear: left; }
+    h1 { font-size: 22px; }
+  }
+  @media (min-width: 1100px) {
+    .card-col { width: 33.333%; }
+    .card-col:nth-child(2n+1) { clear: none; }
+    .card-col:nth-child(3n+1) { clear: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="loading">読み込み中…</div></div>
+
+<script>
+(function () {
+  "use strict";
+  var GAS_URL = "https://script.google.com/macros/s/AKfycbzLZBA7mn6gGj0VrTIF6ztWv50v0W3syRwdl5nyg5Xq0c94iAef8gpLGZiJpZr2B4rggQ/exec";
+  var STORAGE_ID = "connect-admin-id";
+  var STORAGE_DATA = "connect-admin-data";
+  var STORAGE_TAB = "connect-admin-tab";
+  // 新しい順に並べるための時期順（実力テストも時期の位置に入れる）
+  var CHRONO = ["1学期中間テスト", "第1回実力テスト（6月）", "1学期期末テスト", "第2回実力テスト（9月）", "2学期中間テスト", "第3回実力テスト（11月）", "2学期期末テスト", "第4回実力テスト（1月）", "学年末テスト"];
+  var JHS_MAIN = ["国語", "社会", "数学", "理科", "英語"];
+  var JHS_SUB = ["音楽", "美術", "保体", "技家"];
+  var SHORT = { "国語": "国", "社会": "社", "数学": "数", "理科": "理", "英語": "英", "音楽": "音", "美術": "美", "保体": "保", "技家": "技" };
+  var MARK_CLASS = { "◎": "m-ok2", "〇": "m-ok1", "△": "m-part", "未": "m-late", "－": "m-na", "": "m-none" };
+
+  var app = document.getElementById("app");
+  var adminId = "";
+  var data = null;
+  var fromCache = false;
+  var loading = false;
+  var state = { tab: "cards", grade: "all", q: "", test: "", openCards: {}, openTests: {}, cell: null };
+
+  // ---------- 小さな道具 ----------
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function lsGet(k) { try { return window.localStorage ? localStorage.getItem(k) : null; } catch (e) { return null; } }
+  function lsSet(k, v) { try { if (window.localStorage) localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { if (window.localStorage) localStorage.removeItem(k); } catch (e) {} }
+  function indexOf(arr, v) { for (var i = 0; i < arr.length; i++) if (arr[i] === v) return i; return -1; }
+  function chrono(n) { return indexOf(CHRONO, n); }
+  function isNum(v) { return v !== null && v !== undefined && v !== "" && !isNaN(Number(v)); }
+  function diffHtml(d, cls) {
+    if (!isNum(d)) return "";
+    d = Number(d);
+    return '<span class="' + (d >= 0 ? "up" : "down") + (cls ? " " + cls : "") + '">' + (d >= 0 ? "+" : "") + d + "</span>";
+  }
+  function getParam(name) {
+    var q = window.location.search.replace(/^\?/, "").split("&");
+    for (var i = 0; i < q.length; i++) {
+      var kv = q[i].split("=");
+      if (decodeURIComponent(kv[0]) === name) return decodeURIComponent((kv[1] || "").replace(/\+/g, " "));
+    }
+    return null;
+  }
+  function closestAttr(el, attr) {
+    while (el && el !== document) { if (el.getAttribute && el.getAttribute(attr) !== null) return el; el = el.parentNode; }
+    return null;
+  }
+
+  // ---------- 通信（XMLHttpRequest → だめなら JSONP） ----------
+  function requestData(fresh, done) {
+    var url = GAS_URL + "?adminId=" + encodeURIComponent(adminId) + (fresh ? "&fresh=1" : "") + "&_=" + new Date().getTime();
+    var finished = false;
+    function finish(err, json) { if (finished) return; finished = true; done(err, json); }
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+      xhr.timeout = 90000;
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status === 200) {
+          try { finish(null, JSON.parse(xhr.responseText)); } catch (e) { jsonp(); }
+        } else { jsonp(); }
+      };
+      xhr.ontimeout = function () { finish("timeout"); };
+      xhr.send(null);
+    } catch (e) { jsonp(); }
+
+    function jsonp() {
+      if (finished) return;
+      var cb = "adminCb" + new Date().getTime();
+      var s = document.createElement("script");
+      var timer = setTimeout(function () { cleanup(); finish("network"); }, 90000);
+      function cleanup() { clearTimeout(timer); try { delete window[cb]; } catch (e) { window[cb] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); }
+      window[cb] = function (json) { cleanup(); finish(null, json); };
+      s.onerror = function () { cleanup(); finish("network"); };
+      s.src = url + "&callback=" + cb;
+      document.getElementsByTagName("head")[0].appendChild(s);
+    }
+  }
+
+  function load(fresh) {
+    if (loading) return;
+    loading = true;
+    if (data) render();
+    requestData(fresh, function (err, json) {
+      loading = false;
+      if (err) {
+        if (data) { fromCache = true; render(); alert("最新の内容を読み込めませんでした。通信状態を確かめて、もう一度「最新にする」を押してください。"); }
+        else showError("読み込めませんでした。通信状態を確かめて、ページを開き直してください。");
+        return;
+      }
+      if (!json || !json.ok) {
+        var e = json && json.error;
+        if (e === "admin not found") { lsDel(STORAGE_ID); lsDel(STORAGE_DATA); data = null; showError("管理者IDが正しくありません。<br>スプレッドシートのメニュー「管理者アプリ」→「管理者用URLを表示する」で出るURLを開いてください。"); }
+        else if (e === "locked") showError("まちがったIDでのアクセスが続いたため、しばらく止めています。<br>10分ほどたってから開き直してください。");
+        else if (data) { fromCache = true; render(); alert("読み込み中にエラーが出ました: " + (e || "")); }
+        else showError("エラーが出ました。<br>" + esc(e || ""));
+        return;
+      }
+      data = json;
+      fromCache = false;
+      lsSet(STORAGE_DATA, JSON.stringify(json));
+      render();
+    });
+  }
+
+  function showError(msg) {
+    app.innerHTML = '<div class="error-box">' + msg + "</div>";
+  }
+
+  // ---------- 絞り込み ----------
+  function gradeList() {
+    var list = [], cnt = {};
+    for (var i = 0; i < data.students.length; i++) {
+      var g = data.students[i].grade || "（学年なし）";
+      if (cnt[g] === undefined) { cnt[g] = 0; list.push(g); }
+      cnt[g]++;
+    }
+    return { list: list, cnt: cnt };
+  }
+  function visibleStudents() {
+    var q = state.q.replace(/\s+/g, "");
+    var out = [];
+    for (var i = 0; i < data.students.length; i++) {
+      var s = data.students[i];
+      if (state.grade !== "all" && (s.grade || "（学年なし）") !== state.grade) continue;
+      if (q) {
+        var hay = (s.name + " " + (s.teachers || "")).replace(/\s+/g, "");
+        if (hay.indexOf(q) === -1) continue;
+      }
+      out.push(s);
+    }
+    return out;
+  }
+  function testsNewestFirst(s) {
+    var t = s.tests.slice();
+    t.sort(function (a, b) { return chrono(b.n) - chrono(a.n); });
+    return t;
+  }
+  function testTotal(t) {
+    var sum = 0;
+    for (var i = 0; i < t.r.length; i++) sum += Number(t.r[i][1]);
+    return sum;
+  }
+
+  // ---------- 画面 ----------
+  function render() {
+    if (!data) return;
+    var html = "";
+    html += '<div class="head"><div class="head-title"><p class="eyebrow">CONNEC＋</p><h1>管理者用 成績一覧</h1></div>';
+    html += '<div class="head-right"><span class="updated">' + (loading ? "読み込み中…" : "更新 " + esc(data.updatedAt || "")) + "</span>";
+    html += '<button type="button" class="btn-refresh" data-act="refresh">↻ 最新にする</button></div></div>';
+    if (fromCache && !loading) html += '<div class="notice">前回読み込んだ内容を表示しています。「最新にする」で読み直せます。</div>';
+
+    html += '<div class="tabs">';
+    html += tabBtn("cards", "生徒ごと") + tabBtn("list", "テスト別一覧") + tabBtn("status", "入力状況");
+    html += "</div>";
+
+    // 絞り込み
+    var gl = gradeList();
+    html += '<div class="filters"><div class="chips">';
+    html += '<button type="button" data-grade="all" class="' + (state.grade === "all" ? "on" : "") + '">全員<span class="cnt">' + data.students.length + "</span></button>";
+    for (var i = 0; i < gl.list.length; i++) {
+      var g = gl.list[i];
+      html += '<button type="button" data-grade="' + esc(g) + '" class="' + (state.grade === g ? "on" : "") + '">' + esc(g) + '<span class="cnt">' + gl.cnt[g] + "</span></button>";
+    }
+    html += "</div>";
+    html += '<input type="search" class="search" id="q" placeholder="名前・担当講師で検索" value="' + esc(state.q) + '">';
+    if (state.tab === "list") html += testSelectHtml();
+    html += "</div>";
+
+    html += '<div id="body"></div>';
+    app.innerHTML = html;
+    renderBody();
+  }
+  function tabBtn(k, label) {
+    return '<button type="button" data-tab="' + k + '" class="' + (state.tab === k ? "on" : "") + '">' + label + "</button>";
+  }
+
+  function renderBody() {
+    var el = document.getElementById("body");
+    if (!el) return;
+    var list = visibleStudents();
+    if (state.tab === "cards") el.innerHTML = cardsHtml(list);
+    else if (state.tab === "list") el.innerHTML = listHtml(list);
+    else el.innerHTML = statusHtml(list);
+  }
+
+  // ===== 生徒ごと =====
+  function cardsHtml(list) {
+    if (!list.length) return '<p class="empty">該当する生徒がいません</p>';
+    var autoOpen = list.length <= 2;
+    var html = '<p class="count-line">' + list.length + "人 ・ 名前をタップすると成績が開きます ・ 目標に届いた得点は緑色</p>";
+    html += '<div class="cards">';
+    for (var i = 0; i < list.length; i++) {
+      var s = list[i];
+      var open = state.openCards[s.id] !== undefined ? state.openCards[s.id] : autoOpen;
+      var tests = testsNewestFirst(s);
+      html += '<div class="card-col"><div class="card' + (open ? " open" : "") + '" data-card="' + esc(s.id) + '">';
+      html += '<div class="card-head" data-togglecard="' + esc(s.id) + '">';
+      html += '<p class="s-name">' + esc(s.name) + '<span class="s-grade">' + esc(s.grade) + "</span>" + (s.free && s.grade.indexOf("高") !== 0 ? '<span class="s-tag">私立中</span>' : "") + "</p>";
+      html += '<p class="s-sub">担当：' + (s.teachers ? esc(s.teachers) : "（名簿に未設定）") + "</p>";
+      if (tests.length) {
+        var t0 = tests[0];
+        html += '<p class="s-latest">最新：' + esc(t0.n) + "　計<b>" + testTotal(t0) + "</b>点（" + t0.r.length + "科目）</p>";
+      } else {
+        html += '<p class="s-latest" style="color:#8A94A8">成績はまだ入力されていません</p>';
+      }
+      html += '<div class="marks-mini">' + marksMiniHtml(s) + "</div>";
+      html += "</div>";
+      html += '<div class="card-body">';
+      if (!tests.length) html += '<p class="empty">成績データがまだありません</p>';
+      for (var j = 0; j < tests.length; j++) {
+        var key = s.id + "|" + tests[j].n;
+        var topen = state.openTests[key] !== undefined ? state.openTests[key] : j === 0;
+        html += testBlockHtml(key, tests[j], topen);
+      }
+      html += "</div></div></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+  function marksMiniHtml(s) {
+    var html = '<span class="mk-lb">定期</span>';
+    for (var i = 0; i < data.testNames.length; i++) {
+      var m = s.marks[i] ? s.marks[i][0] : "";
+      if (i === 5 && m !== "－") html += '<span class="mk-lb">実力</span>';
+      if (m === "－") continue;
+      html += '<span class="mk ' + (MARK_CLASS[m] || "m-none") + '" title="' + esc(data.testNames[i]) + '">' + (m || "・") + "</span>";
+    }
+    return html;
+  }
+  function testBlockHtml(key, t, open) {
+    var html = '<div class="t-block' + (open ? " open" : "") + '">';
+    html += '<div class="t-head" data-toggletest="' + esc(key) + '"><span class="t-name">' + esc(t.n) + "</span>";
+    html += '<span class="t-sum">計<b>' + testTotal(t) + "</b>点（" + t.r.length + "科目）" + (t.p ? '<span class="ph ok">写真済</span>' : '<span class="ph ng">写真未</span>') + "</span></div>";
+    html += '<div class="t-body"><table class="gt"><colgroup><col style="width:30%"><col style="width:17%"><col style="width:17%"><col style="width:18%"><col style="width:18%"></colgroup>';
+    html += '<tr><th class="subj">科目</th><th>得点</th><th>前回比</th><th>目標</th><th>平均</th></tr>';
+    for (var i = 0; i < t.r.length; i++) {
+      var r = t.r[i];
+      var reach = isNum(r[3]) && Number(r[1]) >= Number(r[3]);
+      html += "<tr><td class=\"subj\">" + esc(r[0]) + '</td><td class="score' + (reach ? " reach" : "") + '">' + esc(r[1]) + "</td><td>" + diffHtml(r[2]) + "</td><td>" + (isNum(r[3]) ? esc(r[3]) : "-") + "</td><td>" + (isNum(r[4]) ? esc(r[4]) : "-") + "</td></tr>";
+    }
+    html += "</table></div></div>";
+    return html;
+  }
+
+  // ===== テスト別一覧 =====
+  function testsWithData() {
+    var seen = {}, out = [];
+    for (var i = 0; i < data.students.length; i++) {
+      var ts = data.students[i].tests;
+      for (var j = 0; j < ts.length; j++) if (!seen[ts[j].n]) { seen[ts[j].n] = true; out.push(ts[j].n); }
+    }
+    out.sort(function (a, b) { return chrono(b) - chrono(a); });
+    return out;
+  }
+  function testSelectHtml() {
+    var names = testsWithData();
+    if (!state.test || indexOf(names, state.test) === -1) state.test = names[0] || "";
+    if (!names.length) return "";
+    var html = '<select class="sel" id="testsel">';
+    for (var i = 0; i < names.length; i++) html += '<option value="' + esc(names[i]) + '"' + (names[i] === state.test ? " selected" : "") + ">" + esc(names[i]) + "</option>";
+    return html + "</select>";
+  }
+  function findTest(s, name) {
+    for (var i = 0; i < s.tests.length; i++) if (s.tests[i].n === name) return s.tests[i];
+    return null;
+  }
+  function scoreCell(row) {
+    if (!row) return '<td class="na">-</td>';
+    var reach = isNum(row[3]) && Number(row[1]) >= Number(row[3]);
+    return '<td class="' + (reach ? "reach" : "") + '"><b>' + esc(row[1]) + "</b>" + (isNum(row[2]) ? diffHtml(row[2], "df") : "") + "</td>";
+  }
+  function listHtml(list) {
+    if (!state.test) return '<p class="empty">まだ成績が入力されたテストがありません</p>';
+    var jhs = [], free = [];
+    for (var i = 0; i < list.length; i++) (list[i].free ? free : jhs).push(list[i]);
+    var html = '<p class="count-line">' + esc(state.test) + " ・ 目標に届いた得点は緑色 ・ 小さい数字は前回比（横にスクロールできます）</p>";
+
+    if (jhs.length) {
+      html += '<p class="sec-title">中学生（9教科）</p><div class="tbl-wrap"><table class="lt"><tr><th>学年</th><th>名前</th>';
+      var k;
+      for (k = 0; k < JHS_MAIN.length; k++) html += "<th>" + SHORT[JHS_MAIN[k]] + "</th>";
+      html += "<th>5科計</th>";
+      for (k = 0; k < JHS_SUB.length; k++) html += "<th>" + SHORT[JHS_SUB[k]] + "</th>";
+      html += "<th>9科計</th></tr>";
+      var prevG = null;
+      for (i = 0; i < jhs.length; i++) {
+        var s = jhs[i], t = findTest(s, state.test), bySubj = {};
+        if (t) for (k = 0; k < t.r.length; k++) bySubj[t.r[k][0]] = t.r[k];
+        var sum5 = 0, n5 = 0, sum9 = 0, n9 = 0;
+        var cells = "";
+        for (k = 0; k < JHS_MAIN.length; k++) { var r = bySubj[JHS_MAIN[k]]; cells += scoreCell(r); if (r) { sum5 += Number(r[1]); n5++; sum9 += Number(r[1]); n9++; } }
+        cells += '<td class="tot">' + (n5 ? sum5 + (n5 < 5 ? '<span class="df" style="color:#8A94A8">' + n5 + "科目</span>" : "") : "-") + "</td>";
+        for (k = 0; k < JHS_SUB.length; k++) { var r2 = bySubj[JHS_SUB[k]]; cells += scoreCell(r2); if (r2) { sum9 += Number(r2[1]); n9++; } }
+        cells += '<td class="tot">' + (n9 ? sum9 + (n9 < 9 ? '<span class="df" style="color:#8A94A8">' + n9 + "科目</span>" : "") : "-") + "</td>";
+        html += '<tr class="' + (prevG !== null && prevG !== s.grade ? "gsep" : "") + '"><td class="gr">' + esc(s.grade) + '</td><td class="nm">' + esc(s.name) + "</td>" + cells + "</tr>";
+        prevG = s.grade;
+      }
+      html += "</table></div>";
+    }
+
+    if (free.length) {
+      html += '<p class="sec-title">高校生・私立中（登録した科目）</p><div class="tbl-wrap"><table class="lt"><tr><th>学年</th><th>名前</th><th>科目と得点</th><th>合計</th></tr>';
+      var prevG2 = null;
+      for (i = 0; i < free.length; i++) {
+        var s2 = free[i], t2 = findTest(s2, state.test);
+        var chips = "", tot = 0;
+        if (t2) {
+          for (var m = 0; m < t2.r.length; m++) {
+            var rr = t2.r[m];
+            var reach2 = isNum(rr[3]) && Number(rr[1]) >= Number(rr[3]);
+            tot += Number(rr[1]);
+            chips += '<span class="hs-chip">' + esc(rr[0]) + ' <b class="' + (reach2 ? "reach" : "") + '">' + esc(rr[1]) + "</b>" + (isNum(rr[2]) ? " " + diffHtml(rr[2]) : "") + "</span>";
+          }
+        }
+        var noTest = indexOf(data.testNames.slice(0, 5), state.test) === -1;
+        html += '<tr class="' + (prevG2 !== null && prevG2 !== s2.grade ? "gsep" : "") + '"><td class="gr">' + esc(s2.grade) + '</td><td class="nm">' + esc(s2.name) + '</td><td class="hs-cell">' + (chips || '<span style="color:#B8C0CF">' + (noTest ? "対象外" : "未入力") + "</span>") + '</td><td class="tot">' + (t2 ? tot : "-") + "</td></tr>";
+        prevG2 = s2.grade;
+      }
+      html += "</table></div>";
+    }
+    if (!jhs.length && !free.length) html += '<p class="empty">該当する生徒がいません</p>';
+    return html;
+  }
+
+  // ===== 入力状況 =====
+  function statusHtml(list) {
+    if (!list.length) return '<p class="empty">該当する生徒がいません</p>';
+    var html = '<p class="legend"><span class="mk m-ok2">◎</span>全科目 <span class="mk m-ok1">〇</span>5教科 <span class="mk m-part">△</span>途中まで <span class="mk m-late">未</span>テスト日から' + esc(data.overdueDays) + '日たっても未入力 <span class="mk m-na">－</span>対象外<br>マスをタップすると、未入力の科目やテスト日が出ます（横にスクロールできます）</p>';
+    if (state.cell) {
+      var cs = null;
+      for (var a = 0; a < data.students.length; a++) if (data.students[a].id === state.cell.sid) cs = data.students[a];
+      if (cs) {
+        var mk = cs.marks[state.cell.ti] || ["", ""];
+        html += '<div class="detail"><b>' + esc(cs.name) + "</b>（" + esc(cs.grade) + "）・" + esc(data.testNames[state.cell.ti]) + "：<b>" + esc(mk[0] || "入力なし") + "</b><br>" + esc(mk[1] || (mk[0] === "◎" ? "全科目入力済みです" : mk[0] === "－" ? "このテストは対象外です" : "テスト日はまだ入力されていません")) + "</div>";
+      }
+    }
+    var done = data.testNames.map(function () { return 0; }), target = data.testNames.map(function () { return 0; });
+    var rows = "", prevG = null;
+    for (var i = 0; i < list.length; i++) {
+      var s = list[i];
+      rows += '<tr class="' + (prevG !== null && prevG !== s.grade ? "gsep" : "") + '"><td class="gr">' + esc(s.grade) + '</td><td class="nm">' + esc(s.name) + "</td>";
+      for (var ti = 0; ti < data.testNames.length; ti++) {
+        var m = s.marks[ti] ? s.marks[ti][0] : "";
+        if (m !== "－") { target[ti]++; if (m && m !== "未") done[ti]++; }
+        var selected = state.cell && state.cell.sid === s.id && state.cell.ti === ti;
+        rows += '<td class="m ' + (MARK_CLASS[m] || "m-none") + (selected ? " sel-cell" : "") + '" data-cell="' + esc(s.id) + "|" + ti + '">' + (m || "") + "</td>";
+      }
+      rows += "</tr>";
+      prevG = s.grade;
+    }
+    html += '<div class="tbl-wrap"><table class="lt mt"><tr><th>学年</th><th>名前</th>';
+    for (var h = 0; h < data.testLabels.length; h++) html += "<th>" + esc(data.testLabels[h]) + "</th>";
+    html += '</tr><tr class="sum"><td></td><td class="nm">入力済み</td>';
+    for (var c = 0; c < data.testNames.length; c++) html += "<td>" + (target[c] ? done[c] + "/" + target[c] : "－") + "</td>";
+    html += "</tr>" + rows + "</table></div>";
+    return html;
+  }
+
+  // ---------- 操作 ----------
+  app.onclick = function (ev) {
+    var e = ev || window.event;
+    var t = e.target || e.srcElement;
+    var el;
+    if ((el = closestAttr(t, "data-act"))) { load(true); return; }
+    if ((el = closestAttr(t, "data-tab"))) { state.tab = el.getAttribute("data-tab"); state.cell = null; lsSet(STORAGE_TAB, state.tab); render(); return; }
+    if ((el = closestAttr(t, "data-grade"))) { state.grade = el.getAttribute("data-grade"); state.cell = null; render(); return; }
+    if ((el = closestAttr(t, "data-togglecard"))) {
+      var id = el.getAttribute("data-togglecard");
+      var card = el.parentNode;
+      var nowOpen = card.className.indexOf(" open") === -1;
+      card.className = nowOpen ? card.className + " open" : card.className.replace(" open", "");
+      state.openCards[id] = nowOpen;
+      return;
+    }
+    if ((el = closestAttr(t, "data-toggletest"))) {
+      var key = el.getAttribute("data-toggletest");
+      var blk = el.parentNode;
+      var o = blk.className.indexOf(" open") === -1;
+      blk.className = o ? blk.className + " open" : blk.className.replace(" open", "");
+      state.openTests[key] = o;
+      return;
+    }
+    if ((el = closestAttr(t, "data-cell"))) {
+      var p = el.getAttribute("data-cell").split("|");
+      state.cell = { sid: p[0], ti: Number(p[1]) };
+      renderBody();
+      return;
+    }
+  };
+  var qTimer = null;
+  function onSearch(ev) {
+    var t = (ev || window.event).target || (ev || window.event).srcElement;
+    if (!t || t.id !== "q") return;
+    clearTimeout(qTimer);
+    qTimer = setTimeout(function () { state.q = t.value; renderBody(); }, 250);
+  }
+  if (app.addEventListener) {
+    app.addEventListener("input", onSearch, false);
+    app.addEventListener("keyup", onSearch, false);
+    app.addEventListener("change", function (ev) {
+      var t = ev.target;
+      if (t && t.id === "testsel") { state.test = t.value; renderBody(); }
+      if (t && t.id === "q") { state.q = t.value; renderBody(); }
+    }, false);
+  }
+
+  // ---------- はじめに ----------
+  var urlId = getParam("adminId");
+  adminId = urlId || lsGet(STORAGE_ID) || "";
+  if (!adminId) { showError("このページは管理者専用です。<br>スプレッドシートのメニュー「管理者アプリ」→「管理者用URLを表示する」で出るURLから開いてください。"); return; }
+  if (urlId) {
+    if (lsGet(STORAGE_ID) && lsGet(STORAGE_ID) !== urlId) lsDel(STORAGE_DATA); // 別のIDで開いたら、前の内容は使わない
+    lsSet(STORAGE_ID, urlId);
+  }
+  var savedTab = lsGet(STORAGE_TAB);
+  if (savedTab === "cards" || savedTab === "list" || savedTab === "status") state.tab = savedTab;
+  var cached = lsGet(STORAGE_DATA);
+  if (cached) { try { data = JSON.parse(cached); fromCache = true; } catch (e) { data = null; } }
+  if (data) render();
+  load(false);
+})();
+</script>
+</body>
+</html>
